@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Etkinlikler</title>
+    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page-container">
+<header>
+    <nav class="navbar">
+        <a href="anasayfa.html">
+            <img src="img/4kösematematik.png" alt="Logo" class="logo" />
+        </a>
+        <div class="nav-buttons">
+            <a href="anasayfa.html" class="btn">Ana Sayfa</a>
+            <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
+        </div>    </nav>
+</header>
+
+<main class="container">
+    <h1 class="centered-heading">Sınıf Seçiniz</h1>
+
+    <div class="class-list">
+        <!-- 5. Sınıf -->
+        <button class="class-button" onclick="toggleList('tema5')">5. Sınıf</button>
+        <ul id="tema5" class="tema-list">
+            <li><a href="5sinif-1tema1.html">1. Tema: Sayılar ve Nicelikler - I</a></li>
+            <li><a href="5sinif-1tema2.html">1. Tema: Sayılar ve Nicelikler - II</a></li>
+            <li><a href="5sinif-2tema.html">2. Tema: İşlemlerle Cebirsel Düşünme</a></li>
+            <li><a href="5sinif-3tema.html">3. Tema: Geometrik Şekiller</a></li>
+            <li><a href="5sinif-4tema.html">4. Tema: Geometrik Nicelikler</a></li>
+            <li><a href="5sinif-5tema.html">5. Tema: İstatiksel Araştırma Süreci</a></li>
+            <li><a href="5sinif-6tema.html">6. Tema: Veriden Olasılığa</a></li>
+        </ul>
+
+        <!-- 6. Sınıf -->
+        <button class="class-button" onclick="toggleList('tema6')">6. Sınıf</button>
+        <ul id="tema6" class="tema-list">
+            <li><a href="6sinif-1tema.html">1. Tema: Sayılar ve Nicelikler - I</a></li>
+            <li><a href="hazirlaniyor.html">2. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">3. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">4. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">5. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">6. Tema:</a></li>
+        </ul>
+
+        <!-- 7. Sınıf -->
+        <button class="class-button" onclick="toggleList('tema7')">7. Sınıf</button>
+        <ul id="tema7" class="tema-list">
+            <li><a href="hazirlaniyor.html">1. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">2. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">3. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">4. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">5. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">6. Tema:</a></li>
+        </ul>
+
+        <!-- 8. Sınıf -->
+        <button class="class-button" onclick="toggleList('tema8')">8. Sınıf</button>
+        <ul id="tema8" class="tema-list">
+            <li><a href="hazirlaniyor.html">1. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">2. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">3. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">4. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">5. Tema:</a></li>
+            <li><a href="hazirlaniyor.html">6. Tema:</a></li>
+        </ul>
+    </div>
+</main>
+<footer class="site-footer">
+    <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
+</footer>
+<script>
+    function toggleList(id) {
+        const allLists = document.querySelectorAll('.tema-list');
+        allLists.forEach(list => {
+            if (list.id === id) {
+                list.style.display = list.style.display === 'block' ? 'none' : 'block';
+            } else {
+                list.style.display = 'none';
+            }
+        });
+    }
+</script>
+</div>
+</body>
+</html>

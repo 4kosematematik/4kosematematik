@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5. Sınıf - 1. Tema</title>
+    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page-container">
+<header>
+    <nav class="navbar">
+        <a href="anasayfa.html">
+            <img src="img/4kösematematik.png" alt="Logo" class="logo" />
+        </a>
+        <div class="nav-buttons">
+            <a href="siniflar.html" class="btn">Sınıflar</a>
+            <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container">
+    <h1>5. Sınıf - Tema 1: Sayılar ve Nicelikler - I</h1>
+    <div class="content-box">
+        <div class="toggle-header" onclick="toggleList('kazanım1-content', this)">
+            <h2 id="kazanım1">
+                5.1.1. Altı basamaklı sayıları okuma ve yazmayı çok basamaklı sayılara genelleyebilme
+                <span class="arrow-icon">▼</span>
+            </h2>
+        </div>
+        <div id="kazanım1-content" class="tema-list" style="display: none;">
+            <p>Bu kazanım</p>
+            <img src="img/5-1-1.jpg" alt="5.1.1 Görsel" class="responsive-img"><br>
+            <a href="pdf/5.1.1.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
+            <a href="pdf/5-1-1.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+        </div>
+    </div>
+    <div class="content-box">
+        <div class="toggle-header" onclick="toggleList('kazanım2-content', this)">
+            <h2 id="kazanım2">
+                5.1.2. Doğal sayılar ve işlemler içeren gerçek yaşam problemlerini çözebilme
+                <span class="arrow-icon">▼</span>
+            </h2>
+        </div>
+        <div id="kazanım2-content" class="tema-list" style="display: none;">
+            <p>Bu kazanım</p>
+            <a href="pdf/5-1-2.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+        </div>
+    </div>
+</main>
+<footer class="site-footer">
+    <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
+</footer>
+<script>
+    function toggleList(id, headerElement) {
+        const content = document.getElementById(id);
+        const arrow = headerElement.querySelector('.arrow-icon');
+
+        if (content.style.display === 'block') {
+            content.style.display = 'none';
+            arrow.classList.remove('rotate');
+        } else {
+            content.style.display = 'block';
+            arrow.classList.add('rotate');
+        }
+    }
+
+</script>
+</div>
+</body>
+</html>
