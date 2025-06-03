@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Etkinlikler</title>
+    <script>
+        document.addEventListener("contextmenu", function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener("copy", function(e) {
+            e.preventDefault();
+        });
+    </script>
     <link rel="icon" href="img/4kösemat.png" type="image/png" />
     <link rel="stylesheet" href="style.css" />
 </head>
