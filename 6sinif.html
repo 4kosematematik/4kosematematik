@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Etkinlikler</title>
+    <script>
+        document.addEventListener("contextmenu", function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener("copy", function(e) {
+            e.preventDefault();
+        });
+    </script>
+    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="page-container">
+<header>
+    <nav class="navbar">
+        <a href="index.html">
+            <img src="img/4kösematematik.png" alt="Logo" class="logo" />
+        </a>
+        <div class="nav-buttons">
+            <a href="index.html" class="btn">Ana Sayfa</a>
+            <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
+        </div>    </nav>
+</header>
+
+<main class="container">
+    <h1 class="centered-heading">Sınıf Seçiniz</h1>
+
+    <div class="class-list">
+        <!-- 6. Sınıf -->
+        <button class="class-button" onclick="toggleList('tema6')">6. Sınıf</button>
+        <ul id="tema6" class="tema-list">
+            <li><a href="6sinif-1tema.html">1. Tema: Sayılar ve Nicelikler - I</a></li>
+            <li><a href="hazirlaniyor.html">2. Tema: Sayılar ve Nicelikler - II</a></li>
+            <li><a href="hazirlaniyor.html">3. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler</a></li>
+            <li><a href="hazirlaniyor.html">4. Tema: Geometrik Şekiller</a></li>
+            <li><a href="hazirlaniyor.html">5. Tema: Geometrik Nicelikler</a></li>
+            <li><a href="hazirlaniyor.html">6. Tema: Veriden Olasılığa</a></li>
+        </ul>
+    </div>
+</main>
+<footer class="site-footer">
+    <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
+</footer>
+<script>
+    function toggleList(id) {
+        const allLists = document.querySelectorAll('.tema-list');
+        allLists.forEach(list => {
+            if (list.id === id) {
+                list.style.display = list.style.display === 'block' ? 'none' : 'block';
+            } else {
+                list.style.display = 'none';
+            }
+        });
+    }
+</script>
+</div>
+</body>
+</html>
