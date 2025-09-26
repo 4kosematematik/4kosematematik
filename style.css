@@ -365,6 +365,92 @@ ul.tema-list > li > a {
     margin-bottom: 10px;
 }
 
+.geogebra-container {
+    margin: 20px 0;
+    text-align: center;
+    width: 100%;
+    height: 500px;
+}
+
+.geogebra-container div[id^="ggb-applet"] {
+    border: 1px solid #002147;
+    border-radius: 8px;
+    background-color: white;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-left: 5px solid #4CAF50;
+}
+
+.login-form, .register-form {
+    display: none;
+}
+
+.login-form.active, .register-form.active {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #002147;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-group input[type="file"] {
+    padding: 5px;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.form-buttons .btn {
+    flex: 1;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.toggle-link {
+    text-align: center;
+    margin-top: 15px;
+    cursor: pointer;
+    color: #4CAF50;
+    text-decoration: underline;
+}
+
+.toggle-link:hover {
+    color: #388E3C;
+}
+
+.success-message {
+    color: #4CAF50;
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+}
+
 @media (max-width: 768px) {
     .navbar {
         display: flex;

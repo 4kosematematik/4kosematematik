@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap</title>
+    <script>
+        document.addEventListener("contextmenu", function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener("keydown", function(e) {
+            if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener("copy", function(e) {
+            e.preventDefault();
+        });
+    </script>
+    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page-container">
+    <header>
+        <nav class="navbar">
+            <div class="home-button">
+                <a href="#">
+                    <img src="img/4kösematematik.png" alt="Logo" class="logo" />
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="login-container">
+            <h2 class="centered-heading">Giriş Yap</h2>
+
+            <!-- Giriş Formu -->
+            <form id="loginForm" class="login-form active">
+                <div class="form-group">
+                    <label for="email">E-posta:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Şifre:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn">Giriş Yap</button>
+                    <button type="button" class="btn" onclick="toggleForm('registerForm')">Üye Ol</button>
+                </div>
+                <div id="loginMessage" class="success-message"></div>
+            </form>
+
+            <!-- Üye Ol Formu -->
+            <form id="registerForm" class="register-form">
+                <div class="form-group">
+                    <label for="regName">Ad Soyad:</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label for="regTc">T.C. Kimlik No:</label>
+                    <input type="text" id="regTc" maxlength="11" pattern="\d{11}" required>
+                </div>
+                <div class="form-group">
+                    <label for="regBirthDate">Doğum Tarihi:</label>
+                    <input type="date" id="regBirthDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">E-posta:</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="regTeacherCert">Öğretmenlik Belgesi (Sadece PDF):</label>
+                    <input type="file" id="regTeacherCert" accept=".pdf" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Şifre:</label>
+                    <input type="password" id="regPassword" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn">Üye Ol</button>
+                </div>
+                <div id="registerMessage" class="success-message"></div>
+                <div class="toggle-link" onclick="toggleForm('loginForm')">Zaten üye misin? Giriş yap</div>
+            </form>
+        </div>
+    </main>
+    <footer class="site-footer">
+        <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
+    </footer>
+</div>
+
+<script>
+    // Form toggle fonksiyonu
+    function toggleForm(formId) {
+        document.querySelectorAll('.login-form, .register-form').forEach(form => {
+            form.classList.remove('active');
+        });
+        document.getElementById(formId).classList.add('active');
+    }
+
+    // Giriş formu işleyicisi
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        // Basit doğrulama (gerçekte backend ile kontrol edin)
+        if (email && password) {
+            // Kullanıcıyı onaylanmış olarak varsayalım (gerçekte backend kontrolü)
+            localStorage.setItem('loggedInUser', JSON.stringify({ email, name: 'Kullanıcı' }));
+            document.getElementById('loginMessage').textContent = 'Giriş başarılı! Ana sayfaya yönlendiriliyorsunuz...';
+            document.getElementById('loginMessage').style.display = 'block';
+            setTimeout(() => {
+                window.location.href = 'index.html'; // Ana sayfaya yönlendir
+            }, 2000);
+        } else {
+            alert('Lütfen e-posta ve şifre girin.');
+        }
+    });
+
+    // Üye ol formu işleyicisi
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('regName').value;
+        const tc = document.getElementById('regTc').value;
+        const birthDate = document.getElementById('regBirthDate').value;
+        const email = document.getElementById('regEmail').value;
+        const teacherCert = document.getElementById('regTeacherCert').files[0];
+        const password = document.getElementById('regPassword').value;
+
+        // PDF kontrolü
+        if (teacherCert && !teacherCert.type.includes('pdf')) {
+            alert('Lütfen sadece PDF formatında belge yükleyin.');
+            return; // İşlemi durdur
+        }
+
+        if (name && tc && birthDate && email && teacherCert && password) {
+            // FormData ile dosya ve verileri topla
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('tc', tc);
+            formData.append('birthDate', birthDate);
+            formData.append('email', email);
+            formData.append('teacherCert', teacherCert);
+            formData.append('password', password);
+            formData.append('date', new Date().toISOString());
+
+            // Formspree ile email gönderme (dosya için alternatif bir servis gerekebilir)
+            fetch('https://formspree.io/f/YOUR_FORM_ID', {  // Formspree'ye kaydolup ID alın
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    document.getElementById('registerMessage').textContent = 'Üyelik talebiniz alındı! Onaylandıktan sonra giriş yapabilirsiniz.';
+                    document.getElementById('registerMessage').style.display = 'block';
+                    // Formu temizle
+                    document.getElementById('registerForm').reset();
+                } else {
+                    alert('Hata oluştu, lütfen tekrar deneyin.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('Bağlantı hatası, lütfen tekrar deneyin.');
+            });
+        } else {
+            alert('Lütfen tüm alanları doldurun.');
+        }
+    });
+
+    // Sayfa yüklenirken giriş kontrolü (opsiyonel)
+    window.addEventListener('load', function() {
+        const user = localStorage.getItem('loggedInUser');
+        if (user) {
+            // Zaten giriş yapılmışsa ana sayfaya yönlendir
+            window.location.href = 'index.html';
+        }
+    });
+</script>
+</body>
+</html>
