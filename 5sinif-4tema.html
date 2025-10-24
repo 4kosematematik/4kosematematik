@@ -4,34 +4,200 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>5. Sınıf - 4. Tema</title>
-    <script>
-        document.addEventListener("contextmenu", function(e) {
-            e.preventDefault();
-        });
-
-        document.addEventListener("keydown", function(e) {
-            if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
+    <script>/*
+        document.addEventListener("contextmenu", e => e.preventDefault());
+        document.addEventListener("keydown", e => {
+            if ((e.ctrlKey && ["c","u","s","a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
                 e.preventDefault();
             }
         });
-
-        document.addEventListener("copy", function(e) {
-            e.preventDefault();
-        });
+        document.addEventListener("copy", e => e.preventDefault());*/
     </script>
-    <!-- GeoGebra Kütüphanesi -->
-    <script type="text/javascript" src="https://cdn.geogebra.org/apps/deployggb.js"></script>
-    <script type="text/javascript" src="geogebra-loader.js"></script>
-    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+
+    <!-- GeoGebra Loader -->
+    <script src="https://cdn.geogebra.org/apps/deployggb.js"></script>
+    <script src="geogebra-loader.js"></script>
+
+    <!-- Stil ve Kitap CSS -->
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+
+    <style>
+        /* Kitap Efekti - Optimize Edilmiş */
+        .book-container {
+            perspective: 2500px;
+            margin: 20px auto;
+            max-width: 100%;
+            padding: 0 10px;
+            position: relative;
+        }
+
+        #openBookBtn {
+            display: block;
+            margin: 15px auto;
+            padding: 10px 32px;
+            font-size: 1.2rem;
+            background: #1e40af;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        #openBookBtn:hover {
+            background: #1e3a8a;
+            transform: scale(1.05);
+        }
+
+        .book-wrapper {
+            position: relative;
+            width: 75vw;
+            max-width: 750px;
+            height: calc(75vw * 0.65);
+            max-height: 488px;
+            min-height: 320px;
+            margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .book {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1.8s ease;
+            transform: rotateY(0deg);
+        }
+
+        .book.open {
+            transform: rotateY(-180deg);
+        }
+
+        .page-pair {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+            transform-origin: left center;
+            z-index: 10;
+            display: flex;
+        }
+
+        .page-pair:nth-child(1) { z-index: 14; }
+        .page-pair:nth-child(2) { z-index: 13; }
+        .page-pair:nth-child(3) { z-index: 12; }
+        .page-pair:nth-child(4) { z-index: 11; }
+
+        .page-pair.flipped {
+            transform: rotateY(-180deg) !important;
+            z-index: 10 !important;
+        }
+
+        .page {
+            position: relative;
+            width: 75%;
+            height: 100%;
+            background: #fff;
+            backface-visibility: hidden;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            border: none;
+            box-shadow: none;
+        }
+
+        .left-page { left: 0; }
+        .right-page { right: 0; transform: rotateY(180deg); }
+
+        .page img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .geogebra-container {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #f9f9f9;
+        }
+
+        /* Sayfa Numaraları */
+        .page-number {
+            position: absolute;
+            bottom: 12px;
+            font-size: 0.9rem;
+            color: #555;
+            font-family: 'Georgia', serif;
+        }
+        .left-page .page-number { left: 20px; }
+        .right-page .page-number { right: 20px; }
+
+        /* Geçiş Düğmeleri */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(30, 64, 175, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #1e40af;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-btn.prev { left: -25px; }
+        .nav-btn.next { right: -25px; }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: translateY(-50%) scale(1);
+        }
+
+        /* Mobil */
+        @media (max-width: 768px) {
+            .book-wrapper {
+                width: 90vw;
+                height: calc(90vw * 0.7);
+                min-height: 280px;
+            }
+            .nav-btn { width: 40px; height: 40px; font-size: 1.4rem; }
+            .nav-btn.prev { left: -20px; }
+            .nav-btn.next { right: -20px; }
+        }
+    </style>
 </head>
 <body>
 <div class="page-container">
+    <!-- MEVCUT HEADER VE İÇERİK -->
     <header>
         <nav class="navbar">
-            <a href="index.html">
-                <img src="img/4kösematematik.png" alt="Logo" class="logo" />
-            </a>
+            <a href="index.html"><img src="img/4kösematematik.png" alt="Logo" class="logo" /></a>
             <div class="nav-buttons">
                 <a href="siniflar.html" class="btn">Sınıflar</a>
                 <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
@@ -41,83 +207,175 @@
 
     <main class="container">
         <h1>5. Sınıf - Tema 4: Geometrik Nicelikler</h1>
+
+        <!-- MEVCUT KAZANIMLAR -->
         <div class="content-box">
             <div class="toggle-header" onclick="toggleList('kazanım1-content', this)">
-                <h2 id="kazanım1">
-                    5.4.1. Kenar uzunlukları doğal sayı olan bir dikdörtgenin çevre uzunluğu verildiğinde kenar uzunluklarını yorumlayabilme
-                    <span class="arrow-icon">▼</span>
-                </h2>
+                <h2>5.4.1. Kenar uzunlukları doğal sayı olan bir dikdörtgenin çevre uzunluğu verildiğinde kenar uzunluklarını yorumlayabilme <span class="arrow-icon">▼</span></h2>
             </div>
             <div id="kazanım1-content" class="tema-list" style="display: none;">
-                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-                <img src="img/5-4-1.png" alt="5.1.1 Görsel" class="responsive-img"><br>
-                <a href="pdf/5.4.1.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
-                <a href="pdf/5-4-1.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.</p>
+                <img src="img/5-4-1.png" alt="5.4.1 Görsel" class="responsive-img"><br>
+                <a href="pdf/5.4.1.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı</a>
+                <a href="pdf/5-4-1.pdf" target="_blank" class="mini-btn">Bilgilendirme</a>
             </div>
         </div>
-        <div class="content-box">
-            <div class="toggle-header" onclick="toggleList('kazanım2-content', this)">
-                <h2 id="kazanım2">
-                    5.4.2. Birim karelerden yola çıkarak dikdörtgenin alanını değerlendirebilme
-                    <span class="arrow-icon">▼</span>
-                </h2>
-            </div>
-            <div id="kazanım2-content" class="tema-list" style="display: none;">
-                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-                <img src="img/5-4-2.png" alt="5.1.1 Görsel" class="responsive-img"><br>
-                <a href="pdf/5.4.2.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
-                <a href="pdf/5-4-2.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-            </div>
-        </div>
-        <div class="content-box">
-            <div class="toggle-header" onclick="toggleList('kazanım3-content', this)">
-                <h2 id="kazanım3">
-                    5.4.3. Kenar uzunlukları doğal sayı olan bir dikdörtgenin alanının ölçüsü verildiğinde çevre uzunluğunu, çevre uzunluğu verildiğinde alanını yorumlayabilme
-                    <span class="arrow-icon">▼</span>
-                </h2>
-            </div>
-            <div id="kazanım3-content" class="tema-list" style="display: none;">
-                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-                <img src="img/5-4-3.png" alt="5.1.1 Görsel" class="responsive-img"><br>
-                <a href="pdf/5.4.3.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
-                <a href="pdf/5-4-3.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-                <div id="ggb-applet-5-1-1" data-geogebra="geo/5.4.3.ggb" class="geogebra-container"></div>
-            </div>
-        </div>
-        <div class="content-box">
-            <div class="toggle-header" onclick="toggleList('kazanım4-content', this)">
-                <h2 id="kazanım4">
-                    5.4.4. Dikdörtgenin çevre uzunluğu ve alanı ile ilgili problemleri çözebilme
-                    <span class="arrow-icon">▼</span>
-                </h2>
-            </div>
-            <div id="kazanım4-content" class="tema-list" style="display: none;">
-                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-                <a href="pdf/5-4-4.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+        <!-- Diğer kazanımlar aynı şekilde... -->
+
+        <!-- YENİ: KİTAP BUTONU -->
+        <div class="book-container">
+            <button id="openBookBtn">Open Book</button>
+
+            <!-- 8 SAYFALIK KİTAP -->
+            <div class="book-container">
+                <button id="openBookBtn">Open Book</button>
+
+                <div class="book-wrapper">
+                    <button class="nav-btn prev" id="prevBtn" onclick="turnPage(currentPage - 1)" disabled>❮</button>
+                    <button class="nav-btn next" id="nextBtn" onclick="turnPage(currentPage + 1)">❯</button>
+
+                    <div id="book" class="book">
+                        <!-- 1. Çift -->
+                        <div class="page-pair" data-set="1">
+                            <div class="page left-page">
+                                <img src="img/5-4-1.png" alt="5.4.1">
+                                <div class="page-number">Sayfa 1</div>
+                            </div>
+                            <div class="page right-page">
+                                <div id="ggb-1" class="geogebra-container" data-file="pdf/5.4.1.ggb"></div>
+                                <div class="page-number">Sayfa 2</div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Çift -->
+                        <div class="page-pair" data-set="2">
+                            <div class="page left-page">
+                                <img src="img/5-4-2.png" alt="5.4.2">
+                                <div class="page-number">Sayfa 3</div>
+                            </div>
+                            <div class="page right-page">
+                                <div id="ggb-2" class="geogebra-container" data-file="pdf/5.4.2.ggb"></div>
+                                <div class="page-number">Sayfa 4</div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Çift -->
+                        <div class="page-pair" data-set="3">
+                            <div class="page left-page">
+                                <img src="img/5-4-3.png" alt="5.4.3">
+                                <div class="page-number">Sayfa 5</div>
+                            </div>
+                            <div class="page right-page">
+                                <div id="ggb-3" class="geogebra-container" data-file="pdf/5.4.3.ggb"></div>
+                                <div class="page-number">Sayfa 6</div>
+                            </div>
+                        </div>
+
+                        <!-- 4. Çift -->
+                        <div class="page-pair" data-set="4">
+                            <div class="page left-page">
+                                <img src="img/5-4-4.png" alt="5.4.4">
+                                <div class="page-number">Sayfa 7</div>
+                            </div>
+                            <div class="page right-page">
+                                <div id="ggb-4" class="geogebra-container" data-file="pdf/5.4.4.ggb"></div>
+                                <div class="page-number">Sayfa 8</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
+
     <footer class="site-footer">
         <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
     </footer>
-    <script>
-        function toggleList(id, headerElement) {
-            const content = document.getElementById(id);
-            const arrow = headerElement.querySelector('.arrow-icon');
-
-            if (content.style.display === 'block') {
-                content.style.display = 'none';
-                arrow.classList.remove('rotate');
-            } else {
-                content.style.display = 'block';
-                arrow.classList.add('rotate');
-            }
-        }
-    </script>
 </div>
+
+<!-- GeoGebra Loader Script -->
+<script src="geogebra-loader.js"></script>
+<script>
+    let currentPage = 0;
+    const totalPairs = 4;
+
+    document.getElementById('openBookBtn').addEventListener('click', function() {
+        const book = document.getElementById('book');
+        const btn = this;
+        book.classList.toggle('open');
+
+        if (book.classList.contains('open')) {
+            btn.style.opacity = '0';
+            setTimeout(() => btn.style.display = 'none', 500);
+            setTimeout(() => {
+                loadAllGeoGebra();
+                updateNavButtons();
+            }, 1000);
+        } else {
+            btn.style.display = 'block';
+            setTimeout(() => btn.style.opacity = '1', 100);
+        }
+    });
+
+    function turnPage(to) {
+        if (to < 0 || to >= totalPairs || to === currentPage) return;
+
+        const diff = to > currentPage ? 1 : -1;
+        const steps = Math.abs(to - currentPage);
+        let step = 0;
+
+        const interval = setInterval(() => {
+            if (step >= steps) {
+                clearInterval(interval);
+                currentPage = to;
+                updateNavButtons();
+                return;
+                3}
+            const index = currentPage + (diff > 0 ? step : -step - 1);
+            const pair = document.querySelectorAll('.page-pair')[index];
+            pair.classList.toggle('flipped');
+            step++;
+        }, 500);
+    }
+
+    function updateNavButtons() {
+        document.getElementById('prevBtn').disabled = currentPage === 0;
+        document.getElementById('nextBtn').disabled = currentPage === totalPairs - 1;
+    }
+
+    // GeoGebra Yükleme (Tümünü bir kere yükle)
+    function loadAllGeoGebra() {
+        if (window.ggbLoaded) return;
+        window.ggbLoaded = true;
+
+        setTimeout(() => {
+            document.querySelectorAll('.geogebra-container').forEach(container => {
+                const file = container.getAttribute('data-file');
+                if (file && !container.dataset.loaded) {
+                    container.dataset.loaded = "true";
+                    const applet = new GGBApplet({
+                        appName: "classic",
+                        width: "100%",
+                        height: "100%",
+                        showToolBar: false,
+                        showAlgebraInput: false,
+                        showMenuBar: false,
+                        filename: file,
+                        preventFocus: true,
+                        useBrowserForJS: true
+                    }, true);
+                    applet.inject(container.id);
+                }
+            });
+        }, 300);
+    }
+
+    // Klavye desteği
+    document.addEventListener('keydown', e => {
+        if (!document.getElementById('book').classList.contains('open')) return;
+        if (e.key === 'ArrowRight') turnPage(currentPage + 1);
+        if (e.key === 'ArrowLeft') turnPage(currentPage - 1);
+    });
+</script>
 </body>
 </html>
