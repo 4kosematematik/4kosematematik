@@ -5,73 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>6. Sınıf - 1. Tema</title>
     <script>
-        document.addEventListener("contextmenu", function(e) {
+        document.addEventListener("contextmenu", function (e) {
             e.preventDefault();
         });
 
-        document.addEventListener("keydown", function(e) {
+        document.addEventListener("keydown", function (e) {
             if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
                 e.preventDefault();
             }
         });
 
-        document.addEventListener("copy", function(e) {
+        document.addEventListener("copy", function (e) {
             e.preventDefault();
         });
     </script>
-    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+    <link rel="icon" href="img/4kösemat.png" type="image/png"/>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="page-container">
-<header>
-    <nav class="navbar">
-        <a href="index.html">
-            <img src="img/4kösematematik.png" alt="Logo" class="logo" />
-        </a>
-        <div class="nav-buttons">
-            <a href="siniflar.html" class="btn">Sınıflar</a>
-            <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
-        </div>
-    </nav>
-</header>
+    <header>
+        <nav class="navbar">
+            <a href="index.html">
+                <img src="img/4kösematematik.png" alt="Logo" class="logo"/>
+            </a>
+            <div class="nav-buttons">
+                <a href="siniflar.html" class="btn">Sınıflar</a>
+                <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
+                <!-- KULLANICI DROPDOWN -->
+                <div class="user-dropdown">
+                    <button id="user-btn" class="btn dropbtn">
+                        <span id="user-name">Giriş Yap</span>
+                        <i id="user-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="user-menu">
+                        <a href="#" id="logout-btn">Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-<main class="container">
-    <h1>6. Sınıf - Tema 1: Sayılar ve Nicelikler - I </h1>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım1-content', this)">
-            <h2 id="kazanım1">
-                6.1.2. Bir doğal sayının 2, 3, 4, 5, 6, 9 ve 10 ile tam bölünebilme kriterlerine ilişkin çıkarım yapabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
+    <main class="container">
+        <h1>6. Sınıf - Tema 1: Sayılar ve Nicelikler - I </h1>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım1-content', this)">
+                <h2 id="kazanım1">
+                    6.1.2. Bir doğal sayının 2, 3, 4, 5, 6, 9 ve 10 ile tam bölünebilme kriterlerine ilişkin çıkarım
+                    yapabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım1-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <img src="img/6-1-2.png" alt="5.1.1 Görsel" class="responsive-img"><br>
+                <a href="pdf/6.1.2.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
+                <a href="pdf/6-1-2.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
         </div>
-        <div id="kazanım1-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <img src="img/6-1-2.png" alt="5.1.1 Görsel" class="responsive-img"><br>
-            <a href="pdf/6.1.2.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
-            <a href="pdf/6-1-2.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-</main>
-<footer class="site-footer">
-    <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
-</footer>
-<script>
-    function toggleList(id, headerElement) {
-        const content = document.getElementById(id);
-        const arrow = headerElement.querySelector('.arrow-icon');
+    </main>
+    <footer class="site-footer">
+        <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
+    </footer>
+    <script>
+        function toggleList(id, headerElement) {
+            const content = document.getElementById(id);
+            const arrow = headerElement.querySelector('.arrow-icon');
 
-        if (content.style.display === 'block') {
-            content.style.display = 'none';
-            arrow.classList.remove('rotate');
-        } else {
-            content.style.display = 'block';
-            arrow.classList.add('rotate');
+            if (content.style.display === 'block') {
+                content.style.display = 'none';
+                arrow.classList.remove('rotate');
+            } else {
+                content.style.display = 'block';
+                arrow.classList.add('rotate');
+            }
         }
-    }
 
-</script>
+    </script>
+    <script src="login.js"></script>
 </div>
 </body>
 </html>

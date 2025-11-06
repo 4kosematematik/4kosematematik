@@ -3,40 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ana Sayfa</title>
-    <script>
-        document.addEventListener("contextmenu", function(e) {
-            e.preventDefault();
-        });
-
-        document.addEventListener("keydown", function(e) {
-            if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
-                e.preventDefault();
-            }
-        });
-
-        document.addEventListener("copy", function(e) {
-            e.preventDefault();
-        });
-    </script>
-    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+    <title>4 Köşe Matematik - Ana Sayfa</title>
+    <link rel="icon" href="img/4kösemat.png" type="image/png"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 <body>
 <div class="page-container">
     <header>
         <nav class="navbar">
             <a href="index.html">
-                <img src="img/4kösematematik.png" alt="Logo" class="logo" />
+                <img src="img/4kösematematik.png" alt="4 Köşe Matematik Logo" class="logo"/>
             </a>
             <div class="nav-buttons">
                 <a href="hakkimizda.html" class="btn">Hakkımızda</a>
                 <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
+
+                <!-- KULLANICI DROPDOWN -->
+                <div class="user-dropdown">
+                    <button id="user-btn" class="btn dropbtn">
+                        <span id="user-name">Giriş Yap</span>
+                        <i id="user-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="user-menu">
+                        <a href="#" id="logout-btn">Çıkış Yap</a>
+                    </div>
+                </div>
             </div>
         </nav>
     </header>
 
     <main class="container">
+        <!-- Hakkımızda Bölümü -->
+        <section class="about-section">
+            <h2 class="centered-heading">Hakkımızda</h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <div class="about-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>Misyonumuz</h3>
+                    <p>Öğrencilerin matematiği sadece öğrenmekle kalmayıp keşfetmelerini, sorgulamalarını ve gerçek yaşamla ilişkilendirmelerini sağlayacak öğretim yöntemleri geliştirmek. Matematik öğretmenlerine, STEAM yaklaşımıyla zenginleştirilmiş ve öğrenci merkezli öğrenmeyi önceleyen dijital araçlar ve etkinlikler sunarak, her öğrencinin potansiyelini açığa çıkaracak bir öğrenme ortamı oluşturmalarına destek olmak.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon"><i class="fas fa-eye"></i></div>
+                    <h3>Vizyonumuz</h3>
+                    <p>Matematiği, öğrencilerin merak duygusunu tetikleyen, problem çözme ve yaratıcı düşünme becerilerini geliştiren bir deneyim haline getirmek. Tüm öğrencilerin aktif katılım gösterdiği, anlamlı ve kalıcı öğrenmeler yaşadığı bir matematik eğitimi için öğretmenlerin ilham aldığı öncü bir platform olmak.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-icon"><i class="fas fa-users"></i></div>
+                    <h3>Biz Kimiz?</h3>
+                    <p>Biz, matematik öğretimini daha etkili ve anlamlı hale getirmeyi amaçlayan üç öğretmen ve bir mühendisten oluşan dört kişilik bir ekibiyiz. Öğrenci merkezli yaklaşımı benimseyerek, STEAM entegrasyonuyla zenginleştirilmiş içerikler geliştiriyoruz. Amacımız; öğretmenlerin matematik derslerini daha keşfedici, etkileşimli ve yaşamla bağlantılı biçimde yürütmelerine destek olmak. Birlikte düşünüyor, birlikte üretiyor ve eğitimin geleceğine katkı sunmayı hedefliyoruz.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sınıf Butonları -->
         <div class="class-buttons">
             <div class="dropdown-class">
                 <a href="5sinif.html" class="class-button">5. Sınıf</a>
@@ -55,7 +77,7 @@
                 <div class="dropdown-class-content">
                     <a href="6sinif-1tema.html">1. Tema: Sayılar ve Nicelikler - I</a>
                     <a href="hazirlaniyor.html">2. Tema: Sayılar ve Nicelikler - II</a>
-                    <a href="hazirlaniyor.html">3. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler</a>
+                    <a href="hazirlaniyor.html">3. Tema: İşlemlerle Cebirsel Düşünme</a>
                     <a href="hazirlaniyor.html">4. Tema: Geometrik Şekiller</a>
                     <a href="hazirlaniyor.html">5. Tema: Geometrik Nicelikler</a>
                     <a href="hazirlaniyor.html">6. Tema: Veriden Olasılığa</a>
@@ -66,7 +88,7 @@
                 <div class="dropdown-class-content">
                     <a href="hazirlaniyor.html">1. Tema: Sayılar ve Nicelikler - I</a>
                     <a href="hazirlaniyor.html">2. Tema: Sayılar ve Nicelikler - II</a>
-                    <a href="hazirlaniyor.html">3. Tema: İşlemlerle Cebirsel Düşünme ve Değişimler</a>
+                    <a href="hazirlaniyor.html">3. Tema: İşlemlerle Cebirsel Düşünme</a>
                     <a href="hazirlaniyor.html">4. Tema: Geometrik Nicelikler - I</a>
                     <a href="hazirlaniyor.html">5. Tema: Geometrik Nicelikler - II</a>
                     <a href="hazirlaniyor.html">6. Tema: Geometrik Şekiller</a>
@@ -88,6 +110,7 @@
             </div>
         </div>
 
+        <!-- En İyi İçerikler -->
         <section class="best-content">
             <h2 class="centered-heading">En İyi İçerikler</h2>
             <div class="card-grid">
@@ -134,9 +157,24 @@
             </div>
         </section>
     </main>
+
     <footer class="site-footer">
-        <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
+        <p>
+            <a href="mailto:destek4kosematematik@gmail.com">destek4kosematematik@gmail.com</a><br>
+            Copyright © 2025 4 Köşe Matematik. Tüm Hakları Saklıdır.
+        </p>
     </footer>
 </div>
+<script src="login.js"></script>
+<script>
+    // Sağ tıklama engelleme
+    document.addEventListener("contextmenu", e => e.preventDefault());
+    document.addEventListener("keydown", e => {
+        if ((e.ctrlKey && ["c","u","s","a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
+            e.preventDefault();
+        }
+    });
+    document.addEventListener("copy", e => e.preventDefault());
+</script>
 </body>
 </html>

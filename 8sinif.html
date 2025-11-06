@@ -1,72 +1,143 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Etkinlikler</title>
     <script>
-        document.addEventListener("contextmenu", function(e) {
+        document.addEventListener("contextmenu", function (e) {
             e.preventDefault();
         });
 
-        document.addEventListener("keydown", function(e) {
+        document.addEventListener("keydown", function (e) {
             if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
                 e.preventDefault();
             }
         });
 
-        document.addEventListener("copy", function(e) {
+        document.addEventListener("copy", function (e) {
             e.preventDefault();
         });
     </script>
-    <link rel="icon" href="img/4kösemat.png" type="image/png" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="img/4kösemat.png" type="image/png"/>
+    <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 <div class="page-container">
-<header>
-    <nav class="navbar">
-        <a href="index.html">
-            <img src="img/4kösematematik.png" alt="Logo" class="logo" />
-        </a>
-        <div class="nav-buttons">
-            <a href="index.html" class="btn">Ana Sayfa</a>
-            <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
-        </div>    </nav>
-</header>
+    <header>
+        <nav class="navbar">
+            <a href="index.html">
+                <img src="img/4kösematematik.png" alt="Logo" class="logo"/>
+            </a>
+            <div class="nav-buttons">
+                <!-- Sınıflar Dropdown -->
+                <div class="dropdown">
+                    <a href="#" class="btn dropbtn">Sınıflar</a>
+                    <div class="dropdown-content">
+                        <!-- 5. Sınıf -->
+                        <div class="submenu">
+                            <a href="5sinif.html">5. Sınıf</a>
+                            <div class="submenu-content">
+                                <a href="5sinif-1tema1.html">1. Tema: Sayılar ve Nicelikler - I</a>
+                                <a href="5sinif-1tema2.html">1. Tema: Sayılar ve Nicelikler - II</a>
+                                <a href="5sinif-2tema.html">2. Tema: İşlemlerle Cebirsel Düşünme</a>
+                                <a href="5sinif-3tema.html">3. Tema: Geometrik Şekiller</a>
+                                <a href="5sinif-4tema.html">4. Tema: Geometrik Nicelikler</a>
+                                <a href="5sinif-5tema.html">5. Tema: İstatiksel Araştırma Süreci</a>
+                                <a href="5sinif-6tema.html">6. Tema: Veriden Olasılığa</a>
+                            </div>
+                        </div>
+                        <!-- 6. Sınıf -->
+                        <div class="submenu">
+                            <a href="6sinif.html">6. Sınıf</a>
+                            <div class="submenu-content">
+                                <a href="6sinif-1tema.html">1. Tema: Sayılar ve Nicelikler - I</a>
+                                <a href="hazirlaniyor.html">2. Tema: Sayılar ve Nicelikler - II</a>
+                                <a href="hazirlaniyor.html">3. Tema: İşlemlerle Cebirsel Düşünme</a>
+                                <a href="hazirlaniyor.html">4. Tema: Geometrik Şekiller</a>
+                                <a href="hazirlaniyor.html">5. Tema: Geometrik Nicelikler</a>
+                                <a href="hazirlaniyor.html">6. Tema: Veriden Olasılığa</a>
+                            </div>
+                        </div>
+                        <!-- 7. Sınıf -->
+                        <div class="submenu">
+                            <a href="7sinif.html">7. Sınıf</a>
+                            <div class="submenu-content">
+                                <a href="hazirlaniyor.html">1. Tema: Sayılar ve Nicelikler - I</a>
+                                <a href="hazirlaniyor.html">2. Tema: Sayılar ve Nicelikler - II</a>
+                                <a href="hazirlaniyor.html">3. Tema: İşlemlerle Cebirsel Düşünme</a>
+                                <a href="hazirlaniyor.html">4. Tema: Geometrik Nicelikler - I</a>
+                                <a href="hazirlaniyor.html">5. Tema: Geometrik Nicelikler - II</a>
+                                <a href="hazirlaniyor.html">6. Tema: Geometrik Şekiller</a>
+                                <a href="hazirlaniyor.html">7. Tema: İstatiksel Araştırma Süreci</a>
+                                <a href="hazirlaniyor.html">8. Tema: Veriden Olasılığa</a>
+                            </div>
+                        </div>
+                        <!-- 8. Sınıf -->
+                        <div class="submenu">
+                            <a href="8sinif.html">8. Sınıf</a>
+                            <div class="submenu-content">
+                                <a href="hazirlaniyor.html">1. Tema: Sayılar ve Nicelikler</a>
+                                <a href="hazirlaniyor.html">2. Tema: Cebirsel Düşünme ve Değişimler</a>
+                                <a href="hazirlaniyor.html">3. Tema: Geometrik Şekiller</a>
+                                <a href="hazirlaniyor.html">4. Tema: Geometrik Nicelikler</a>
+                                <a href="hazirlaniyor.html">5. Tema: Dönüşüm</a>
+                                <a href="hazirlaniyor.html">6. Tema: İstatiksel Araştırma Süreci</a>
+                                <a href="hazirlaniyor.html">7. Tema: Veriden Olasılığa</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="index.html" class="btn">Ana Sayfa</a>
+                <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
+                <!-- KULLANICI DROPDOWN -->
+                <div class="user-dropdown">
+                    <button id="user-btn" class="btn dropbtn">
+                        <span id="user-name">Giriş Yap</span>
+                        <i id="user-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="user-menu">
+                        <a href="#" id="logout-btn">Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-<main class="container">
-    <h1 class="centered-heading">Tema Seçiniz</h1>
+    <main class="container">
+        <h1 class="centered-heading">Tema Seçiniz</h1>
 
-    <div class="class-list">
-        <!-- 8. Sınıf -->
-        <button class="class-button" onclick="toggleList('tema8')">8. Sınıf</button>
-        <ul id="tema8" class="tema-list">
-            <li><a href="hazirlaniyor.html">1. Tema: Sayılar ve Nicelikler</a></li>
-            <li><a href="hazirlaniyor.html">2. Tema: Cebirsel Düşünme ve Değişimler</a></li>
-            <li><a href="hazirlaniyor.html">3. Tema: Geometrik Şekiller</a></li>
-            <li><a href="hazirlaniyor.html">4. Tema: Geometrik Nicelikler</a></li>
-            <li><a href="hazirlaniyor.html">5. Tema: Dönüşüm</a></li>
-            <li><a href="hazirlaniyor.html">6. Tema: İstatiksel Araştırma Süreci</a></li>
-            <li><a href="hazirlaniyor.html">7. Tema: Veriden Olasılığa</a></li>
-        </ul>
-    </div>
-</main>
-<footer class="site-footer">
-    <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
-</footer>
-<script>
-    function toggleList(id) {
-        const allLists = document.querySelectorAll('.tema-list');
-        allLists.forEach(list => {
-            if (list.id === id) {
-                list.style.display = list.style.display === 'block' ? 'none' : 'block';
-            } else {
-                list.style.display = 'none';
-            }
-        });
-    }
-</script>
+        <div class="class-list">
+            <div class="class-section">
+                <a href="8sinif.html" class="class-header">8. Sınıf</a>
+                <ul class="tema-list">
+                    <li><a href="hazirlaniyor.html">1. Tema: Sayılar ve Nicelikler</a></li>
+                    <li><a href="hazirlaniyor.html">2. Tema: Cebirsel Düşünme ve Değişimler</a></li>
+                    <li><a href="hazirlaniyor.html">3. Tema: Geometrik Şekiller</a></li>
+                    <li><a href="hazirlaniyor.html">4. Tema: Geometrik Nicelikler</a></li>
+                    <li><a href="hazirlaniyor.html">5. Tema: Dönüşüm</a></li>
+                    <li><a href="hazirlaniyor.html">6. Tema: İstatiksel Araştırma Süreci</a></li>
+                    <li><a href="hazirlaniyor.html">7. Tema: Veriden Olasılığa</a></li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <footer class="site-footer">
+        <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
+    </footer>
+    <script>
+        function toggleList(id) {
+            const allLists = document.querySelectorAll('.tema-list');
+            allLists.forEach(list => {
+                if (list.id === id) {
+                    list.style.display = list.style.display === 'block' ? 'none' : 'block';
+                } else {
+                    list.style.display = 'none';
+                }
+            });
+        }
+    </script>
+    <script src="login.js"></script>
 </div>
 </body>
 </html>
