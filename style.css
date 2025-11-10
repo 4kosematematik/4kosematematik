@@ -73,7 +73,7 @@ html, body {
     cursor: pointer;
 }
 
-.btn:hover, .dropbtn:hover {
+.btn:hover, .dropbtn:hover, .content-box .tema-list a:hover {
     background-color: #388E3C;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
@@ -271,7 +271,7 @@ html, body {
 }
 
 .responsive-img {
-    max-width: 100%;
+    max-width: 50%;
     height: auto;
     border-radius: 8px;
     margin: 1rem 0;
@@ -762,10 +762,13 @@ html, body {
     transition: all 0.3s ease;
 }
 
-.tema-list a:hover {
-    color: #4CAF50;
-    font-weight: 600;
-    transform: translateX(4px);
+.content-box .tema-list a{
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.05rem;
+    display: inline-block;
+    transition: all 0.3s ease;
 }
 
 /* Responsive */
@@ -1006,4 +1009,265 @@ html, body {
     background-color: #1A252F;
     color: #D4E4D2;
     padding-left: 1.5rem;
+}
+
+/* Kitap Efekti - Optimize Edilmiş */
+.book-container {
+    perspective: 2500px;
+    margin: 20px auto;
+    max-width: 100%;
+    padding: 0 10px;
+    position: relative;
+}
+
+#openBookBtn {
+    display: block;
+    margin: 15px auto;
+    padding: 10px 32px;
+    font-size: 1.2rem;
+    background: #1e40af;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+#openBookBtn:hover {
+    background: #1e3a8a;
+    transform: scale(1.05);
+}
+
+/* Normal Kitap Boyutu */
+.book-wrapper {
+    position: relative;
+    width: 75vw;
+    max-width: 750px;
+    height: calc(75vw * 0.65);
+    max-height: 488px;
+    min-height: 320px;
+    margin: 0 auto;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+/* Popup (Modal) Stil */
+.book-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.book-modal.active {
+    display: flex;
+}
+
+.book-modal .book-wrapper {
+    width: 90vw;
+    max-width: 1100px;
+    height: calc(90vw * 0.65);
+    max-height: 715px;
+    min-height: 500px;
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    font-size: 2.5rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+.book {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 1.8s ease;
+    transform: rotateY(0deg);
+}
+
+.book.open {
+    transform: rotateY(-180deg);
+}
+
+.page-pair {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 1.4s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transform-origin: left center;
+    z-index: 10;
+    display: flex;
+}
+
+.page-pair:nth-child(1) {
+    z-index: 14;
+}
+
+.page-pair:nth-child(2) {
+    z-index: 13;
+}
+
+.page-pair:nth-child(3) {
+    z-index: 12;
+}
+
+.page-pair:nth-child(4) {
+    z-index: 11;
+}
+
+.page-pair.flipped {
+    transform: rotateY(-180deg) !important;
+    z-index: 10 !important;
+}
+
+.page {
+    position: relative;
+    width: 75%;
+    height: 100%;
+    background: #fff;
+    backface-visibility: hidden;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+}
+
+.left-page {
+    left: 0;
+}
+
+.right-page {
+    right: 0;
+    transform: rotateY(180deg);
+}
+
+.page img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.geogebra-container {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #f9f9f9;
+}
+
+/* Sayfa Numaraları */
+.page-number {
+    position: absolute;
+    bottom: 12px;
+    font-size: 0.9rem;
+    color: #555;
+    font-family: 'Georgia', serif;
+}
+
+.left-page .page-number {
+    left: 20px;
+}
+
+.right-page .page-number {
+    right: 20px;
+}
+
+/* Geçiş Düğmeleri - TAM GÖRÜNÜR */
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 56px;
+    height: 56px;
+    background: rgba(30, 64, 175, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: #1e40af;
+    transform: translateY(-50%) scale(1.15);
+}
+
+.nav-btn.prev {
+    left: 10px; /* Tamamen görünür */
+}
+
+.nav-btn.next {
+    right: 10px; /* Tamamen görünür */
+}
+
+.nav-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: translateY(-50%) scale(1);
+}
+
+/* Mobil */
+@media (max-width: 768px) {
+    .book-wrapper {
+        width: 90vw;
+        height: calc(90vw * 0.7);
+        min-height: 280px;
+    }
+
+    .book-modal .book-wrapper {
+        width: 95vw;
+        height: calc(95vw * 0.7);
+        min-height: 400px;
+    }
+
+    .nav-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+    }
+
+    .nav-btn.prev {
+        left: 5px;
+    }
+
+    .nav-btn.next {
+        right: 5px;
+    }
+
+    .close-modal {
+        top: 15px;
+        right: 15px;
+        font-size: 2rem;
+    }
 }
