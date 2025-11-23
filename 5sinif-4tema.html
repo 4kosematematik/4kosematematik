@@ -14,10 +14,6 @@
         document.addEventListener("copy", e => e.preventDefault());
     </script>
 
-    <!-- GeoGebra Loader -->
-    <script src="https://cdn.geogebra.org/apps/deployggb.js"></script>
-    <script src="geogebra-loader.js"></script>
-
     <!-- Stil ve Kitap CSS -->
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="img/4kösemat.png" type="image/png"/>
@@ -130,7 +126,7 @@
                             <div class="page-number">Sayfa 1</div>
                         </div>
                         <div class="page right-page">
-                            <div id="ggb-1" class="geogebra-container" data-file="pdf/5.4.1.ggb"></div>
+                            <img src="img/5-4-1.png" alt="5.4.1">
                             <div class="page-number">Sayfa 2</div>
                         </div>
                     </div>
@@ -142,7 +138,7 @@
                             <div class="page-number">Sayfa 3</div>
                         </div>
                         <div class="page right-page">
-                            <div id="ggb-2" class="geogebra-container" data-file="pdf/5.4.2619.ggb"></div>
+                            <img src="img/5-4-2.png" alt="5.4.2">
                             <div class="page-number">Sayfa 4</div>
                         </div>
                     </div>
@@ -154,7 +150,7 @@
                             <div class="page-number">Sayfa 5</div>
                         </div>
                         <div class="page right-page">
-                            <div id="ggb-3" class="geogebra-container" data-file="pdf/5.4.3.ggb"></div>
+                            <img src="img/5-4-3.png" alt="5.4.3">
                             <div class="page-number">Sayfa 6</div>
                         </div>
                     </div>
@@ -162,11 +158,11 @@
                     <!-- 4. Çift -->
                     <div class="page-pair" data-set="4">
                         <div class="page left-page">
-                            <img src="img/5-4-4.png" alt="5.4.4">
+                            <img src="img/5-4-2.png" alt="5.4.4">
                             <div class="page-number">Sayfa 7</div>
                         </div>
                         <div class="page right-page">
-                            <div id="ggb-4" class="geogebra-container" data-file="pdf/5.4.4.ggb"></div>
+                            <img src="img/5-4-2.png" alt="5.4.4">
                             <div class="page-number">Sayfa 8</div>
                         </div>
                     </div>
@@ -194,8 +190,6 @@
 </div>
 <script src="chatbot-data.js"></script>
 <script src="chatbot.js"></script>
-<!-- GeoGebra Loader Script -->
-<script src="geogebra-loader.js"></script>
 <script>
     let currentPage = 0;
     const totalPairs = 4;
@@ -233,33 +227,6 @@
     // Tüm sayfaları sıfırla
     function resetAllPages() {
         document.querySelectorAll('.page-pair').forEach(p => p.classList.remove('flipped'));
-    }
-
-    // Modal'da GeoGebra yükle
-    function loadAllGeoGebraInModal() {
-        if (window.ggbModalLoaded) return;
-        window.ggbModalLoaded = true;
-
-        setTimeout(() => {
-            document.querySelectorAll('#bookModal .geogebra-container').forEach(container => {
-                const file = container.getAttribute('data-file');
-                if (file && !container.dataset.loaded) {
-                    container.dataset.loaded = "true";
-                    const applet = new GGBApplet({
-                        appName: "classic",
-                        width: "100%",
-                        height: "100%",
-                        showToolBar: false,
-                        showAlgebraInput: false,
-                        showMenuBar: false,
-                        filename: file,
-                        preventFocus: true,
-                        useBrowserForJS: true
-                    }, true);
-                    applet.inject(container.id);
-                }
-            });
-        }, 300);
     }
 
     // Sayfa çevirme

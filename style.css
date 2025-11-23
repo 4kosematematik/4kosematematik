@@ -1162,7 +1162,6 @@ html, body {
 
 .right-page {
     right: 0;
-    transform: rotateY(180deg);
 }
 
 .page img {
