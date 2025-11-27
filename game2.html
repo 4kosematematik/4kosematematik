@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satranç Geometri - Slider Modu</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 800px) { .main-container { flex-direction: column; } }
+
+        /* Sol Menü */
+        .menu { width: 200px; display: flex; flex-direction: column; gap: 10px; }
+        .menu button {
+            padding: 15px; border: none; background: #e0e0e0;
+            cursor: pointer; border-radius: 8px; font-weight: bold;
+            text-align: left; transition: 0.2s;
+        }
+        .menu button:hover { background: #d0d0d0; }
+        .menu button.active { background: #3498db; color: white; }
+
+        /* Sağ Taraf (Tahta + Slider) */
+        .display-area { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+
+        canvas {
+            border: 8px solid #5d4037;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Slider Tasarımı */
+        .slider-container {
+            width: 100%;
+            background: #eee;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 10px;
+            background: #d3d3d3;
+            border-radius: 5px;
+            outline: none;
+            cursor: grab;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px; height: 25px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .step-info {
+            font-size: 18px; font-weight: bold; color: #2c3e50; margin-bottom: 5px;
+        }
+        .final-shape {
+            color: #e67e22; font-size: 20px; font-weight: 800; height: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 style="color:#333;">♟️ Satranç Geometri Atölyesi</h1>
+
+<div class="main-container">
+    <div class="menu">
+        <button onclick="loadScenario('vezir')" id="btn-vezir" class="active">1. VEZİR</button>
+        <button onclick="loadScenario('fil')" id="btn-fil">2. FİL</button>
+        <button onclick="loadScenario('at')" id="btn-at">3. AT</button>
+    </div>
+
+    <div class="display-area">
+        <canvas id="board" width="480" height="480"></canvas>
+
+        <div class="slider-container">
+            <div class="step-info" id="stepLabel">Başlangıç: d1</div>
+            <input type="range" id="moveSlider" min="0" max="3" value="0" step="1" oninput="updateBoard()">
+            <div class="final-shape" id="shapeLabel"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('board');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('moveSlider');
+    const stepLabel = document.getElementById('stepLabel');
+    const shapeLabel = document.getElementById('shapeLabel');
+
+    const SQUARE_SIZE = 60; // 480 / 8
+    const LIGHT = "#f0d9b5";
+    const DARK = "#b58863";
+
+    // --- PDF VERİLERİ ---
+    const data = {
+        vezir: {
+            piece: '♕',
+            path: ['d1', 'd7', 'g4', 'd1'],
+            desc: ['Başlangıç (d1)', '1. Adım: Yukarı (d7)', '2. Adım: Çapraz (g4)', '3. Adım: Başlangıca Dönüş (d1)'],
+            shapeName: "ÜÇGEN"
+        },
+        fil: {
+            piece: '♗',
+            path: ['f1', 'c4', 'd5', 'g2', 'f1'],
+            desc: ['Başlangıç (f1)', '1. Adım: Sol Yukarı (c4)', '2. Adım: Sağ Yukarı (d5)', '3. Adım: Sağ Aşağı (g2)', '4. Adım: Başlangıca Dönüş (f1)'],
+            shapeName: "DİKDÖRTGEN"
+        },
+        at: {
+            piece: '♘',
+            path: ['b1', 'a3', 'b5', 'd6', 'e4', 'd2', 'b1'],
+            desc: ['Başlangıç (b1)', '1. Adım: a3', '2. Adım: b5', '3. Adım: d6', '4. Adım: e4', '5. Adım: d2', '6. Adım: Başlangıca Dönüş (b1)'],
+            shapeName: "ALTIGEN"
+        }
+    };
+
+    let currentKey = 'vezir';
+
+    // Koordinat Hesaplama (a1 -> piksel)
+    function getPixel(alg) {
+        const colMap = {a:0, b:1, c:2, d:3, e:4, f:5, g:6, h:7};
+        const c = colMap[alg[0]];
+        const r = 8 - parseInt(alg[1]); // Canvas y ekseni ters
+        return {
+            x: c * SQUARE_SIZE + SQUARE_SIZE/2,
+            y: r * SQUARE_SIZE + SQUARE_SIZE/2
+        };
+    }
+
+    // Tahta Çizimi
+    function drawBase() {
+        for(let r=0; r<8; r++){
+            for(let c=0; c<8; c++){
+                ctx.fillStyle = (r+c)%2===0 ? LIGHT : DARK;
+                ctx.fillRect(c*SQUARE_SIZE, r*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+
+                // Kırmızı Merkez Noktaları
+                ctx.beginPath();
+                ctx.arc(c*SQUARE_SIZE+30, r*SQUARE_SIZE+30, 4, 0, Math.PI*2);
+                ctx.fillStyle = "#e74c3c";
+                ctx.fill();
+            }
+        }
+
+        // Koordinatlar
+        ctx.fillStyle = "#333";
+        ctx.font = "12px Arial";
+        for(let i=0; i<8; i++) {
+            ctx.fillText("abcdefgh"[i], i*60+50, 475);
+            ctx.fillText(8-i, 5, i*60+15);
+        }
+    }
+
+    function updateBoard() {
+        drawBase();
+
+        const scenario = data[currentKey];
+        const step = parseInt(slider.value);
+
+        // 1. Çizgileri Çiz (Slider değerine kadar)
+        if (step > 0) {
+            ctx.beginPath();
+            const start = getPixel(scenario.path[0]);
+            ctx.moveTo(start.x, start.y);
+
+            for(let i=1; i<=step; i++) {
+                const p = getPixel(scenario.path[i]);
+                ctx.lineTo(p.x, p.y);
+            }
+
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#2980b9"; // GeoGebra mavisi
+            ctx.lineJoin = "round";
+            ctx.stroke();
+
+            // Eğer son adımdaysa içini boya
+            if (step === scenario.path.length - 1) {
+                ctx.fillStyle = "rgba(52, 152, 219, 0.3)";
+                ctx.fill();
+                shapeLabel.innerText = "✨ " + scenario.shapeName + " ✨";
+            } else {
+                shapeLabel.innerText = "";
+            }
+        } else {
+            shapeLabel.innerText = "";
+        }
+
+        // 2. Taşın Konumu
+        const currentPos = getPixel(scenario.path[step]);
+
+        // Taşı Çiz
+        ctx.font = "40px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.lineWidth = 1;
+
+        // Beyaz Kontur (Okunabilirlik için)
+        ctx.strokeStyle = "white";
+        ctx.strokeText(scenario.piece, currentPos.x, currentPos.y);
+        // Siyah Dolgu
+        ctx.fillStyle = "black";
+        ctx.fillText(scenario.piece, currentPos.x, currentPos.y);
+
+        // 3. Bilgi Metnini Güncelle
+        stepLabel.innerText = scenario.desc[step];
+    }
+
+    function loadScenario(key) {
+        currentKey = key;
+
+        // Buton Stilleri
+        document.querySelectorAll('.menu button').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-'+key).classList.add('active');
+
+        // Slider Ayarla
+        slider.value = 0;
+        slider.max = data[key].path.length - 1;
+
+        updateBoard();
+    }
+
+    // Başlangıç
+    loadScenario('vezir');
+
+</script>
+</body>
+</html>

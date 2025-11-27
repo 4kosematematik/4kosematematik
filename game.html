@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sayı Okuma Oyunu</title>
+    <script src="/_sdk/element_sdk.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        .game-container {
+            width: 100%;
+            min-height: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin: 0;
+        }
+
+        .score-board {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .question-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .question-type {
+            font-size: 16px;
+            color: #764ba2;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .number-display {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+        }
+
+        .word-display {
+            font-size: 20px;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: bold;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f0f4ff;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #dc3545;
+        }
+
+        .feedback.hidden {
+            display: none;
+        }
+
+        .emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .correct-answer {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+    <style>@view-transition { navigation: auto; }</style>
+    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+</head>
+<body>
+<div class="game-container">
+    <header class="header">
+        <h1 class="title" id="gameTitle">🎮 Sayı Okuma Oyunu</h1>
+    </header>
+    <div class="score-board">
+        <div class="score-item">
+            <div class="score-label">
+                Doğru
+            </div>
+            <div class="score-value" id="correctScore">
+                0
+            </div>
+        </div>
+        <div class="score-item">
+            <div class="score-label">
+                Yanlış
+            </div>
+            <div class="score-value" id="incorrectScore">
+                0
+            </div>
+        </div>
+        <div class="score-item">
+            <div class="score-label">
+                Toplam
+            </div>
+            <div class="score-value" id="totalScore">
+                0
+            </div>
+        </div>
+    </div>
+    <main class="question-card">
+        <div class="question-type" id="questionType"></div>
+        <div id="questionDisplay"></div>
+        <div class="input-group"><label for="answerInput" class="input-label" id="inputLabel">Cevabınız:</label> <input type="text" id="answerInput" class="answer-input" placeholder="Cevabınızı yazın">
+        </div>
+        <div class="button-group"><button class="btn btn-primary" id="checkBtn">✓ Kontrol Et</button> <button class="btn btn-secondary" id="newQuestionBtn">➜ Yeni Soru</button>
+        </div>
+        <div id="feedback" class="feedback hidden"></div>
+    </main>
+</div>
+<script>
+    const defaultConfig = {
+        game_title: '🎮 Sayı Okuma Oyunu',
+        check_button_text: '✓ Kontrol Et',
+        new_question_text: '➜ Yeni Soru',
+        primary_color: '#667eea',
+        secondary_color: '#764ba2',
+        background_color: '#ffffff',
+        text_color: '#333333',
+        accent_color: '#f0f4ff',
+        font_family: 'Comic Sans MS',
+        font_size: 16
+    };
+
+    let currentQuestion = null;
+    let correctCount = 0;
+    let incorrectCount = 0;
+
+    const numberWords = {
+        0: 'sıfır', 1: 'bir', 2: 'iki', 3: 'üç', 4: 'dört', 5: 'beş',
+        6: 'altı', 7: 'yedi', 8: 'sekiz', 9: 'dokuz', 10: 'on',
+        20: 'yirmi', 30: 'otuz', 40: 'kırk', 50: 'elli', 60: 'altmış',
+        70: 'yetmiş', 80: 'seksen', 90: 'doksan'
+    };
+
+    function numberToWords(num) {
+        if (num === 0) return 'sıfır';
+
+        const billions = Math.floor(num / 1000000000);
+        const millions = Math.floor((num % 1000000000) / 1000000);
+        const thousands = Math.floor((num % 1000000) / 1000);
+        const remainder = num % 1000;
+
+        let result = [];
+
+        if (billions > 0) {
+            if (billions === 1) result.push('bir milyar');
+            else result.push(convertHundreds(billions) + ' milyar');
+        }
+
+        if (millions > 0) {
+            if (millions === 1) result.push('bir milyon');
+            else result.push(convertHundreds(millions) + ' milyon');
+        }
+
+        if (thousands > 0) {
+            if (thousands === 1) result.push('bin');
+            else result.push(convertHundreds(thousands) + ' bin');
+        }
+
+        if (remainder > 0) {
+            result.push(convertHundreds(remainder));
+        }
+
+        return result.join(' ');
+    }
+
+    function convertHundreds(num) {
+        const hundreds = Math.floor(num / 100);
+        const tens = num % 100;
+
+        let result = [];
+
+        if (hundreds > 0) {
+            if (hundreds === 1) result.push('yüz');
+            else result.push(numberWords[hundreds] + ' yüz');
+        }
+
+        if (tens > 0) {
+            if (tens <= 10) {
+                result.push(numberWords[tens]);
+            } else if (tens < 20) {
+                result.push('on ' + numberWords[tens - 10]);
+            } else {
+                const tensDigit = Math.floor(tens / 10) * 10;
+                const onesDigit = tens % 10;
+                if (onesDigit === 0) {
+                    result.push(numberWords[tensDigit]);
+                } else {
+                    result.push(numberWords[tensDigit] + ' ' + numberWords[onesDigit]);
+                }
+            }
+        }
+
+        return result.join(' ');
+    }
+
+    function generateRandomNumber() {
+        return Math.floor(Math.random() * 900000) + 100000;
+    }
+
+    function generateQuestion() {
+        const questionType = Math.random() < 0.5 ? 'numberToWord' : 'wordToNumber';
+        const number = generateRandomNumber();
+
+        currentQuestion = {
+            type: questionType,
+            number: number,
+            words: numberToWords(number)
+        };
+
+        displayQuestion();
+    }
+
+    function displayQuestion() {
+        const questionTypeEl = document.getElementById('questionType');
+        const questionDisplayEl = document.getElementById('questionDisplay');
+        const inputLabel = document.getElementById('inputLabel');
+        const answerInput = document.getElementById('answerInput');
+        const feedback = document.getElementById('feedback');
+
+        answerInput.value = '';
+        feedback.classList.add('hidden');
+
+        if (currentQuestion.type === 'numberToWord') {
+            questionTypeEl.textContent = '📝 Bu sayıyı yazıyla yazın:';
+            questionDisplayEl.innerHTML = `<div class="number-display">${currentQuestion.number.toLocaleString('tr-TR')}</div>`;
+            inputLabel.textContent = 'Yazıyla yazın:';
+            answerInput.placeholder = 'Örnek: altı yüz bin...';
+        } else {
+            questionTypeEl.textContent = '🔢 Bu yazıyı rakamla yazın:';
+            questionDisplayEl.innerHTML = `<div class="word-display">${currentQuestion.words}</div>`;
+            inputLabel.textContent = 'Rakamla yazın:';
+            answerInput.placeholder = 'Örnek: 600000';
+        }
+
+        answerInput.focus();
+    }
+
+    function normalizeText(text) {
+        return text.toLowerCase()
+            .replace(/\s+/g, ' ')
+            .trim()
+            .replace(/i̇/g, 'i');
+    }
+
+    function checkAnswer() {
+        const answerInput = document.getElementById('answerInput');
+        const userAnswer = answerInput.value.trim();
+        const feedback = document.getElementById('feedback');
+
+        if (!userAnswer) {
+            feedback.innerHTML = '<div class="emoji">⚠️</div>Lütfen bir cevap yazın!';
+            feedback.className = 'feedback incorrect';
+            return;
+        }
+
+        let isCorrect = false;
+
+        if (currentQuestion.type === 'numberToWord') {
+            const normalizedUser = normalizeText(userAnswer);
+            const normalizedCorrect = normalizeText(currentQuestion.words);
+            isCorrect = normalizedUser === normalizedCorrect;
+        } else {
+            const userNumber = parseInt(userAnswer.replace(/\./g, '').replace(/,/g, ''));
+            isCorrect = userNumber === currentQuestion.number;
+        }
+
+        if (isCorrect) {
+            correctCount++;
+            feedback.innerHTML = '<div class="emoji">🎉</div><div>Harika! Doğru cevap!</div>';
+            feedback.className = 'feedback correct';
+        } else {
+            incorrectCount++;
+            const correctAnswer = currentQuestion.type === 'numberToWord'
+                ? currentQuestion.words
+                : currentQuestion.number.toLocaleString('tr-TR');
+            feedback.innerHTML = `
+                    <div class="emoji">😔</div>
+                    <div>Maalesef yanlış!</div>
+                    <div class="correct-answer">Doğru cevap: ${correctAnswer}</div>
+                `;
+            feedback.className = 'feedback incorrect';
+        }
+
+        updateScores();
+    }
+
+    function updateScores() {
+        document.getElementById('correctScore').textContent = correctCount;
+        document.getElementById('incorrectScore').textContent = incorrectCount;
+        document.getElementById('totalScore').textContent = correctCount + incorrectCount;
+    }
+
+    document.getElementById('checkBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        checkAnswer();
+    });
+
+    document.getElementById('newQuestionBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        generateQuestion();
+    });
+
+    document.getElementById('answerInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkAnswer();
+        }
+    });
+
+    async function onConfigChange(config) {
+        const baseSize = config.font_size || defaultConfig.font_size;
+        const customFont = config.font_family || defaultConfig.font_family;
+        const baseFontStack = 'cursive, sans-serif';
+
+        document.getElementById('gameTitle').textContent = config.game_title || defaultConfig.game_title;
+        document.getElementById('checkBtn').textContent = config.check_button_text || defaultConfig.check_button_text;
+        document.getElementById('newQuestionBtn').textContent = config.new_question_text || defaultConfig.new_question_text;
+
+        const gameContainer = document.querySelector('.game-container');
+        gameContainer.style.background = `linear-gradient(135deg, ${config.primary_color || defaultConfig.primary_color} 0%, ${config.secondary_color || defaultConfig.secondary_color} 100%)`;
+
+        const questionCard = document.querySelector('.question-card');
+        questionCard.style.background = config.background_color || defaultConfig.background_color;
+
+        const title = document.querySelector('.title');
+        title.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        title.style.fontSize = `${baseSize * 2}px`;
+
+        const allText = document.querySelectorAll('.score-label, .score-value, .question-type, .input-label, .btn, .feedback');
+        allText.forEach(el => {
+            el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        });
+
+        document.querySelectorAll('.score-label').forEach(el => {
+            el.style.fontSize = `${baseSize * 0.875}px`;
+        });
+
+        document.querySelectorAll('.score-value').forEach(el => {
+            el.style.fontSize = `${baseSize * 1.5}px`;
+            el.style.color = config.primary_color || defaultConfig.primary_color;
+        });
+
+        document.querySelector('.question-type').style.fontSize = `${baseSize}px`;
+        document.querySelector('.question-type').style.color = config.secondary_color || defaultConfig.secondary_color;
+
+        document.querySelectorAll('.number-display, .word-display').forEach(el => {
+            el.style.color = config.primary_color || defaultConfig.primary_color;
+            el.style.background = config.accent_color || defaultConfig.accent_color;
+        });
+
+        document.querySelector('.answer-input').style.borderColor = config.primary_color || defaultConfig.primary_color;
+        document.querySelector('.answer-input').style.fontSize = `${baseSize * 1.125}px`;
+
+        document.querySelector('.btn-primary').style.background = `linear-gradient(135deg, ${config.primary_color || defaultConfig.primary_color} 0%, ${config.secondary_color || defaultConfig.secondary_color} 100%)`;
+
+        const btnSecondary = document.querySelector('.btn-secondary');
+        btnSecondary.style.background = config.accent_color || defaultConfig.accent_color;
+        btnSecondary.style.color = config.primary_color || defaultConfig.primary_color;
+        btnSecondary.style.borderColor = config.primary_color || defaultConfig.primary_color;
+    }
+
+    if (window.elementSdk) {
+        window.elementSdk.init({
+            defaultConfig: defaultConfig,
+            onConfigChange: onConfigChange,
+            mapToCapabilities: (config) => ({
+                recolorables: [
+                    {
+                        get: () => config.primary_color || defaultConfig.primary_color,
+                        set: (value) => {
+                            config.primary_color = value;
+                            window.elementSdk.setConfig({ primary_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.secondary_color || defaultConfig.secondary_color,
+                        set: (value) => {
+                            config.secondary_color = value;
+                            window.elementSdk.setConfig({ secondary_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.background_color || defaultConfig.background_color,
+                        set: (value) => {
+                            config.background_color = value;
+                            window.elementSdk.setConfig({ background_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.text_color || defaultConfig.text_color,
+                        set: (value) => {
+                            config.text_color = value;
+                            window.elementSdk.setConfig({ text_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.accent_color || defaultConfig.accent_color,
+                        set: (value) => {
+                            config.accent_color = value;
+                            window.elementSdk.setConfig({ accent_color: value });
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: {
+                    get: () => config.font_family || defaultConfig.font_family,
+                    set: (value) => {
+                        config.font_family = value;
+                        window.elementSdk.setConfig({ font_family: value });
+                    }
+                },
+                fontSizeable: {
+                    get: () => config.font_size || defaultConfig.font_size,
+                    set: (value) => {
+                        config.font_size = value;
+                        window.elementSdk.setConfig({ font_size: value });
+                    }
+                }
+            }),
+            mapToEditPanelValues: (config) => new Map([
+                ['game_title', config.game_title || defaultConfig.game_title],
+                ['check_button_text', config.check_button_text || defaultConfig.check_button_text],
+                ['new_question_text', config.new_question_text || defaultConfig.new_question_text]
+            ])
+        });
+    }
+
+    generateQuestion();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a542a8434ff8604',t:'MTc2NDI3MzE0Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
