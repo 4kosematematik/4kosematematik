@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çöp Şiş Paylaştırma Simülasyonu</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 { margin-bottom: 10px; color: #d35400; }
+
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        /* SOL PANEL: KONTROLLER */
+        .controls {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background: #fff8e1; /* Hafif sarımsı not kağıdı rengi */
+            border-radius: 8px;
+            border: 1px solid #ffe0b2;
+        }
+
+        .slider-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #e67e22; /* Turuncu slider */
+        }
+
+        .badge {
+            background: #333;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        /* SAĞ PANEL: ÇİZİM */
+        .canvas-area {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #fff;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.03);
+        }
+
+        /* KALAN BİLGİSİ */
+        .status-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .stick-visual {
+            display: flex;
+            gap: 3px;
+        }
+        
+        .stick {
+            width: 5px;
+            height: 30px;
+            background-color: #f1c40f;
+            border-radius: 2px;
+            display: inline-block;
+        }
+        
+        .stick.used {
+            background-color: #555; /* Kullanılanlar sönük */
+            opacity: 0.3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>🍡 12 Çöp Şiş ile Çokgen Oluşturma</h1>
+
+    <div class="main-container">
+        
+        <div class="controls">
+            <h3 style="margin-top:0;">Kenar Sayıları (n)</h3>
+            <p style="font-size:0.85em; color:#666;">
+                Her slider bir sonrakini kısıtlar. Toplam 12 çubuğunuz var.
+            </p>
+            <hr style="border:0; border-top:1px solid #e0e0e0; margin-bottom:20px;">
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>1. Şekil (n₁)</span>
+                    <span class="badge" id="val1">0</span>
+                </div>
+                <input type="range" id="s1" min="0" max="12" value="0" step="1">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>2. Şekil (n₂)</span>
+                    <span class="badge" id="val2">0</span>
+                </div>
+                <input type="range" id="s2" min="0" max="12" value="0" step="1">
+                <small style="font-size:0.7em; color:#888;">Max: <span id="max2">12</span></small>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>3. Şekil (n₃)</span>
+                    <span class="badge" id="val3">0</span>
+                </div>
+                <input type="range" id="s3" min="0" max="12" value="0" step="1">
+                <small style="font-size:0.7em; color:#888;">Max: <span id="max3">12</span></small>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span>4. Şekil (n₄)</span>
+                    <span class="badge" id="val4">0</span>
+                </div>
+                <input type="range" id="s4" min="0" max="12" value="0" step="1">
+                <small style="font-size:0.7em; color:#888;">Max: <span id="max4">12</span></small>
+            </div>
+
+        </div>
+
+        <div class="canvas-area">
+            
+            <div class="status-bar">
+                <div style="font-size:1.2em; font-weight:bold;">
+                    Kalan: <span id="remainingCount" style="color:#f1c40f;">12</span>
+                </div>
+                <div id="stickContainer" class="stick-visual">
+                    </div>
+            </div>
+
+            <canvas id="canvas" width="600" height="450"></canvas>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Element Referansları
+    const sliders = [
+        document.getElementById('s1'),
+        document.getElementById('s2'),
+        document.getElementById('s3'),
+        document.getElementById('s4')
+    ];
+
+    const badges = [
+        document.getElementById('val1'),
+        document.getElementById('val2'),
+        document.getElementById('val3'),
+        document.getElementById('val4')
+    ];
+
+    const maxLabels = [
+        null, // 1. slider'ın max label'ı yok (hep 12)
+        document.getElementById('max2'),
+        document.getElementById('max3'),
+        document.getElementById('max4')
+    ];
+
+    const remainingEl = document.getElementById('remainingCount');
+    const stickContainer = document.getElementById('stickContainer');
+
+    const TOTAL_STICKS = 12;
+
+    // --- ANA MANTIK FONKSİYONU ---
+    function updateLogic() {
+        let remaining = TOTAL_STICKS;
+
+        // --- 1. SLIDER ---
+        let v1 = parseInt(sliders[0].value);
+        remaining -= v1;
+        badges[0].innerText = v1 > 2 ? v1 + " (Çokgen)" : v1; // 3'ten küçükse sadece sayı
+
+        // --- 2. SLIDER ---
+        // 2. slider'ın yeni limiti = Kalan (1. slider hariç şu anki kalan)
+        // Ama dikkat: Şu anki s2 değeri, yeni limitten büyükse düşürülmeli.
+        updateSliderConstraint(1, remaining);
+        let v2 = parseInt(sliders[1].value);
+        remaining -= v2;
+        badges[1].innerText = v2 > 2 ? v2 + " (Çokgen)" : v2;
+
+        // --- 3. SLIDER ---
+        updateSliderConstraint(2, remaining);
+        let v3 = parseInt(sliders[2].value);
+        remaining -= v3;
+        badges[2].innerText = v3 > 2 ? v3 + " (Çokgen)" : v3;
+
+        // --- 4. SLIDER ---
+        updateSliderConstraint(3, remaining);
+        let v4 = parseInt(sliders[3].value);
+        remaining -= v4;
+        badges[3].innerText = v4 > 2 ? v4 + " (Çokgen)" : v4;
+
+        // --- SONUÇLARI GÖSTER ---
+        updateUI(remaining);
+        drawShapes([v1, v2, v3, v4]);
+    }
+
+    // Bir slider'ın max değerini ayarla ve mevcut değeri aşarsa kırp
+    function updateSliderConstraint(index, availableLimit) {
+        const slider = sliders[index];
+        const maxLabel = maxLabels[index];
+
+        // Max özelliğini güncelle
+        slider.max = availableLimit;
+        
+        // Eğer mevcut değer, yeni limitten büyükse değeri düşür
+        if (parseInt(slider.value) > availableLimit) {
+            slider.value = availableLimit;
+        }
+
+        // Küçük bilgi metnini güncelle
+        if(maxLabel) maxLabel.innerText = availableLimit;
+    }
+
+    function updateUI(remaining) {
+        remainingEl.innerText = remaining;
+        
+        // Çubuk animasyonu
+        stickContainer.innerHTML = '';
+        const used = TOTAL_STICKS - remaining;
+        
+        // 12 çubuğu çiz
+        for(let i=0; i<TOTAL_STICKS; i++) {
+            let div = document.createElement('div');
+            div.className = 'stick';
+            // Eğer bu çubuk kullanıldıysa "used" class'ı ekle (gri yap)
+            if (i >= remaining) { 
+                div.classList.add('used'); 
+            }
+            stickContainer.appendChild(div);
+        }
+    }
+
+    // --- ÇİZİM FONKSİYONU ---
+    function drawShapes(values) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 4 Bölge Koordinatları
+        const positions = [
+            {x: 150, y: 110}, // Sol Üst
+            {x: 450, y: 110}, // Sağ Üst
+            {x: 150, y: 340}, // Sol Alt
+            {x: 450, y: 340}  // Sağ Alt
+        ];
+
+        const colors = ["#e74c3c", "#3498db", "#9b59b6", "#2ecc71"];
+
+        values.forEach((sides, i) => {
+            const cx = positions[i].x;
+            const cy = positions[i].y;
+
+            if (sides < 3) {
+                // Çokgen oluşmaz, sadece nokta veya çubuk gösterelim
+                ctx.fillStyle = "#ccc";
+                ctx.font = "14px Arial";
+                ctx.textAlign = "center";
+                
+                if (sides === 0) {
+                    ctx.fillText("(Boş)", cx, cy);
+                } else {
+                    // Yan yana çubuk çiz
+                    ctx.beginPath();
+                    ctx.strokeStyle = "#888";
+                    ctx.lineWidth = 3;
+                    let offset = (sides-1)*10;
+                    for(let k=0; k<sides; k++){
+                        ctx.moveTo(cx - offset + k*20, cy-15);
+                        ctx.lineTo(cx - offset + k*20, cy+15);
+                    }
+                    ctx.stroke();
+                    ctx.fillText(sides + " Çubuk", cx, cy + 35);
+                }
+            } else {
+                // Çokgen Çiz
+                drawPolygon(cx, cy, 60, sides, colors[i]);
+                
+                // Altına ismini yaz
+                ctx.fillStyle = "#333";
+                ctx.font = "bold 16px Arial";
+                ctx.textAlign = "center";
+                let name = sides + "gen";
+                if(sides===3) name="Üçgen";
+                if(sides===4) name="Dörtgen";
+                if(sides===5) name="Beşgen";
+                ctx.fillText(name, cx, cy + 85);
+            }
+        });
+    }
+
+    function drawPolygon(centerX, centerY, radius, sides, color) {
+        ctx.beginPath();
+        let angleStep = (Math.PI * 2) / sides;
+        
+        // İlk noktaya git (Tepeden başlasın diye -PI/2)
+        ctx.moveTo(
+            centerX + radius * Math.cos(-Math.PI/2),
+            centerY + radius * Math.sin(-Math.PI/2)
+        );
+
+        for (let i = 1; i <= sides; i++) {
+            ctx.lineTo(
+                centerX + radius * Math.cos(-Math.PI/2 + i * angleStep),
+                centerY + radius * Math.sin(-Math.PI/2 + i * angleStep)
+            );
+        }
+
+        ctx.closePath();
+        
+        // İçini doldur
+        ctx.fillStyle = color + "33"; // %20 transparan
+        ctx.fill();
+        
+        // Kenarları çiz
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = color;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+
+        // Köşe Noktaları (Çöp şiş birleşim yerleri)
+        ctx.fillStyle = "#d35400"; // Hamur/Bağlantı rengi
+        for (let i = 0; i < sides; i++) {
+            let x = centerX + radius * Math.cos(-Math.PI/2 + i * angleStep);
+            let y = centerY + radius * Math.sin(-Math.PI/2 + i * angleStep);
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+
+    // Olay Dinleyicileri (Her slider oynadığında her şeyi güncelle)
+    sliders.forEach(s => {
+        s.addEventListener('input', updateLogic);
+    });
+
+    // Başlangıç
+    updateLogic();
+
+</script>
+
+</body>
+</html>

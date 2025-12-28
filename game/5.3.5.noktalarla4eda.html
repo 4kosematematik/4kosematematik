@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çokgen Avcısı: Temizle & Sıfırla</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            user-select: none;
+        }
+
+        h1 { color: #f1c40f; margin-bottom: 10px; text-shadow: 2px 2px 4px #000; }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            background: #ecf0f1;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            align-items: flex-start;
+            color: #333;
+        }
+
+        .canvas-area {
+            position: relative;
+        }
+
+        canvas {
+            background-color: #fff;
+            border: 4px solid #34495e;
+            border-radius: 12px;
+            cursor: crosshair;
+            background-image: 
+                linear-gradient(#bdc3c7 2px, transparent 2px),
+                linear-gradient(90deg, #bdc3c7 2px, transparent 2px);
+            background-size: 50px 50px;
+        }
+
+        .panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-box {
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 1em;
+            text-align: center;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .msg-start { background: #3498db; color: white; border: 2px solid #2980b9; }
+        .msg-error { background: #e74c3c; color: white; border: 2px solid #c0392b; animation: shake 0.4s; }
+        .msg-success { background: #2ecc71; color: white; border: 2px solid #27ae60; transform: scale(1.05); }
+        .msg-finish { background: #f1c40f; color: #d35400; border: 2px solid #e67e22; animation: pulse 1s infinite; }
+        .msg-info { background: #95a5a6; color: white; border: 2px solid #7f8c8d; }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: white;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+
+        .btn-undo { background-color: #f39c12; grid-column: span 2; }
+        .btn-undo:hover { background-color: #d35400; }
+
+        .btn-clear { background-color: #8e44ad; } /* Mor */
+        .btn-clear:hover { background-color: #6c3483; }
+
+        .btn-reset { background-color: #c0392b; } /* Kırmızı */
+        .btn-reset:hover { background-color: #922b21; }
+
+        .lists-container {
+            display: flex;
+            gap: 10px;
+            height: 300px;
+        }
+
+        .list-col {
+            flex: 1;
+            background: #fff;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .list-col h4 {
+            margin: 0 0 10px 0;
+            text-align: center;
+            font-size: 1.1em;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .log-item {
+            font-size: 0.9em;
+            padding: 6px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeIn 0.3s;
+        }
+        
+        .badge {
+            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <h1>✏️ Noktaları Birleştir: Doğru Çokgenler</h1>
+
+    <div class="main-container">
+        
+        <div class="canvas-area">
+            <canvas id="canvas" width="600" height="400"></canvas>
+        </div>
+
+        <div class="panel">
+            <div id="statusBox" class="info-box msg-start">
+                Noktaları birleştir ve şekli kapat!
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-undo" onclick="undoLastLine()">↩ Geri Al</button>
+                <button class="btn btn-clear" onclick="clearScreen()">🧹 Temizle</button>
+                <button class="btn btn-reset" onclick="resetGame()">🔄 Sıfırla</button>
+            </div>
+
+            <div class="lists-container">
+                <div class="list-col">
+                    <h4>Üçgenler</h4>
+                    <div id="triList"></div>
+                </div>
+                <div class="list-col">
+                    <h4>Dörtgenler</h4>
+                    <div id="quadList"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const statusBox = document.getElementById('statusBox');
+    const triListEl = document.getElementById('triList');
+    const quadListEl = document.getElementById('quadList');
+
+    const GRID = 50;
+    const OFF_X = 50;
+    const OFF_Y = 50;
+
+    const TOTAL_TRIANGLES = 9;
+    const TOTAL_QUADS = 3;
+
+    const pointsData = [
+        { name: 'A', x: 3, y: 2 },
+        { name: 'B', x: 5, y: 2 },
+        { name: 'C', x: 7, y: 2 },
+        { name: 'D', x: 5, y: 4 },
+        { name: 'E', x: 7, y: 4 }
+    ];
+
+    const points = pointsData.map(p => ({
+        name: p.name,
+        x: p.x * GRID + OFF_X,
+        y: p.y * GRID + OFF_Y
+    }));
+
+    let activePath = [];      
+    let completedShapes = []; 
+    let isDragging = false;
+    let dragStartPoint = null; 
+    let dragCurrentPos = {x:0, y:0}; 
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // YALNIZCA GÖRÜNÜR OLAN (visible: true) ŞEKİLLERİ ÇİZ
+        completedShapes.forEach(shape => {
+            if (shape.visible) {
+                drawPolygon(shape.indices, shape.color, true);
+            }
+        });
+
+        if (activePath.length > 0) {
+            ctx.beginPath();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#333";
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.moveTo(points[activePath[0]].x, points[activePath[0]].y);
+            for (let i = 1; i < activePath.length; i++) {
+                ctx.lineTo(points[activePath[i]].x, points[activePath[i]].y);
+            }
+            ctx.stroke();
+
+            if (isDragging && dragStartPoint !== null) {
+                const startP = points[dragStartPoint];
+                ctx.beginPath();
+                ctx.strokeStyle = "#7f8c8d";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([8, 8]);
+                ctx.moveTo(startP.x, startP.y);
+                ctx.lineTo(dragCurrentPos.x, dragCurrentPos.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        points.forEach((p, idx) => {
+            const isActive = activePath.includes(idx);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, isActive ? 9 : 6, 0, Math.PI * 2);
+            ctx.fillStyle = isActive ? "#e67e22" : "#34495e";
+            ctx.fill();
+            ctx.fillStyle = "#2c3e50";
+            ctx.font = "bold 20px Comic Sans MS";
+            ctx.fillText(p.name, p.x - 12, p.y - 18);
+        });
+    }
+
+    function drawPolygon(indices, color, fill) {
+        if (indices.length < 3) return;
+        ctx.beginPath();
+        const start = points[indices[0]];
+        ctx.moveTo(start.x, start.y);
+        for(let i=1; i<indices.length; i++) {
+            const p = points[indices[i]];
+            ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+        
+        if (fill) {
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = color.replace(", 0.4)", ", 1)");
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+    }
+
+    function getClosestPoint(x, y) {
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            const dist = Math.sqrt((x - p.x)**2 + (y - p.y)**2);
+            if (dist < 25) return i; 
+        }
+        return -1;
+    }
+
+    // --- MOUSE EVENTS ---
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const pIdx = getClosestPoint(e.clientX - rect.left, e.clientY - rect.top);
+
+        if (pIdx !== -1) {
+            if (activePath.length > 2 && activePath[0] === activePath[activePath.length-1]) {
+                activePath = []; 
+            }
+            if (activePath.length === 0) {
+                activePath.push(pIdx);
+                setStatus("Çiziliyor...", "start");
+            } 
+            isDragging = true;
+            dragStartPoint = activePath[activePath.length - 1]; 
+            dragCurrentPos = {x: e.clientX - rect.left, y: e.clientY - rect.top};
+            draw();
+        }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        dragCurrentPos = {x: e.clientX - rect.left, y: e.clientY - rect.top};
+        draw();
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const rect = canvas.getBoundingClientRect();
+        const targetIdx = getClosestPoint(e.clientX - rect.left, e.clientY - rect.top);
+
+        if (targetIdx !== -1) {
+            if (targetIdx === activePath[0] && activePath.length >= 3) {
+                activePath.push(targetIdx);
+                finishShape();
+            } else if (!activePath.includes(targetIdx)) {
+                activePath.push(targetIdx);
+            }
+        }
+        draw();
+    });
+
+    // --- KESİŞİM KONTROLLERİ ---
+    function ccw(p1, p2, p3) {
+        return (p3.y - p1.y) * (p2.x - p1.x) > (p2.y - p1.y) * (p3.x - p1.x);
+    }
+    function isIntersect(p1, p2, p3, p4) {
+        return (ccw(p1, p3, p4) != ccw(p2, p3, p4)) && (ccw(p1, p2, p3) != ccw(p1, p2, p4));
+    }
+    function isSimplePolygon(indices) {
+        const n = indices.length - 1;
+        if (n < 4) return true;
+        let edges = [];
+        for(let i=0; i<n; i++) {
+            edges.push({ p1: points[indices[i]], p2: points[indices[i+1]] });
+        }
+        for(let i=0; i<edges.length; i++) {
+            for(let j=i+2; j<edges.length; j++) {
+                if (i === 0 && j === edges.length - 1) continue;
+                if (isIntersect(edges[i].p1, edges[i].p2, edges[j].p1, edges[j].p2)) return false;
+            }
+        }
+        return true;
+    }
+
+    function getNormalizedID(path) {
+        const cleanPath = path.slice(0, path.length - 1);
+        const variations = [];
+        const n = cleanPath.length;
+        for (let i = 0; i < n; i++) {
+            const rotated = [...cleanPath.slice(i), ...cleanPath.slice(0, i)];
+            variations.push(rotated.join('-'));
+        }
+        const reversed = [...cleanPath].reverse();
+        for (let i = 0; i < n; i++) {
+            const rotated = [...reversed.slice(i), ...reversed.slice(0, i)];
+            variations.push(rotated.join('-'));
+        }
+        variations.sort();
+        return variations[0];
+    }
+
+    function finishShape() {
+        const labelsStr = activePath.map(i => points[i].name).join('');
+        const uniqueId = getNormalizedID(activePath);
+
+        const sortedLabels = [...activePath].slice(0, activePath.length-1).map(i => points[i].name).sort().join('');
+        if (sortedLabels === "ABC") {
+             setStatus("HATA: A-B-C düz bir çizgi! Çokgen olmaz.", "error");
+             activePath = []; draw(); return;
+        }
+
+        if (!isSimplePolygon(activePath)) {
+            setStatus("OLMAZ! Kenarlar kesişiyor (kum saati). Bu geçerli değil.", "error");
+            activePath = []; draw(); return;
+        }
+
+        // --- ZATEN BULUNDU KONTROLÜ ---
+        const existingShape = completedShapes.find(s => s.id === uniqueId);
+        
+        if (existingShape) {
+            if (existingShape.visible === false) {
+                // Eğer ekran temizlendiyse ve tekrar çizildiyse, geri getir
+                existingShape.visible = true;
+                setStatus("Bunu zaten bulmuştun, ekrana geri getirdim!", "success");
+            } else {
+                // Zaten ekranda varsa hata ver
+                setStatus("Dikkat: Bu şekli zaten çizdiniz!", "error");
+            }
+            activePath = []; 
+            draw(); 
+            return;
+        }
+
+        // --- YENİ ŞEKİL OLUŞTURMA ---
+        let shapeName = "";
+        let color = "";
+        let isTriangle = false;
+        const displayName = labelsStr.substring(0, labelsStr.length - 1);
+        const numPoints = activePath.length - 1;
+
+        if (numPoints === 3) {
+            isTriangle = true;
+            shapeName = displayName + " Üçgeni";
+            color = "rgba(52, 152, 219, 0.4)";
+        } 
+        else if (numPoints === 4) {
+            if (sortedLabels === "BCDE") {
+                 shapeName = displayName + " Dikdörtgeni";
+                 color = "rgba(46, 204, 113, 0.4)";
+            } else if (sortedLabels === "ABDE") {
+                 if (displayName.includes("BE") || displayName.includes("EB") || displayName.includes("AD") || displayName.includes("DA")) {
+                     shapeName = displayName + " Paralelkenarı";
+                 } else {
+                     shapeName = displayName + " Dik Yamuğu";
+                 }
+                 color = "rgba(155, 89, 182, 0.4)";
+            } else if (sortedLabels === "ACDE") {
+                 shapeName = displayName + " Dik Yamuğu";
+                 color = "rgba(255, 159, 67, 0.4)";
+            } else {
+                 shapeName = displayName + " Dörtgeni";
+                 color = "rgba(155, 89, 182, 0.4)";
+            }
+        } 
+        else {
+            setStatus("Sadece Üçgen ve Dörtgen!", "error");
+            activePath = []; draw(); return;
+        }
+
+        completedShapes.push({
+            id: uniqueId,
+            indices: [...activePath],
+            color: color,
+            name: shapeName,
+            type: isTriangle ? 'tri' : 'quad',
+            visible: true // Varsayılan olarak görünür
+        });
+
+        addToList(shapeName, color, isTriangle);
+
+        if (completedShapes.length === (TOTAL_TRIANGLES + TOTAL_QUADS)) {
+            setStatus("TEBRİKLER! HEPSİNİ BULDUN! 🏆", "finish");
+        } else {
+            setStatus(`Harika! ${shapeName} eklendi.`, "success");
+        }
+
+        activePath = [];
+        draw();
+    }
+
+    function addToList(text, color, isTriangle) {
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.style.backgroundColor = color.replace(", 0.4)", ", 1)");
+        div.appendChild(badge);
+        div.appendChild(document.createTextNode(text));
+        const targetList = isTriangle ? triListEl : quadListEl;
+        targetList.prepend(div);
+    }
+
+    // --- BUTON FONKSİYONLARI ---
+
+    function undoLastLine() {
+        if (activePath.length > 0) {
+            activePath.pop(); draw();
+        }
+    }
+
+    // 1. EKRANI TEMİZLE (Sadece görüntü gider, hafıza kalır)
+    function clearScreen() {
+        if (completedShapes.length === 0 && activePath.length === 0) return;
+        
+        // Tüm şekilleri gizle
+        completedShapes.forEach(s => s.visible = false);
+        activePath = [];
+        
+        setStatus("Ekran temizlendi. Buldukların listede duruyor.", "info");
+        draw();
+    }
+
+    // 2. OYUNU SIFIRLA (Her şey gider)
+    function resetGame() {
+        activePath = [];
+        completedShapes = [];
+        triListEl.innerHTML = "";
+        quadListEl.innerHTML = "";
+        setStatus("Oyun sıfırlandı. Hadi baştan başla!", "start");
+        draw();
+    }
+
+    function setStatus(msg, type) {
+        statusBox.innerText = msg;
+        statusBox.className = "info-box msg-" + type;
+        if (type === 'error') void statusBox.offsetWidth;
+    }
+
+    draw();
+
+</script>
+
+</body>
+</html>

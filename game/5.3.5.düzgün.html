@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Düzgün Çokgen Laboratuvarı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 10px;
+            color: #2d3436;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center; /* Ekranın ortasına hizala */
+        }
+
+        h1 {
+            color: #2d3436;
+            font-weight: 900;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        /* Kartlar Yan Yana */
+        .cards-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s;
+            border-top: 8px solid #b2bec3;
+        }
+
+        .card:hover { transform: translateY(-5px); }
+
+        .card h2 { font-size: 1.3rem; margin-bottom: 10px; text-align: center; min-height: 40px; display: flex; align-items: center; justify-content: center; color: #2d3436;}
+        
+        canvas {
+            background: #fdfdfd;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border: 1px solid #eee;
+        }
+
+        .controls {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        label { font-weight: 800; display: block; margin-bottom: 5px; color: #636e72; font-size: 0.9rem; }
+        input[type=range] { width: 90%; cursor: pointer; accent-color: #6c5ce7; }
+
+        .status-box {
+            background: #dfe6e9;
+            padding: 10px;
+            border-radius: 10px;
+            width: 100%;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .status-item:last-child { border-bottom: none; margin-bottom: 0; }
+
+        .check-icon { font-weight: bold; }
+        .yes { color: #00b894; }
+        .no { color: #d63031; }
+
+        .result {
+            margin-top: 5px;
+            font-weight: 900;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            color: white;
+            transition: background 0.3s;
+            font-size: 1rem;
+        }
+
+        .result.regular { background: #00b894; }
+        .result.not-regular { background: #d63031; }
+
+        /* Renk Temaları */
+        .card.rhombus { border-top-color: #e17055; }
+        .card.rect { border-top-color: #0984e3; }
+        .card.poly { border-top-color: #6c5ce7; }
+
+    </style>
+</head>
+<body>
+
+    <h1>🔍 Düzgün Çokgen Dedektifi</h1>
+    
+    <!-- Açıklama yazısı kaldırıldı -->
+
+    <div class="cards-container">
+        
+        <!-- KART 1: EŞKENAR DÖRTGEN -->
+        <div class="card rhombus">
+            <h2>1. Kenarlar Eşit Ama...</h2>
+            <canvas id="canvas1" width="320" height="240"></canvas>
+            
+            <div class="controls">
+                <label>Tepe Açısını Değiştir</label>
+                <input type="range" id="slider1" min="40" max="140" value="60" step="1">
+            </div>
+
+            <div class="status-box">
+                <div class="status-item">
+                    <span>Kenarlar Eşit mi?</span>
+                    <span class="check-icon yes">✅ EVET</span>
+                </div>
+                <div class="status-item">
+                    <span>Açılar Eşit mi?</span>
+                    <span id="status1-angle" class="check-icon no">❌ HAYIR</span>
+                </div>
+                <div id="result1" class="result not-regular">DÜZGÜN DEĞİL</div>
+            </div>
+        </div>
+
+        <!-- KART 2: DİKDÖRTGEN -->
+        <div class="card rect">
+            <h2>2. Açılar Eşit Ama...</h2>
+            <canvas id="canvas2" width="320" height="240"></canvas>
+            
+            <div class="controls">
+                <label>Genişliği Değiştir</label>
+                <input type="range" id="slider2" min="60" max="240" value="180" step="1">
+            </div>
+
+            <div class="status-box">
+                <div class="status-item">
+                    <span>Kenarlar Eşit mi?</span>
+                    <span id="status2-side" class="check-icon no">❌ HAYIR</span>
+                </div>
+                <div class="status-item">
+                    <span>Açılar Eşit mi?</span>
+                    <span class="check-icon yes">✅ EVET</span>
+                </div>
+                <div id="result2" class="result not-regular">DÜZGÜN DEĞİL</div>
+            </div>
+        </div>
+
+        <!-- KART 3: DÜZGÜN ÇOKGEN -->
+        <div class="card poly">
+            <h2>3. İkisi de Eşit!</h2>
+            <canvas id="canvas3" width="320" height="240"></canvas>
+            
+            <div class="controls">
+                <label>Kenar Sayısı (n)</label>
+                <input type="range" id="slider3" min="3" max="8" value="5" step="1">
+            </div>
+
+            <div class="status-box">
+                <div class="status-item">
+                    <span>Kenarlar Eşit mi?</span>
+                    <span class="check-icon yes">✅ EVET</span>
+                </div>
+                <div class="status-item">
+                    <span>Açılar Eşit mi?</span>
+                    <span class="check-icon yes">✅ EVET</span>
+                </div>
+                <div id="result3" class="result regular">🏆 DÜZGÜN ÇOKGEN!</div>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    // --- YARDIMCI: Metin Arkasına Beyaz Kutu ---
+    function drawTextWithBg(ctx, text, x, y, color) {
+        ctx.font = "bold 13px Nunito";
+        let w = ctx.measureText(text).width;
+        
+        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillRect(x - w/2 - 3, y - 9, w + 6, 18);
+        
+        ctx.fillStyle = color;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, x, y);
+    }
+
+    // --- YARDIMCI: Kenara Eşitlik Çentiği Atma ---
+    function drawTickMark(ctx, p1, p2) {
+        let mx = (p1.x + p2.x) / 2;
+        let my = (p1.y + p2.y) / 2;
+        
+        // Kenara dik vektör
+        let dx = p2.x - p1.x;
+        let dy = p2.y - p1.y;
+        let len = Math.sqrt(dx*dx + dy*dy);
+        let ux = -dy / len * 5; 
+        let uy = dx / len * 5;
+
+        ctx.beginPath();
+        ctx.moveTo(mx - ux, my - uy);
+        ctx.lineTo(mx + ux, my + uy);
+        ctx.strokeStyle = "#e17055";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    // --- SENARYO 1: EŞKENAR DÖRTGEN ---
+    const cv1 = document.getElementById('canvas1');
+    const ctx1 = cv1.getContext('2d');
+    const sl1 = document.getElementById('slider1');
+    const st1Angle = document.getElementById('status1-angle');
+    const res1 = document.getElementById('result1');
+
+    function drawRhombus() {
+        let angleDeg = parseInt(sl1.value);
+        let side = 80; // Biraz küçülttük
+        let cx = cv1.width / 2;
+        let cy = cv1.height / 2;
+        
+        let angleRad = (angleDeg * Math.PI) / 180;
+        let dx = side * Math.sin(angleRad / 2);
+        let dy = side * Math.cos(angleRad / 2);
+
+        let p = [
+            {x: cx, y: cy - dy},
+            {x: cx + dx, y: cy},
+            {x: cx, y: cy + dy},
+            {x: cx - dx, y: cy}
+        ];
+
+        ctx1.clearRect(0, 0, cv1.width, cv1.height);
+
+        ctx1.beginPath();
+        ctx1.moveTo(p[0].x, p[0].y);
+        for(let i=1; i<p.length; i++) ctx1.lineTo(p[i].x, p[i].y);
+        ctx1.closePath();
+        ctx1.fillStyle = "rgba(225, 112, 85, 0.1)";
+        ctx1.fill();
+        ctx1.strokeStyle = "#e17055";
+        ctx1.lineWidth = 2.5;
+        ctx1.stroke();
+
+        ctx1.fillStyle = "#2d3436";
+        p.forEach(pt => {
+            ctx1.beginPath();
+            ctx1.arc(pt.x, pt.y, 3.5, 0, Math.PI*2);
+            ctx1.fill();
+        });
+
+        // AÇI DEĞERLERİ (YAYSIZ)
+        drawTextWithBg(ctx1, angleDeg + "°", cx, p[0].y + 35, "#d35400");
+        
+        let sideAngle = 180 - angleDeg;
+        drawTextWithBg(ctx1, sideAngle + "°", p[1].x - 30, cy, "#636e72");
+
+        // ÇENTİKLER
+        drawTickMark(ctx1, p[0], p[1]);
+        drawTickMark(ctx1, p[1], p[2]);
+        drawTickMark(ctx1, p[2], p[3]);
+        drawTickMark(ctx1, p[3], p[0]);
+
+        drawTextWithBg(ctx1, "a = " + side + " br", (p[3].x + p[2].x)/2 - 15, (p[3].y + p[2].y)/2 + 15, "#e17055");
+
+        // KESİN KONTROL (SADECE 90)
+        if (angleDeg === 90) {
+            st1Angle.innerHTML = "✅ EVET (90°)";
+            st1Angle.className = "check-icon yes";
+            res1.innerHTML = "🏆 ARTIK DÜZGÜN (KARE)";
+            res1.className = "result regular";
+        } else {
+            st1Angle.innerHTML = "❌ HAYIR (" + angleDeg + "° ≠ " + sideAngle + "°)";
+            st1Angle.className = "check-icon no";
+            res1.innerHTML = "DÜZGÜN DEĞİL";
+            res1.className = "result not-regular";
+        }
+    }
+    sl1.addEventListener('input', drawRhombus);
+    drawRhombus();
+
+
+    // --- SENARYO 2: DİKDÖRTGEN ---
+    const cv2 = document.getElementById('canvas2');
+    const ctx2 = cv2.getContext('2d');
+    const sl2 = document.getElementById('slider2');
+    const st2Side = document.getElementById('status2-side');
+    const res2 = document.getElementById('result2');
+
+    function drawRect() {
+        let w = parseInt(sl2.value);
+        let h = 120; 
+        let cx = cv2.width / 2;
+        let cy = cv2.height / 2;
+
+        let p = [
+            {x: cx - w/2, y: cy - h/2},
+            {x: cx + w/2, y: cy - h/2},
+            {x: cx + w/2, y: cy + h/2},
+            {x: cx - w/2, y: cy + h/2}
+        ];
+
+        ctx2.clearRect(0, 0, cv2.width, cv2.height);
+
+        ctx2.beginPath();
+        ctx2.rect(p[0].x, p[0].y, w, h);
+        ctx2.fillStyle = "rgba(9, 132, 227, 0.1)";
+        ctx2.fill();
+        ctx2.lineWidth = 2.5;
+        ctx2.strokeStyle = "#0984e3";
+        ctx2.stroke();
+
+        let s = 10;
+        ctx2.strokeStyle = "#0984e3";
+        ctx2.lineWidth = 1.5;
+        ctx2.strokeRect(p[0].x, p[0].y, s, s);
+        ctx2.strokeRect(p[1].x - s, p[1].y, s, s);
+        ctx2.strokeRect(p[2].x - s, p[2].y - s, s, s);
+        ctx2.strokeRect(p[3].x, p[3].y - s, s, s);
+
+        drawTextWithBg(ctx2, w + " br", cx, p[0].y - 12, "#0984e3");
+        drawTextWithBg(ctx2, h + " br", p[1].x + 22, cy, "#0984e3");
+
+        ctx2.fillStyle = "#2d3436";
+        p.forEach(pt => {
+            ctx2.beginPath();
+            ctx2.arc(pt.x, pt.y, 3.5, 0, Math.PI*2);
+            ctx2.fill();
+        });
+
+        // KESİN KONTROL (SADECE W = H)
+        if (w === h) { 
+            st2Side.innerHTML = "✅ EVET";
+            st2Side.className = "check-icon yes";
+            res2.innerHTML = "🏆 ARTIK DÜZGÜN (KARE)";
+            res2.className = "result regular";
+        } else {
+            st2Side.innerHTML = "❌ HAYIR";
+            st2Side.className = "check-icon no";
+            res2.innerHTML = "DÜZGÜN DEĞİL";
+            res2.className = "result not-regular";
+        }
+    }
+    sl2.addEventListener('input', drawRect);
+    drawRect();
+
+
+    // --- SENARYO 3: DÜZGÜN ÇOKGEN ---
+    const cv3 = document.getElementById('canvas3');
+    const ctx3 = cv3.getContext('2d');
+    const sl3 = document.getElementById('slider3');
+    const res3 = document.getElementById('result3');
+
+    function drawRegular() {
+        let n = parseInt(sl3.value);
+        let r = 80;
+        let cx = cv3.width / 2;
+        let cy = cv3.height / 2;
+        let p = [];
+
+        let interiorAngle = Math.round((n - 2) * 180 / n);
+        let sideLen = Math.round(2 * r * Math.sin(Math.PI / n));
+
+        for (let i = 0; i < n; i++) {
+            let angle = (i * 2 * Math.PI / n) - Math.PI/2;
+            p.push({
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle)
+            });
+        }
+
+        ctx3.clearRect(0, 0, cv3.width, cv3.height);
+
+        ctx3.beginPath();
+        ctx3.moveTo(p[0].x, p[0].y);
+        for(let i=1; i<p.length; i++) ctx3.lineTo(p[i].x, p[i].y);
+        ctx3.closePath();
+        ctx3.fillStyle = "rgba(108, 92, 231, 0.1)";
+        ctx3.fill();
+        ctx3.lineWidth = 2.5;
+        ctx3.strokeStyle = "#6c5ce7";
+        ctx3.stroke();
+
+        for(let i=0; i<n; i++) {
+            let p1 = p[i];
+            let p2 = p[(i+1)%n];
+
+            let mx = (p1.x + p2.x)/2;
+            let my = (p1.y + p2.y)/2;
+            let vx = mx - cx;
+            let vy = my - cy;
+            let dist = Math.sqrt(vx*vx + vy*vy);
+            let offX = (vx/dist) * 18; 
+            let offY = (vy/dist) * 18;
+            
+            let textS = (i === 0) ? sideLen + " br" : sideLen;
+            drawTextWithBg(ctx3, textS, mx + offX, my + offY, "#6c5ce7");
+
+            let ax = cx - p1.x;
+            let ay = cy - p1.y;
+            let adist = Math.sqrt(ax*ax + ay*ay);
+            let aOffX = (ax/adist) * 22;
+            let aOffY = (ay/adist) * 22;
+
+            let textA = (i === 0) ? interiorAngle + "°" : interiorAngle;
+            ctx3.font = "bold 11px Nunito";
+            ctx3.fillStyle = "#2d3436";
+            ctx3.textAlign = "center";
+            ctx3.fillText(textA, p1.x + aOffX, p1.y + aOffY);
+
+            ctx3.beginPath();
+            ctx3.arc(p1.x, p1.y, 3.5, 0, Math.PI*2);
+            ctx3.fillStyle = "#2d3436";
+            ctx3.fill();
+        }
+        
+        let names = {3:"Eşkenar Üçgen", 4:"Kare", 5:"Düzgün Beşgen", 6:"Düzgün Altıgen", 7:"Düzgün Yedigen", 8:"Düzgün Sekizgen"};
+        res3.innerHTML = `🏆 ${names[n] || "Düzgün Çokgen"}`;
+    }
+    sl3.addEventListener('input', drawRegular);
+    drawRegular();
+
+</script>
+
+</body>
+</html>

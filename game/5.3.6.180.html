@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üçgen İç Açılar Toplamı İspatı</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 800px;
+            width: 95%;
+        }
+        canvas {
+            background-color: #ffffff;
+            border: 2px solid #eef2f7;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            touch-action: none;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .control-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 0.95em;
+        }
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #3498db;
+        }
+        h2 { margin-top: 0; color: #2c3e50; font-size: 1.6em; }
+        p.info { color: #6c757d; font-size: 0.95em; margin-bottom: 20px; }
+        .math-text {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            min-width: 250px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Üçgenin İç Açıları Toplamı: 180°</h2>
+    <p class="info">Sürgüleri kullanarak açıların <b>paralel doğrular</b> arasında nasıl taşındığını inceleyin.</p>
+    
+    <canvas id="canvas" width="650" height="400"></canvas>
+    
+    <div>
+        <div class="math-text" id="angleText">Hesaplanıyor...</div>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="shapeSlider">1. C Köşesini Kaydır</label>
+            <input type="range" id="shapeSlider" min="-180" max="180" value="0">
+        </div>
+        <div class="control-group">
+            <label for="animSlider">2. İspatı Oynat (Taşı)</label>
+            <input type="range" id="animSlider" min="0" max="100" value="0">
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const shapeSlider = document.getElementById('shapeSlider');
+    const animSlider = document.getElementById('animSlider');
+    const angleTextDiv = document.getElementById('angleText');
+
+    // Koordinatlar
+    const Ax = 150, Ay = 320;
+    const Bx = 500, By = 320;
+    let Cx = 325; 
+    const Cy = 100; 
+    
+    let animationProgress = 0;
+
+    // Etkileşimler
+    shapeSlider.addEventListener('input', () => {
+        Cx = 325 + parseInt(shapeSlider.value);
+        draw();
+    });
+
+    animSlider.addEventListener('input', () => {
+        animationProgress = parseInt(animSlider.value) / 100;
+        draw();
+    });
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // --- 1. Paralel Doğrular (Üst ve Alt) ---
+        ctx.beginPath();
+        ctx.setLineDash([8, 6]); // Kesikli çizgi stili
+        
+        // Üst Doğru (C'den geçen)
+        ctx.moveTo(0, Cy);
+        ctx.lineTo(650, Cy);
+        
+        // Alt Doğru (A ve B'den geçen) - YENİ EKLENDİ
+        ctx.moveTo(0, Ay);
+        ctx.lineTo(650, Ay);
+
+        ctx.strokeStyle = '#95a5a6'; // Gri renk
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.setLineDash([]); // Normale dön
+
+        // Paralellik sembolleri (Oklar)
+        drawArrowHead(620, Cy, '#95a5a6');
+        drawArrowHead(620, Ay, '#95a5a6');
+
+
+        // --- 2. Üçgenin Kendisi ---
+        ctx.beginPath();
+        ctx.moveTo(Ax, Ay);
+        ctx.lineTo(Bx, By);
+        ctx.lineTo(Cx, Cy);
+        ctx.closePath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#2c3e50'; // Koyu lacivert
+        ctx.stroke();
+        
+        // Köşe İsimleri
+        ctx.fillStyle = '#212529';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillText("A", Ax - 25, Ay + 10);
+        ctx.fillText("B", Bx + 15, Ay + 10);
+        ctx.fillText("C", Cx, Cy - 15);
+
+        // --- 3. Açı Hesaplamaları ---
+        const angleAC = Math.atan2(Cy - Ay, Cx - Ax);
+        const angleBC = Math.atan2(Cy - By, Cx - Bx);
+
+        // Derece Değerleri
+        const degA = Math.round(Math.abs(angleAC * 180 / Math.PI));
+        const degB = Math.round((Math.PI - Math.abs(angleBC)) * 180 / Math.PI);
+        const degC = 180 - degA - degB;
+
+        angleTextDiv.innerText = `${degA}° + ${degB}° + ${degC}° = 180°`;
+
+        // --- 4. Açıları Çiz ve Hareket Ettir ---
+
+        // >>> C Açısı (Yeşil - Tepe) <<<
+        // Sabit kalır
+        drawWedge(Cx, Cy, Math.PI + angleAC, Math.PI + angleBC, 'rgba(46, 204, 113, 0.7)', degC + '°', 0);
+
+
+        // >>> A Açısı (Kırmızı - Sol) <<<
+        // Hedefe doğru döner ve taşınır
+        let midAC_x = (Ax + Cx) / 2;
+        let midAC_y = (Ay + Cy) / 2;
+        
+        ctx.save();
+        // Dönme merkezi orta nokta
+        ctx.translate(midAC_x, midAC_y);
+        
+        // Animasyon: Açı kadar döndür
+        let rotationA = animationProgress * Math.PI; // 180 dereceye kadar döndür (Z kuralı için)
+        // Bekle, Z kuralı için aslında sadece A açısı kadar değil, tam tersine dönmesi lazım.
+        // Basit simülasyonda olduğu gibi "taşıma" efekti veriyoruz.
+        // Amaç: A açısını C'nin soluna getirmek.
+        
+        // Basit taşıma (rotasyon)
+        ctx.rotate(rotationA);
+        ctx.translate(-midAC_x, -midAC_y);
+        
+        // Açı yayını ve yazısını çiz
+        drawWedge(Ax, Ay, 0, angleAC, 'rgba(231, 76, 60, 0.7)', degA + '°', -rotationA);
+        ctx.restore();
+
+
+        // >>> B Açısı (Mavi - Sağ) <<<
+        let midBC_x = (Bx + Cx) / 2;
+        let midBC_y = (By + Cy) / 2;
+
+        ctx.save();
+        ctx.translate(midBC_x, midBC_y);
+        
+        // Ters yöne döndür
+        let rotationB = -animationProgress * Math.PI;
+        ctx.rotate(rotationB);
+        
+        ctx.translate(-midBC_x, -midBC_y);
+
+        drawWedge(Bx, By, angleBC, Math.PI, 'rgba(52, 152, 219, 0.7)', degB + '°', -rotationB);
+        ctx.restore();
+    }
+
+    // Açı Dilimi ve DÜZ METİN Çizen Fonksiyon
+    function drawWedge(x, y, startAngle, endAngle, color, label, rotationCorrection) {
+        const radius = 55;
+        
+        let diff = endAngle - startAngle;
+        while (diff <= -Math.PI) diff += 2*Math.PI;
+        while (diff > Math.PI) diff -= 2*Math.PI;
+        
+        let useAntiClockwise = false;
+        if (diff < 0) useAntiClockwise = true; 
+
+        // Dilimi Çiz
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, radius, startAngle, endAngle, useAntiClockwise);
+        ctx.closePath();
+        
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = color.replace('0.7', '1.0');
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Yazı Konumunu Hesapla
+        let midAngle = startAngle + diff / 2;
+        let labelR = radius * 0.7; 
+        
+        let labelX = x + labelR * Math.cos(midAngle);
+        let labelY = y + labelR * Math.sin(midAngle);
+        
+        // --- YAZIYI DÜZ TUTMA ---
+        ctx.save();
+        ctx.translate(labelX, labelY);
+        ctx.rotate(rotationCorrection); // Dünya dönerken yazıyı tersine çevir
+        
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 3; 
+        ctx.font = 'bold 15px Arial'; 
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        ctx.strokeText(label, 0, 0);
+        ctx.fillText(label, 0, 0);
+        
+        ctx.restore();
+    }
+
+    // Paralellik Oku Çizen Yardımcı Fonksiyon
+    function drawArrowHead(x, y, color) {
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 10, y - 5);
+        ctx.lineTo(x - 10, y + 5);
+        ctx.closePath();
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    draw();
+
+</script>
+
+</body>
+</html>

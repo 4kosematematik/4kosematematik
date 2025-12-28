@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Köşegen ve Ampül Oyunu</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7ff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .wrapper {
+      display: flex;
+      gap: 12px;
+      max-width: 900px;
+      width: 100%;
+      flex-wrap: wrap; /* Mobilde alt alta geçsin */
+      transition: all 0.3s ease;
+    }
+    .left, .right {
+      background: #ffffff;
+      padding: 12px 14px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .left { flex: 1; min-width: 300px; } 
+    .right { 
+      flex: 0 0 250px; 
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    h2 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      text-align: center;
+      color: #333;
+    }
+    #controls label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    input[type="range"] {
+      width: 100%;
+      max-width: 300px;
+      cursor: pointer;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      background: #ffffff;
+      border-radius: 10px;
+      display: block;
+      margin-top: 15px;
+      margin-inline: auto;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+      max-width: 100%; /* Responsive canvas */
+    }
+    .section-title {
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      color: #444;
+    }
+    .value {
+      font-weight: bold;
+      color: #2980b9;
+    }
+    .info-text {
+      font-size: 12px;
+      color: #555;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    
+    .toggle-area {
+      background-color: #e8f4fd;
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      border: 1px solid #bbdefb;
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .toggle-area label {
+      margin: 0 !important;
+      cursor: pointer;
+      font-weight: bold;
+      color: #1565c0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    input[type="checkbox"] {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .right {
+        flex: 100%;
+        order: -1; /* Bilgi kutusunu mobilde üste alabiliriz veya alta, şu an standart */
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+
+    <div class="left">
+      <h2>Köşegen – Ampül Etkinliği</h2>
+
+      <div id="controls">
+        
+        <div class="toggle-area">
+          <label>
+            <input type="checkbox" id="toggleInfo" checked>
+            Bilgi Kutusunu Göster / Gizle
+          </label>
+        </div>
+
+        <div class="section-title">Köşe sayısı (n)</div>
+        <label>
+          n:
+          <input type="range" id="nSlider" min="3" max="8" value="5" />
+          <span id="nValue" class="value">5</span>
+        </label>
+
+        <div class="section-title">Köşegen sayısı tahmini</div>
+        <label>
+          Tahmin edilen köşegen sayısı:
+          <!-- Max değer JS ile dinamik ayarlanacak -->
+          <input type="range" id="diagSlider" min="0" value="0" />
+          <span id="diagValue" class="value">0</span>
+        </label>
+        <span class="info-text">
+          Sliderı kaydırarak devre bağlantılarını (köşegenleri) tamamla.
+        </span>
+      </div>
+
+      <canvas id="canvas" width="480" height="360"></canvas>
+    </div>
+
+    <div class="right" id="rightPanel">
+      <h2>Bilgi Kutusu</h2>
+
+      <div class="section-title">Toplam köşegen sayısı</div>
+      <div class="info-text">
+        n kenarlı bir düzgün çokgenin toplam köşegen sayısı:<br>
+        <strong style="font-size:1.1em; color:#d35400;">n(n − 3) / 2</strong>
+      </div>
+
+      <div class="info-text" style="margin-top:8px;">
+        Şu anki n: 
+        <span id="infoN" class="value">5</span><br>
+        Toplam köşegen sayısı: 
+        <span id="infoDiag" class="value">5</span>
+      </div>
+
+      <div class="info-text" style="margin-top:10px;">
+        Ampüller:
+        <ul style="margin:4px 0 0 16px; padding:0;">
+          <li>Sönük: Devre tamamlanmadı.</li>
+          <li>Hepsi yanık: Devre tamam! 🔥</li>
+        </ul>
+        <div style="margin-top:8px; font-size:11px; color:#555;">
+          *<strong>Mavi Kablolar:</strong> Çokgenin Kenarları<br>
+          *<strong>Kırmızı Kablolar:</strong> Köşegenler
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    var nSlider    = document.getElementById("nSlider");
+    var nValue     = document.getElementById("nValue");
+    var diagSlider = document.getElementById("diagSlider");
+    var diagValue  = document.getElementById("diagValue");
+
+    var infoN    = document.getElementById("infoN");
+    var infoDiag = document.getElementById("infoDiag");
+    
+    var toggleInfo = document.getElementById("toggleInfo");
+    var rightPanel = document.getElementById("rightPanel");
+
+    var cx = canvas.width / 2;
+    var cy = canvas.height / 2 + 10;
+    var R  = 110;  // çokgen yarıçapı
+
+    toggleInfo.addEventListener("change", function() {
+      if(this.checked) {
+        rightPanel.style.display = "block"; 
+      } else {
+        rightPanel.style.display = "none";
+      }
+    });
+
+    // Bu fonksiyon slider'ın maksimum değerini ayarlar.
+    function updateSliderMax() {
+      var n = parseInt(nSlider.value, 10);
+      
+      // n=3 için özel durum: Slider 10'a kadar gitsin
+      if (n === 3) {
+        diagSlider.max = 10;
+      } else {
+        // Diğer çokgenler için tam cevapta dursun
+        var maxDiagonals = (n * (n - 3)) / 2;
+        if (maxDiagonals < 0) maxDiagonals = 0;
+        diagSlider.max = maxDiagonals;
+      }
+      
+      // Eğer mevcut tahmin yeni max'tan büyükse, sınıra çek
+      if (parseInt(diagSlider.value, 10) > parseInt(diagSlider.max, 10)) {
+        diagSlider.value = diagSlider.max;
+      }
+    }
+
+    // Yardımcı Fonksiyon: Kablo Çizimi
+    // colorBase: Kablonun ana rengi (koyu)
+    // colorHighlight: Kablonun ortasındaki parlaklık rengi (daha açık)
+    function drawWire(x1, y1, x2, y2, colorBase, colorHighlight) {
+      // Dış kalın hat (Kablo gövdesi)
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.lineCap = 'round'; // Uçları yuvarlak
+      ctx.lineWidth = 6;     // Kalınlık
+      ctx.strokeStyle = colorBase;
+      ctx.stroke();
+
+      // İç ince hat (Parlama efekti / 3D hissi)
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 2;     // Daha ince
+      ctx.strokeStyle = colorHighlight;
+      ctx.stroke();
+      
+      // Ayarları normale döndür
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'butt';
+    }
+
+    function draw() {
+      var n        = parseInt(nSlider.value, 10);
+      var guess    = parseInt(diagSlider.value, 10);
+      var totalDiag = (n * (n - 3)) / 2;
+      
+      if (totalDiag < 0) totalDiag = 0;
+
+      nValue.textContent    = n;
+      diagValue.textContent = guess;
+
+      infoN.textContent    = n;
+      infoDiag.textContent = totalDiag;
+
+      // Temizle
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Köşe noktalarını hesapla
+      var vertices = [];
+      for (var k = 0; k < n; k++) {
+        var angle = -Math.PI / 2 + 2 * Math.PI * k / n;
+        var x = cx + R * Math.cos(angle);
+        var y = cy + R * Math.sin(angle);
+        vertices.push({x: x, y: y});
+      }
+
+      // 1. Çokgenin kenarlarını çiz (MAVİ KABLOLAR)
+      for (var i = 0; i < n; i++) {
+        var next = (i + 1) % n;
+        // Mavi (#1565c0) gövde, Açık Mavi (#64b5f6) parlama
+        drawWire(vertices[i].x, vertices[i].y, vertices[next].x, vertices[next].y, "#1565c0", "#64b5f6");
+      }
+
+      // 2. Çizilecek bağlantıları (Sadece Köşegenler) hazırla
+      var diagonals = [];
+      for (var i = 0; i < n; i++) {
+        for (var j = i + 1; j < n; j++) {
+           var isSide = (Math.abs(i - j) === 1) || (Math.abs(i - j) === n - 1);
+           if (!isSide) {
+             diagonals.push({ start: i, end: j });
+           }
+        }
+      }
+
+      // Slider sınırına göre çizim (KIRMIZI KABLOLAR)
+      var drawLimit = Math.min(guess, diagonals.length);
+
+      if (drawLimit > 0) {
+        for (var d = 0; d < drawLimit; d++) {
+           var line = diagonals[d];
+           var s = line.start;
+           var e = line.end;
+           
+           // Kırmızı (#c62828) gövde, Açık Kırmızı/Turuncu (#ff8a65) parlama
+           drawWire(vertices[s].x, vertices[s].y, vertices[e].x, vertices[e].y, "#c62828", "#ff8a65");
+        }
+      }
+
+      // 3. Bağlantı Noktaları (Vida/Terminal görüntüsü)
+      ctx.fillStyle = "#455a64"; // Koyu gri metalik
+      for (var j = 0; j < n; j++) {
+        ctx.beginPath();
+        ctx.arc(vertices[j].x, vertices[j].y, 6, 0, 2*Math.PI);
+        ctx.fill();
+        
+        // Vida başı efekti (içine küçük açık gri nokta)
+        ctx.fillStyle = "#cfd8dc";
+        ctx.beginPath();
+        ctx.arc(vertices[j].x, vertices[j].y, 2, 0, 2*Math.PI);
+        ctx.fill();
+        ctx.fillStyle = "#455a64"; // Rengi geri al
+      }
+
+      // 4. Ampülleri çiz
+      var lightsOn = (guess === totalDiag);
+
+      for (var t = 0; t < n; t++) {
+        var vx = vertices[t].x;
+        var vy = vertices[t].y;
+
+        var dx = vx - cx;
+        var dy = vy - cy;
+        var len = Math.sqrt(dx*dx + dy*dy);
+        if (len === 0) len = 1;
+        var bx = cx + (R + 25) * dx / len;
+        var by = cy + (R + 25) * dy / len;
+
+        // Kablo bağlantısı (Köşeden ampule giden küçük siyah kablo)
+        ctx.beginPath();
+        ctx.moveTo(vx, vy);
+        ctx.lineTo(bx, by);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#333";
+        ctx.stroke();
+        ctx.lineWidth = 1; // reset
+
+        // Ampul Camı
+        ctx.beginPath();
+        ctx.arc(bx, by, 10, 0, 2*Math.PI);
+        if (lightsOn) {
+          ctx.fillStyle = "#ffff00"; // Canlı sarı
+          ctx.shadowBlur = 20;
+          ctx.shadowColor = "#ffff00";
+        } else {
+          ctx.fillStyle = "#b0bec5"; // Sönük gri-mavi
+          ctx.shadowBlur = 0;
+        }
+        ctx.fill();
+        ctx.shadowBlur = 0; 
+        
+        ctx.strokeStyle = "#555";
+        ctx.stroke();
+
+        // Duy (Metal kısım)
+        ctx.fillStyle = "#78909c";
+        ctx.fillRect(bx - 4, by + 7, 8, 5);
+      }
+
+      // Başlık
+      ctx.fillStyle = "#000";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(n + " kenarlı düzgün çokgen", cx, 30);
+    }
+
+    // Başlangıçta max değerini ayarla
+    updateSliderMax();
+
+    nSlider.addEventListener("input", function() {
+      updateSliderMax(); // n değişince max limit de değişsin
+      draw();
+    });
+    
+    diagSlider.addEventListener("input", draw);
+
+    // İlk çizim
+    draw();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çokgen Kesme ve Tahmin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #2d3436;
+            user-select: none;
+        }
+
+        h1 { 
+            color: #d63031; 
+            font-weight: 900; 
+            margin-bottom: 20px; 
+            font-size: 2.5em; 
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.5);
+            text-align: center;
+        }
+
+        .main-layout {
+            display: flex;
+            flex-direction: row;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border: 6px solid #fff;
+            max-width: 1100px;
+            width: 100%;
+            gap: 30px;
+        }
+
+        .canvas-container {
+            position: relative;
+            flex: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f1f2f6;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        canvas {
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .instruction-box {
+            background: #ffeaa7;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 6px solid #fdcb6e;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #d35400;
+            line-height: 1.4;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        button {
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:active { transform: translateY(4px); box-shadow: none; }
+        button:hover { transform: translateY(-2px); }
+
+        .btn-shape { background: #74b9ff; }
+        .btn-shape:hover { background: #0984e3; }
+
+        .btn-reset { 
+            grid-column: span 2; 
+            background: #ff7675; 
+            margin-top: 10px;
+        }
+        .btn-reset:hover { background: #d63031; }
+
+        #scissors {
+            position: absolute;
+            font-size: 50px;
+            pointer-events: none;
+            display: none;
+            z-index: 100;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        /* --- Quiz Popup --- */
+        .quiz-popup {
+            position: absolute;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 3px solid #6c5ce7;
+            display: none;
+            z-index: 200;
+            min-width: 180px;
+            text-align: center;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .quiz-popup h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            color: #2d3436;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .btn-option {
+            background: #f1f2f6;
+            color: #2d3436;
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #dfe6e9;
+            box-shadow: none;
+        }
+        .btn-option:hover {
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .result-label {
+            position: absolute;
+            pointer-events: none;
+            font-weight: 900;
+            color: white;
+            background: #00b894;
+            padding: 8px 15px;
+            border-radius: 50px;
+            border: 2px solid #fff;
+            display: none;
+            font-size: 1.2em;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 50;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 800px) {
+            .main-layout { flex-direction: column; }
+            .canvas-container { min-height: 400px; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>✂️ Çokgen Kesme ve Tahmin</h1>
+    
+    <div class="main-layout">
+        
+        <div class="canvas-container" id="canvasWrap">
+            <canvas id="polyCanvas" width="600" height="500"></canvas>
+            
+            <div id="scissors">✂️</div>
+            
+            <div id="label1" class="result-label"></div>
+            <div id="label2" class="result-label"></div>
+
+            <!-- Soru Modalı (İçerik JS ile doldurulacak) -->
+            <div id="quizModal" class="quiz-popup">
+                <h3>Bu şekil nedir?</h3>
+                <div class="quiz-options" id="quizOptions">
+                    <!-- Butonlar buraya gelecek -->
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="instruction-box" id="instr">
+                Başlamak için aşağıdaki butonlardan bir çokgen seç!
+            </div>
+
+            <div class="controls-grid">
+                <button class="btn-shape" onclick="initPolygon(4)">⬜ Kare</button>
+                <button class="btn-shape" onclick="initPolygon(5)">⬠ Beşgen</button>
+                <button class="btn-shape" onclick="initPolygon(6)">⬡ Altıgen</button>
+                <button class="btn-shape" onclick="initPolygon(8)">🛑 Sekizgen</button>
+                
+                <button class="btn-reset" onclick="reset()">🔄 Yeniden Başlat</button>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    const canvas = document.getElementById('polyCanvas');
+    const ctx = canvas.getContext('2d');
+    const scissors = document.getElementById('scissors');
+    const instr = document.getElementById('instr');
+    const label1 = document.getElementById('label1');
+    const label2 = document.getElementById('label2');
+    const quizModal = document.getElementById('quizModal');
+    const quizOptionsDiv = document.getElementById('quizOptions');
+
+    let vertices = [];
+    let selectedVertices = [];
+    let isCut = false;
+    let pieces = [];
+    let cutPath = null; 
+    let canGuess = false;
+    let activePieceIndex = -1; 
+
+    const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const CENTER = { x: 300, y: 250 };
+    const RADIUS = 160;
+
+    function initPolygon(n) {
+        reset();
+        vertices = [];
+        instr.innerText = "Şimdi bir köşegen oluşturmak için iki farklı köşeye tıkla!";
+        instr.style.color = "#d35400";
+        
+        for (let i = 0; i < n; i++) {
+            let angle = (i * 2 * Math.PI / n) - Math.PI / 2;
+            vertices.push({
+                x: CENTER.x + RADIUS * Math.cos(angle),
+                y: CENTER.y + RADIUS * Math.sin(angle),
+                label: LETTERS[i],
+                id: i
+            });
+        }
+        draw();
+    }
+
+    function reset() {
+        selectedVertices = [];
+        isCut = false;
+        canGuess = false;
+        activePieceIndex = -1;
+        pieces = [];
+        cutPath = null;
+        scissors.style.display = 'none';
+        label1.style.display = 'none';
+        label2.style.display = 'none';
+        quizModal.style.display = 'none';
+        instr.innerText = "Bir şekil seçerek başla.";
+        instr.style.color = "#d35400";
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // --- DIŞARI TIKLAMA KONTROLÜ (Modalı Kapatmak İçin) ---
+    document.addEventListener('click', (e) => {
+        // Eğer modal açıksa ve tıklanan yer modalın içi değilse
+        if (quizModal.style.display === 'block') {
+            // Tıklamanın canvas içinde bir parçaya olup olmadığını kontrol et
+            // Eğer parçaya tıklandıysa zaten modal açılıyor/güncelleniyor
+            // Eğer boşluğa tıklandıysa modalı kapat
+            
+            // Bu event listener canvas listener'dan sonra çalışır (bubbling)
+            // Canvas içinde parçaya tıklayınca stopPropagation yaparsak buraya gelmez
+            // Ama biz buraya özel bir kontrol ekleyelim:
+            
+            const isClickInsideModal = quizModal.contains(e.target);
+            const isClickOnCanvas = e.target === canvas; // Canvas'a tıklandı
+            
+            // Canvas'a tıklandıysa, canvas listener zaten işini yaptı (parça kontrolü)
+            // Eğer parça bulunamadıysa (boşluğa tıklandıysa) modalı kapatmalı
+            // Parça bulunduysa modal açılır (veya açık kalır)
+            
+            if (!isClickInsideModal && !isClickOnCanvas) {
+                quizModal.style.display = 'none';
+            }
+        }
+    });
+
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        if (!isCut && vertices.length > 0) {
+            for (let v of vertices) {
+                let dist = Math.sqrt((v.x - mouseX)**2 + (v.y - mouseY)**2);
+                if (dist < 25) { 
+                    handleVertexClick(v);
+                    return;
+                }
+            }
+        }
+
+        if (canGuess) {
+            let clickedOnPiece = false;
+            pieces.forEach((p, idx) => {
+                // Önceden bilinenlere tıklanınca bir şey yapma (ya da tekrar göster?)
+                if (p.isRevealed) return;
+
+                let cx = (p.verts.reduce((s,v)=>s+v.x,0) / p.verts.length) + p.offset.x;
+                let cy = (p.verts.reduce((s,v)=>s+v.y,0) / p.verts.length) + p.offset.y;
+                
+                let dist = Math.sqrt((cx - mouseX)**2 + (cy - mouseY)**2);
+                
+                // Parçaya tıklandı
+                if (dist < 60) {
+                    openQuiz(idx, cx, cy);
+                    clickedOnPiece = true;
+                    e.stopPropagation(); // Global click'i durdur (Modal kapanmasın)
+                }
+            });
+
+            // Eğer boşluğa tıklandıysa ve modal açıksa kapat
+            if (!clickedOnPiece && quizModal.style.display === 'block') {
+                quizModal.style.display = 'none';
+            }
+        }
+    });
+
+    function handleVertexClick(v) {
+        if (selectedVertices.includes(v)) {
+            selectedVertices = selectedVertices.filter(sv => sv !== v);
+            draw();
+            return;
+        }
+
+        selectedVertices.push(v);
+
+        if (selectedVertices.length === 1) {
+            instr.innerText = `İlk köşe (${v.label}) seçildi. Şimdi karşısındaki bir köşeye tıkla.`;
+        } 
+        else if (selectedVertices.length === 2) {
+            let id1 = selectedVertices[0].id;
+            let id2 = selectedVertices[1].id;
+            let diff = Math.abs(id1 - id2);
+            let n = vertices.length;
+            
+            if (diff === 1 || diff === n - 1) {
+                instr.innerText = "❌ Hata: Komşu köşeler seçilemez! Köşegen olmalı.";
+                instr.style.color = "#d63031";
+                setTimeout(() => { 
+                    instr.style.color = "#d35400"; 
+                    instr.innerText = "Lütfen köşegen olacak (komşu olmayan) bir köşe seç."; 
+                }, 2000);
+                selectedVertices.pop(); 
+            } else {
+                startCutAnimation();
+            }
+        }
+        draw();
+    }
+
+    function startCutAnimation() {
+        instr.innerText = "✂️ Kesiliyor...";
+        let v1 = selectedVertices[0];
+        let v2 = selectedVertices[1];
+        cutPath = { start: v1, end: v2 };
+        
+        scissors.style.display = 'block';
+        let startTime = null;
+        const duration = 1500;
+
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let progress = (timestamp - startTime) / duration;
+            if (progress > 1) progress = 1;
+
+            let curX = v1.x + (v2.x - v1.x) * progress;
+            let curY = v1.y + (v2.y - v1.y) * progress;
+            
+            scissors.style.left = (curX - 25) + 'px';
+            scissors.style.top = (curY - 25) + 'px';
+            
+            let angle = Math.atan2(v2.y - v1.y, v2.x - v1.x);
+            scissors.style.transform = `rotate(${angle}rad)`;
+
+            draw(progress); 
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                scissors.style.display = 'none';
+                splitPolygon();
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function splitPolygon() {
+        isCut = true;
+        let id1 = Math.min(selectedVertices[0].id, selectedVertices[1].id);
+        let id2 = Math.max(selectedVertices[0].id, selectedVertices[1].id);
+
+        let poly1 = vertices.slice(id1, id2 + 1);
+        let poly2 = vertices.slice(id2).concat(vertices.slice(0, id1 + 1));
+
+        pieces = [
+            { verts: poly1, color: "#ffeaa7", stroke: "#fdcb6e", offset: {x:0, y:0}, isRevealed: false },
+            { verts: poly2, color: "#81ecec", stroke: "#00cec9", offset: {x:0, y:0}, isRevealed: false }
+        ];
+
+        let startTime = null;
+        function animateSplit(timestamp) {
+            if (!startTime) startTime = timestamp;
+            let progress = (timestamp - startTime) / 800;
+            if (progress > 1) progress = 1;
+
+            pieces.forEach(p => {
+                let cx = p.verts.reduce((s,v)=>s+v.x,0) / p.verts.length;
+                let cy = p.verts.reduce((s,v)=>s+v.y,0) / p.verts.length;
+                let dx = cx - CENTER.x;
+                let dy = cy - CENTER.y;
+                let len = Math.sqrt(dx*dx + dy*dy) || 1;
+                
+                let ease = 1 - Math.pow(1 - progress, 3);
+                p.offset.x = (dx / len) * 40 * ease;
+                p.offset.y = (dy / len) * 40 * ease;
+            });
+
+            drawPieces();
+
+            if (progress < 1) {
+                requestAnimationFrame(animateSplit);
+            } else {
+                enableGuessing();
+            }
+        }
+        requestAnimationFrame(animateSplit);
+    }
+
+    function enableGuessing() {
+        canGuess = true;
+        instr.innerText = "❓ Soru Zamanı: Parçaların üzerine tıkla ve ne olduklarını söyle!";
+        instr.style.color = "#6c5ce7";
+    }
+
+    function openQuiz(idx, x, y) {
+        activePieceIndex = idx;
+        let piece = pieces[idx];
+        let correctSides = piece.verts.length;
+
+        // --- AKILLI ŞIK ÜRETME ---
+        // Seçenek havuzu: 3, 4, 5, 6, 7, 8
+        let allOptions = [3, 4, 5, 6, 7, 8];
+        
+        // Doğru cevabı havuzdan çıkar
+        let distractors = allOptions.filter(n => n !== correctSides);
+        
+        // Rastgele 3 yanlış cevap seç
+        distractors.sort(() => Math.random() - 0.5);
+        let selectedOptions = [correctSides, ...distractors.slice(0, 3)];
+        
+        // Karıştır (Doğru cevap hep ilk sırada olmasın)
+        selectedOptions.sort(() => Math.random() - 0.5);
+
+        // HTML'i doldur
+        quizOptionsDiv.innerHTML = "";
+        const names = {3: "Üçgen", 4: "Dörtgen", 5: "Beşgen", 6: "Altıgen", 7: "Yedigen", 8: "Sekizgen"};
+
+        selectedOptions.forEach(sides => {
+            let btn = document.createElement("button");
+            btn.className = "btn-option";
+            btn.innerText = names[sides] || (sides + "gen"); // Yedigen burada çıkacak
+            btn.onclick = () => checkGuess(sides);
+            quizOptionsDiv.appendChild(btn);
+        });
+
+        // Modalı Konumlandır
+        const rect = document.getElementById('canvasWrap').getBoundingClientRect();
+        let posX = x + 20;
+        let posY = y - 80;
+        
+        // Taşma kontrolü
+        if(posX + 200 > rect.width) posX = x - 200;
+        if(posY + 200 > rect.height) posY = y - 150;
+        if(posY < 0) posY = 10;
+
+        quizModal.style.left = posX + 'px';
+        quizModal.style.top = posY + 'px';
+        quizModal.style.display = 'block';
+    }
+
+    function checkGuess(guessSides) {
+        if (activePieceIndex === -1) return;
+
+        let piece = pieces[activePieceIndex];
+        let actualSides = piece.verts.length;
+
+        if (guessSides === actualSides) {
+            quizModal.style.display = 'none';
+            piece.isRevealed = true;
+            revealLabel(activePieceIndex);
+            
+            if (pieces.every(p => p.isRevealed)) {
+                instr.innerText = "🎉 Harika! Tüm parçaları doğru bildin.";
+                instr.style.color = "#00b894";
+            } else {
+                instr.innerText = "✅ Doğru! Şimdi diğer parçayı dene.";
+                instr.style.color = "#00b894";
+            }
+        } else {
+            instr.innerText = "⚠️ Yanlış cevap. Köşeleri sayabilirsin!";
+            instr.style.color = "#d63031";
+        }
+    }
+
+    function revealLabel(idx) {
+        let p = pieces[idx];
+        let el = (idx === 0) ? label1 : label2;
+        
+        let cx = (p.verts.reduce((s,v)=>s+v.x,0) / p.verts.length) + p.offset.x;
+        let cy = (p.verts.reduce((s,v)=>s+v.y,0) / p.verts.length) + p.offset.y;
+
+        const names = {3: "Üçgen", 4: "Dörtgen", 5: "Beşgen", 6: "Altıgen", 7: "Yedigen", 8: "Sekizgen"};
+        el.innerText = names[p.verts.length] || (p.verts.length + "GEN");
+        
+        el.style.left = (cx - 30) + 'px';
+        el.style.top = (cy - 15) + 'px';
+        el.style.display = 'block';
+        el.style.transform = "scale(0)";
+        el.style.transition = "transform 0.3s";
+        setTimeout(() => el.style.transform = "scale(1)", 50);
+    }
+
+    function draw(cutProgress = 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (isCut) {
+            drawPieces();
+            return;
+        }
+
+        if (vertices.length === 0) return;
+
+        ctx.beginPath();
+        ctx.moveTo(vertices[0].x, vertices[0].y);
+        for (let i = 1; i < vertices.length; i++) ctx.lineTo(vertices[i].x, vertices[i].y);
+        ctx.closePath();
+        
+        ctx.fillStyle = "rgba(9, 132, 227, 0.1)";
+        ctx.fill();
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#0984e3";
+        ctx.stroke();
+
+        vertices.forEach(v => {
+            let isSel = selectedVertices.includes(v);
+            ctx.beginPath();
+            ctx.arc(v.x, v.y, isSel ? 14 : 8, 0, Math.PI * 2);
+            ctx.fillStyle = isSel ? "#00b894" : "#2d3436";
+            ctx.fill();
+            
+            if(isSel) {
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = "#fff";
+                ctx.stroke();
+            }
+            
+            ctx.font = "bold 20px Nunito";
+            ctx.fillStyle = "#2d3436";
+            let dx = v.x - CENTER.x;
+            let dy = v.y - CENTER.y;
+            let len = Math.sqrt(dx*dx + dy*dy);
+            let lx = v.x + (dx/len) * 30;
+            let ly = v.y + (dy/len) * 30;
+            ctx.fillText(v.label, lx - 6, ly + 6);
+        });
+
+        if (cutPath && cutProgress > 0) {
+            ctx.beginPath();
+            ctx.moveTo(cutPath.start.x, cutPath.start.y);
+            let tx = cutPath.start.x + (cutPath.end.x - cutPath.start.x) * cutProgress;
+            let ty = cutPath.start.y + (cutPath.end.y - cutPath.start.y) * cutProgress;
+            ctx.lineTo(tx, ty);
+            
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#d63031"; 
+            ctx.setLineDash([10, 10]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+    }
+
+    function drawPieces() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        pieces.forEach((p, idx) => {
+            ctx.save();
+            ctx.translate(p.offset.x, p.offset.y);
+            
+            ctx.beginPath();
+            if (p.verts.length > 0) {
+                ctx.moveTo(p.verts[0].x, p.verts[0].y);
+                for(let i=1; i<p.verts.length; i++) ctx.lineTo(p.verts[i].x, p.verts[i].y);
+                ctx.closePath();
+            }
+            
+            if (canGuess && !p.isRevealed) {
+                ctx.fillStyle = "#dfe6e9"; 
+                ctx.strokeStyle = "#b2bec3";
+            } else {
+                ctx.fillStyle = p.color; 
+                ctx.strokeStyle = p.stroke;
+            }
+
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            if (canGuess && !p.isRevealed) {
+                let cx = p.verts.reduce((s,v)=>s+v.x,0) / p.verts.length;
+                let cy = p.verts.reduce((s,v)=>s+v.y,0) / p.verts.length;
+                ctx.font = "bold 40px Nunito";
+                ctx.fillStyle = "rgba(0,0,0,0.2)";
+                ctx.textAlign = "center";
+                ctx.fillText("?", cx, cy + 15);
+            }
+
+            ctx.fillStyle = "#2d3436";
+            p.verts.forEach(v => {
+                ctx.beginPath();
+                ctx.arc(v.x, v.y, 6, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            ctx.restore();
+        });
+    }
+
+</script>
+
+</body>
+</html>

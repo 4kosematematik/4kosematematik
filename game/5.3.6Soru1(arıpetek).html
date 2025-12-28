@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arı Rotası: H ve I Düzenlendi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #FFEFBA 0%, #FFFFFF 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            background: #fff;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.1);
+            max-width: 1300px;
+            width: 100%;
+            overflow: hidden;
+            min-height: 750px;
+            border: 4px solid #fff;
+        }
+
+        /* SOL PANEL: Canvas */
+        .left-panel {
+            flex: 2.2;
+            background: #fffcf2;
+            position: relative;
+            border-right: 3px solid #ffeaa7;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        #bee {
+            font-size: 3em;
+            position: absolute;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 10;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+            margin-left: -20px;
+            margin-top: -45px;
+            opacity: 0;
+        }
+
+        /* SAĞ PANEL: Kontroller */
+        .right-panel {
+            flex: 1;
+            padding: 40px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        h2 { color: #f39c12; margin: 0 0 10px 0; font-weight: 900; font-size: 2em; text-align: center; }
+        p.desc { color: #7f8c8d; margin-bottom: 30px; font-size: 1.1em; text-align: center; }
+
+        .segment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .segment-btn {
+            background: #f7f1e3;
+            border: 2px solid #d1ccc0;
+            border-radius: 12px;
+            padding: 12px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1em;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #84817a;
+        }
+
+        .segment-btn:hover {
+            transform: translateY(-3px);
+            background: #fff;
+            border-color: #f1c40f;
+            color: #d35400;
+            box-shadow: 0 5px 15px rgba(241, 196, 15, 0.2);
+        }
+
+        .segment-btn.correct { background: #2ecc71; border-color: #27ae60; color: #fff; }
+        .segment-btn.wrong { background: #e74c3c; border-color: #c0392b; color: #fff; }
+        .segment-btn.side { background: #3498db; border-color: #2980b9; color: #fff; }
+
+        /* Bilgi Kutusu */
+        .info-card {
+            margin-top: 30px;
+            background: #fcf6e5;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 6px solid #f1c40f;
+            display: none;
+            animation: slideIn 0.4s;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .info-title { font-weight: 900; font-size: 1.3em; margin-bottom: 5px; display: block; }
+        .info-text { font-size: 1.1em; line-height: 1.5; color: #2c3e50; }
+
+        @media (max-width: 1000px) {
+            .main-container { flex-direction: column; }
+            .left-panel { min-height: 500px; border-right: none; border-bottom: 4px solid #ffeaa7; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="left-panel" id="canvasContainer">
+        <canvas id="honeyCanvas"></canvas>
+        <div id="bee">🐝</div>
+    </div>
+
+    <div class="right-panel">
+        <h2>🐝 Arının Rotası</h2>
+        <p class="desc">Aşağıdaki yol parçalarına tıkla. Hangileri <strong>Köşegen</strong>, hangileri <strong>Kenar</strong>?</p>
+        
+        <div class="segment-grid">
+            <button class="segment-btn" onclick="checkSegment('AB')">[AB] <span>🔍</span></button>
+            <button class="segment-btn" onclick="checkSegment('BC')">[BC] <span>🔍</span></button>
+            <button class="segment-btn" onclick="checkSegment('CD')">[CD] <span>🔍</span></button>
+            <button class="segment-btn" onclick="checkSegment('DE')">[DE] <span>🔍</span></button>
+            <button class="segment-btn" onclick="checkSegment('EF')">[EF] <span>🔍</span></button>
+            <button class="segment-btn" onclick="checkSegment('FG')">[FG] <span>🔍</span></button>
+            <button class="segment-btn" onclick="checkSegment('GH')">[GH] <span>🔍</span></button>
+            <button class="segment-btn" onclick="checkSegment('HI')">[HI] <span>🔍</span></button>
+        </div>
+
+        <div id="feedbackBox" class="info-card">
+            <span id="fbTitle" class="info-title">Sonuç</span>
+            <span id="fbText" class="info-text">...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('honeyCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvasContainer');
+    const bee = document.getElementById('bee');
+    const fbBox = document.getElementById('feedbackBox');
+    const fbTitle = document.getElementById('fbTitle');
+    const fbText = document.getElementById('fbText');
+
+    let R = 50; 
+    let ORIGIN_X = 0;
+    let ORIGIN_Y = 0;
+
+    function getHexCenter(col, row) {
+        let x = R * Math.sqrt(3) * (col + 0.5 * (row & 1));
+        let y = R * 1.5 * row;
+        return { x: ORIGIN_X + x, y: ORIGIN_Y + y };
+    }
+
+    function getHexCorner(center, i) {
+        // Pointy Topped: 0=Top, 1=TR, 2=BR, 3=Bot, 4=BL, 5=TL
+        let angle_deg = -90 + 60 * i;
+        let angle_rad = Math.PI / 180 * angle_deg;
+        return {
+            x: center.x + R * Math.cos(angle_rad),
+            y: center.y + R * Math.sin(angle_rad)
+        };
+    }
+
+    let hexMap = [];
+    let points = {};
+
+    function initScene() {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        
+        ORIGIN_X = canvas.width / 2 - 1.5 * (Math.sqrt(3) * R);
+        ORIGIN_Y = canvas.height / 2 - 2 * R;
+        
+        // 1-3-3-2 Yapısı
+        hexMap = [
+            {c:1, r:0}, 
+            {c:0, r:1}, {c:1, r:1}, {c:2, r:1}, // Row 1 (Visual) is grid r=1
+            {c:0, r:2}, {c:1, r:2}, {c:2, r:2}, // Row 2 (Visual) is grid r=2 (BURASI 3. SIRA)
+            {c:1, r:3}, {c:2, r:3}
+        ];
+
+        // --- NOKTA KONUMLARI VE ETİKETLER ---
+        // A, B, C, D, E, F, G -> Eski konumlarında
+        let h_A = getHexCenter(1, 3);
+        points.A = { ...getHexCorner(h_A, 3), labelOff: {x: 0, y: 35} }; 
+        points.B = { ...getHexCorner(h_A, 1), labelOff: {x: 20, y: -5} }; 
+
+        let h_C = getHexCenter(2, 2);
+        points.C = { ...getHexCorner(h_C, 2), labelOff: {x: 25, y: 10} }; 
+        points.D = { ...getHexCorner(h_C, 1), labelOff: {x: 25, y: -5} }; 
+        points.E = { ...getHexCorner(h_C, 0), labelOff: {x: 5, y: -25} }; 
+
+        let h_F = getHexCenter(1, 1);
+        points.F = { ...getHexCorner(h_F, 5), labelOff: {x: 0, y: -25} }; 
+
+        let h_G = getHexCenter(0, 1);
+        points.G = { ...getHexCorner(h_G, 0), labelOff: {x: -15, y: -20} }; 
+
+        // --- GÜNCELLENEN H VE I NOKTALARI ---
+        
+        // H: 3. Sıra (Grid r=2), 2. Altıgen (Grid c=1) -> Tepesi (Corner 0)
+        let h_H_center = getHexCenter(1, 2); // 3. Sıra Orta Altıgen
+        points.H = { ...getHexCorner(h_H_center, 0), labelOff: {x: 5, y: -15} }; // Tepesine koyuldu
+
+        // I: 3. Sıra, 1. ve 2. Altıgenin Ortak Kenarının Alttaki Köşesi
+        // 1. Altıgen (c=0, r=2), 2. Altıgen (c=1, r=2)
+        // 2. Altıgenin Sol Alt köşesi (Corner 4) bu birleşim yerinin alt ucudur.
+        points.I = { ...getHexCorner(h_H_center, 4), labelOff: {x: -25, y: 15} }; // Sol Alt Köşe
+
+        // Arı başlangıç
+        bee.style.opacity = 1;
+        bee.style.left = points.A.x + "px";
+        bee.style.top = points.A.y + "px";
+
+        drawAll();
+    }
+
+    let activeSegment = null;
+    
+    // Segment Verileri
+    const segmentsData = {
+        'AB': { type: 'diag', title:'✅ Köşegen', desc: "Altıgenin alt ucundan sağ üst köşesine giden iç çizgidir." },
+        'BC': { type: 'side', title:'🔷 Kenar', desc: "İki altıgenin birleştiği sınırdır." },
+        'CD': { type: 'side', title:'🔷 Kenar', desc: "Altıgenin dikey kenarıdır." },
+        'DE': { type: 'side', title:'🔷 Kenar', desc: "Altıgenin üst sağ kenarıdır." },
+        'EF': { type: 'diag', title:'✅ Köşegen', desc: "İki komşu altıgenin tepe noktalarını birleştiren çizgidir." },
+        'FG': { type: 'side', title:'🔷 Kenar', desc: "Altıgenin üst sağ kenarıdır (Ardışık iki köşe)." },
+        'GH': { type: 'diag', title:'✅ Köşegen', desc: "2. sıradaki peteğin tepesinden, 3. sıradaki peteğin tepesine inen bağlantı çizgisi." },
+        'HI': { type: 'diag', title:'✅ Köşegen', desc: "Altıgenin tepe noktasından (H) sol alt köşesine (I) inen iç çizgidir." }
+    };
+
+    function drawAll() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Petekleri Çiz
+        hexMap.forEach(h => {
+            let center = getHexCenter(h.c, h.r);
+            drawHexagon(center, "#fffbf0", "#f39c12");
+        });
+
+        // 2. Yolu Çiz (A -> B -> C -> D -> E -> F -> G -> H -> I)
+        ctx.beginPath();
+        ctx.moveTo(points.A.x, points.A.y);
+        let path = ['B','C','D','E','F','G','H','I'];
+        path.forEach(k => ctx.lineTo(points[k].x, points[k].y));
+        
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = 8;
+        ctx.strokeStyle = "#2c3e50";
+        ctx.stroke();
+
+        // 3. Aktif Segmenti Parlat
+        if(activeSegment) {
+            let p1 = points[activeSegment[0]];
+            let p2 = points[activeSegment[1]];
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = "#3498db";
+            ctx.stroke();
+        }
+
+        // 4. Noktalar ve Harfler (Özel Konumlandırma ile)
+        for(let k in points) {
+            let p = points[k];
+            // Nokta
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 8, 0, Math.PI*2);
+            ctx.fillStyle = "#e74c3c";
+            ctx.fill();
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Harf (Özel ofset kullan)
+            ctx.font = "900 22px Nunito";
+            ctx.fillStyle = "#2d3436";
+            let off = p.labelOff || {x:15, y:-15};
+            ctx.fillText(k, p.x + off.x, p.y + off.y);
+        }
+    }
+
+    function drawHexagon(center, fill, stroke) {
+        ctx.beginPath();
+        for(let i=0; i<6; i++) {
+            let p = getHexCorner(center, i);
+            if(i===0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+        }
+        ctx.closePath();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = stroke;
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    function checkSegment(seg) {
+        activeSegment = seg;
+        let p = points[seg[0]];
+        bee.style.left = p.x + "px";
+        bee.style.top = p.y + "px";
+        
+        drawAll();
+
+        let data = segmentsData[seg];
+        // Butonları güncelle
+        document.querySelectorAll('.segment-btn').forEach(b => {
+            b.classList.remove('correct', 'wrong', 'side');
+            if(b.innerText.includes(seg)) {
+                if(data.type === 'diag') {
+                    b.classList.add('correct');
+                    b.querySelector('span').innerText = "✅";
+                } else {
+                    b.classList.add('side'); 
+                    b.querySelector('span').innerText = "🔷";
+                }
+            } else {
+                b.querySelector('span').innerText = "🔍";
+            }
+        });
+
+        fbBox.style.display = "block";
+        fbBox.style.animation = 'none';
+        fbBox.offsetHeight; 
+        fbBox.style.animation = null; 
+
+        fbTitle.innerText = data.title;
+        fbText.innerText = data.desc;
+        
+        if(data.type === 'diag') {
+            fbBox.style.borderColor = "#2ecc71";
+            fbBox.style.background = "#dff9fb";
+            fbTitle.style.color = "#27ae60";
+        } else {
+            fbBox.style.borderColor = "#3498db";
+            fbBox.style.background = "#dff9fb";
+            fbTitle.style.color = "#2980b9";
+        }
+    }
+
+    window.addEventListener('resize', initScene);
+    setTimeout(initScene, 100);
+
+</script>
+
+</body>
+</html>

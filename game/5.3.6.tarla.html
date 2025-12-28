@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En Kısa Yol: Kesin Rota</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ecf0f1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 1100px;
+            width: 95%;
+        }
+        canvas {
+            background-color: #ffffff;
+            border: 2px solid #bdc3c7;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        h2 { color: #2c3e50; margin: 0 0 10px 0; }
+        p { color: #7f8c8d; font-size: 1.1em; margin-bottom: 20px; }
+        
+        .status-panel {
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            font-weight: bold;
+            font-size: 1.2em;
+            min-height: 30px;
+            border: 2px solid #dfe6e9;
+            color: #2d3436;
+        }
+        .status-panel.success { background-color: #d4edda; color: #155724; border-color: #27ae60; }
+        .status-panel.fail { background-color: #f8d7da; color: #721c24; border-color: #c0392b; }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 15px;
+        }
+        button:hover { background-color: #2980b9; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>En Kısa Yol Problemi</h2>
+    <p><strong>D</strong> noktasından <strong>P</strong> noktasına, belirlenen en kısa rotayı (fazladan dolaşmadan) çiz.</p>
+    
+    <canvas id="gameCanvas" width="1000" height="500"></canvas>
+    
+    <div id="statusBox" class="status-panel">
+        Başlamak için D noktasına tıkla.
+    </div>
+    
+    <button onclick="resetGame()">Yeniden Başlat</button>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusBox = document.getElementById('statusBox');
+
+    // --- AYARLAR ---
+    const SIDE_LENGTH = 90; 
+    const START_X = 120;
+    const CENTER_Y = 250;
+    const CLICK_RADIUS = 25;
+
+    let shapes = [];
+    let gates = {}; 
+    let allPoints = []; 
+    let D_Node = null;
+    let P_Node = null;
+
+    // --- MATEMATİKSEL FONKSİYONLAR ---
+    function getRadius(n, side) { return side / (2 * Math.sin(Math.PI / n)); }
+    function dist(p1, p2) { return Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2); }
+
+    // --- ŞEKİL OLUŞTURMA ---
+    function createPolygon(n, centerX, centerY, rotationOffset = 0, name) {
+        const r = getRadius(n, SIDE_LENGTH);
+        let vertices = [];
+        for (let i = 0; i < n; i++) {
+            let theta = rotationOffset + (i * 2 * Math.PI / n);
+            let x = centerX + r * Math.cos(theta);
+            let y = centerY + r * Math.sin(theta);
+            vertices.push({ x: x, y: y, id: `${name}_v${i}` });
+        }
+        return { n, r, center: {x: centerX, y: centerY}, vertices, name };
+    }
+
+    function initWorld() {
+        shapes = [];
+        allPoints = [];
+        
+        // 1. ALTIGEN
+        let hexShape = createPolygon(6, START_X, CENTER_Y, Math.PI/6, "Altıgen");
+        shapes.push(hexShape);
+
+        // 2. KARE
+        let hexAp = SIDE_LENGTH / (2 * Math.tan(Math.PI / 6));
+        let sqAp = SIDE_LENGTH / 2;
+        let sqX = START_X + hexAp + sqAp;
+        let sqShape = createPolygon(4, sqX, CENTER_Y, Math.PI/4, "Kare");
+        shapes.push(sqShape);
+
+        // 3. SEKİZGEN
+        let octAp = SIDE_LENGTH / (2 * Math.tan(Math.PI / 8));
+        let octX = sqX + sqAp + octAp;
+        let octShape = createPolygon(8, octX, CENTER_Y, Math.PI/8, "Sekizgen");
+        shapes.push(octShape);
+
+        // 4. YEDİGEN
+        let heptAp = SIDE_LENGTH / (2 * Math.tan(Math.PI / 7));
+        let heptX = octX + octAp + heptAp;
+        let heptShape = createPolygon(7, heptX, CENTER_Y, Math.PI - Math.PI/7, "Yedigen");
+        shapes.push(heptShape);
+
+        // --- NOKTALARI BELİRLE ---
+        
+        // D Noktası: Altıgen Sol Üst
+        D_Node = hexShape.vertices[3];
+        D_Node.label = "D";
+        D_Node.isStart = true;
+        
+        // P Noktası: Yedigen Sağ Üst
+        let potentialEnds = heptShape.vertices.filter(v => v.x > heptX);
+        P_Node = potentialEnds.reduce((prev, curr) => (curr.y < prev.y ? curr : prev));
+        P_Node.label = "P";
+        P_Node.isEnd = true;
+
+        // Geçiş Kapıları (Üst ve Alt çiftler)
+        gates.step1 = findCommon(hexShape, sqShape); // Hex->Sq
+        gates.step2 = findCommon(sqShape, octShape); // Sq->Oct
+        gates.step3 = findCommon(octShape, heptShape); // Oct->Hept
+        gates.step4 = [P_Node];
+
+        // Tüm noktaları tek listede topla
+        shapes.forEach(s => {
+            s.vertices.forEach(v => {
+                let exists = allPoints.find(p => dist(p, v) < 2);
+                if(!exists) allPoints.push(v);
+            });
+        });
+    }
+
+    function findCommon(s1, s2) {
+        let common = [];
+        s1.vertices.forEach(v1 => {
+            s2.vertices.forEach(v2 => {
+                if(dist(v1, v2) < 5) common.push(v1);
+            });
+        });
+        // Sırala: [0] Üst (y küçük), [1] Alt (y büyük)
+        return common.sort((a,b) => a.y - b.y);
+    }
+
+    // --- OYUN DEĞİŞKENLERİ ---
+    let currentPath = [];
+    let currentShapeIdx = 0; 
+    let gameActive = true;
+
+    // --- ÇİZİM ---
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1. ŞEKİLLER
+        shapes.forEach((shape, idx) => {
+            ctx.beginPath();
+            ctx.moveTo(shape.vertices[0].x, shape.vertices[0].y);
+            for(let i=1; i<shape.vertices.length; i++) ctx.lineTo(shape.vertices[i].x, shape.vertices[i].y);
+            ctx.closePath();
+            
+            if (gameActive && idx === currentShapeIdx) {
+                ctx.fillStyle = "rgba(52, 152, 219, 0.1)";
+                ctx.strokeStyle = "#2980b9";
+                ctx.lineWidth = 3;
+            } else {
+                ctx.fillStyle = "rgba(236, 240, 241, 0.5)";
+                ctx.strokeStyle = "#bdc3c7";
+                ctx.lineWidth = 2;
+            }
+            ctx.fill();
+            ctx.stroke();
+
+            // İsim
+            ctx.fillStyle = "#95a5a6";
+            ctx.font = "12px Arial";
+            ctx.fillText(shape.name, shape.center.x, 420);
+        });
+
+        // 2. KÖŞE IŞIKLARI
+        if (gameActive) {
+            let activeShape = shapes[currentShapeIdx];
+            activeShape.vertices.forEach(v => {
+                if (!currentPath.includes(v)) {
+                    drawGlow(v, "rgba(241, 196, 15, 0.6)");
+                }
+            });
+        }
+
+        // 3. YOL
+        if (currentPath.length > 0) {
+            ctx.beginPath();
+            ctx.moveTo(currentPath[0].x, currentPath[0].y);
+            for(let i=1; i<currentPath.length; i++) ctx.lineTo(currentPath[i].x, currentPath[i].y);
+            ctx.strokeStyle = "#2c3e50";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        // 4. NOKTALAR
+        allPoints.forEach(p => {
+            let isActive = false;
+            if (gameActive && shapes[currentShapeIdx].vertices.some(v => dist(v,p)<2)) isActive = true;
+            
+            let color = "#bdc3c7"; 
+            let size = 5;
+
+            if (currentPath.includes(p)) {
+                color = "#2c3e50"; size = 7;
+            } else if (isActive) {
+                color = "#f1c40f"; size = 9;
+            }
+
+            if (dist(p, D_Node) < 2 || dist(p, P_Node) < 2) {
+                size = 10;
+                if(!currentPath.includes(p)) color = "#e74c3c";
+            }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            if (isActive) {
+                ctx.strokeStyle = "#e67e22";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            ctx.fill();
+
+            if (dist(p, D_Node) < 2) {
+                ctx.fillStyle = "black";
+                ctx.font = "bold 24px Arial";
+                ctx.fillText("D", p.x - 25, p.y);
+            }
+            if (dist(p, P_Node) < 2) {
+                ctx.fillStyle = "black";
+                ctx.font = "bold 24px Arial";
+                ctx.fillText("P", p.x + 25, p.y);
+            }
+        });
+    }
+
+    function drawGlow(p, color) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 14, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = color;
+        ctx.fill();
+        ctx.restore();
+    }
+
+    // --- ETKİLEŞİM ---
+    canvas.addEventListener('mousedown', (e) => {
+        if (!gameActive) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        let clicked = allPoints.find(p => dist(p, {x:mx, y:my}) < CLICK_RADIUS);
+        
+        if (clicked) {
+            handleNodeClick(clicked);
+        }
+    });
+
+    function handleNodeClick(node) {
+        if (currentPath.length === 0) {
+            if (dist(node, D_Node) < 2) {
+                currentPath.push(node);
+                statusBox.innerText = "Altıgenin içindesin. Kareye geçmek için kapıyı seç.";
+                draw();
+            } else {
+                statusBox.innerText = "Lütfen önce 'D' noktasına tıkla.";
+            }
+            return;
+        }
+
+        let lastNode = currentPath[currentPath.length - 1];
+        if (node === lastNode) return;
+
+        currentPath.push(node);
+
+        // Level Kontrolü
+        let gateSets = [gates.step1, gates.step2, gates.step3, gates.step4];
+        let targetGates = gateSets[currentShapeIdx]; 
+        
+        // Eğer tıklanan nokta beklenen kapılardan biriyse, level atla
+        if (targetGates && targetGates.some(g => dist(g, node) < 2)) {
+            currentShapeIdx++;
+            if (currentShapeIdx > 3) {
+                checkWin();
+            } else {
+                let names = ["Altıgen", "Kare", "Sekizgen", "Yedigen"];
+                statusBox.innerText = `${names[currentShapeIdx]} içine girdin.`;
+            }
+        }
+        draw();
+    }
+
+    function checkWin() {
+        gameActive = false;
+
+        // --- KESİN DOĞRULUK KONTROLÜ ---
+        // 1. Adım Sayısı Kontrolü: Kesinlikle 5 nokta olmalı (D, G1, G2, G3, P)
+        // Eğer kullanıcı aralarda fazladan noktalara tıkladıysa YANLIŞTIR.
+        if (currentPath.length !== 5) {
+             statusBox.innerHTML = "YANLIŞ! Fazladan dolaştın. Sadece gerekli kapılara tıklayarak git.";
+             statusBox.className = "status-panel fail";
+             showCorrectPath();
+             return;
+        }
+
+        // 2. Koordinat/Rota Kontrolü
+        // İdeal Rota: D(Top) -> G1(Top) -> G2(Bot) -> G3(Top) -> P(Top)
+        
+        let path = currentPath; // [0]=D, [1]=G1, [2]=G2, [3]=G3, [4]=P
+        
+        // Hedeflenen Kapıların Gerçek Konumları
+        let Target_G1 = gates.step1[0]; // Top (0=Top, 1=Bot sıralamıştık)
+        let Target_G2 = gates.step2[1]; // Bot
+        let Target_G3 = gates.step3[0]; // Top
+        
+        // Kullanıcının noktaları hedef noktalarla eşleşiyor mu?
+        let check1 = dist(path[1], Target_G1) < 2;
+        let check2 = dist(path[2], Target_G2) < 2;
+        let check3 = dist(path[3], Target_G3) < 2;
+
+        if (check1 && check2 && check3) {
+            statusBox.innerHTML = "TEBRİKLER! En kısa yolu buldun.";
+            statusBox.className = "status-panel success";
+            drawResult(currentPath, "#27ae60", false);
+        } else {
+            statusBox.innerHTML = "YANLIŞ! Bu en kısa yol değil.";
+            statusBox.className = "status-panel fail";
+            showCorrectPath();
+        }
+    }
+
+    function showCorrectPath() {
+        // İdeal Yol: D(Top) -> G1(Top) -> G2(Bot) -> G3(Top) -> P(Top)
+        let idealPath = [
+            D_Node,
+            gates.step1[0], // Top
+            gates.step2[1], // Bot
+            gates.step3[0], // Top
+            P_Node          // Top
+        ];
+        drawResult(idealPath, "#e74c3c", true);
+    }
+
+    function drawResult(path, color, dashed) {
+        ctx.beginPath();
+        ctx.moveTo(path[0].x, path[0].y);
+        for(let i=1; i<path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 5;
+        if (dashed) ctx.setLineDash([15, 10]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    function resetGame() {
+        gameActive = true;
+        currentPath = [];
+        currentShapeIdx = 0;
+        statusBox.className = "status-panel";
+        statusBox.innerText = "Başlamak için D noktasına tıkla.";
+        initWorld();
+        draw();
+    }
+
+    // Başlat
+    initWorld();
+    draw();
+
+</script>
+
+</body>
+</html>

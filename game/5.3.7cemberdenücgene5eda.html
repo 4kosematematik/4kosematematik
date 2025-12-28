@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Çemberden Üçgene: Hassas Ayar</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef2f5;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .wrapper {
+      display: flex;
+      gap: 15px;
+      max-width: 960px; 
+      width: 100%;
+      align-items: flex-start;
+    }
+
+    /* SOL PANEL */
+    .left-panel {
+      flex: 1;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      border: 1px solid #e0e0e0;
+    }
+
+    /* SAĞ PANEL */
+    .right-panel {
+      width: 240px;
+      flex-shrink: 0;
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      display: none;
+      font-size: 13px;
+      border-left: 4px solid #3498db;
+    }
+
+    h2 {
+      margin: 0 0 15px 0;
+      font-size: 20px;
+      color: #2c3e50;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 8px;
+      text-align: center;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 15px;
+      justify-content: space-between;
+    }
+
+    .control-item {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .control-item label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+      font-size: 14px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .checkbox-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+    .checkbox-row label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #333;
+    }
+
+    canvas {
+      border: 1px solid #ddd;
+      background: #fafafa;
+      border-radius: 8px;
+      width: 100%;
+      height: 400px;
+      display: block;
+    }
+
+    .info-block {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #eee;
+    }
+    .info-title {
+      font-weight: bold;
+      color: #7f8c8d;
+      margin-bottom: 4px;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .info-value {
+      font-size: 15px;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .triLabel {
+      font-size: 12px;
+      font-weight: bold;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 4px 8px;
+      border-radius: 4px;
+      position: absolute;
+      border: 1px solid #ccc;
+      display: none;
+      color: #d35400;
+      pointer-events: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 99;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="triLabel" id="triangleLabelShape"></div>
+
+  <div class="wrapper">
+
+    <div class="left-panel">
+      <h2>📐 Çemberden Üçgene</h2>
+
+      <div class="controls-row">
+        <div class="control-item">
+          <label style="color:#2980b9;">Yarıçap 1: <span id="r1Value">6</span> br</label>
+          <input type="range" id="r1Slider" min="1.5" max="12" value="6" step="0.5">
+        </div>
+        <div class="control-item">
+          <label style="color:#e67e22;">Yarıçap 2: <span id="r2Value">8</span> br</label>
+          <input type="range" id="r2Slider" min="1.5" max="12" value="8" step="0.5">
+        </div>
+        <div class="control-item">
+          <label style="color:#2c3e50;">Merkez Arası (d): <span id="dValue">10</span> br</label>
+          <input type="range" id="dSlider" min="0.5" max="20" value="10" step="0.5">
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <label><input type="checkbox" id="showTriangle" checked> Üçgeni Göster</label>
+        <label><input type="checkbox" id="showSides"> Uzunluklar</label>
+        <label style="color:#2980b9; font-weight:bold; margin-left:auto;">
+            <input type="checkbox" id="toggleAnalysis"> 📊 Analizi Aç
+        </label>
+      </div>
+
+      <canvas id="canvas" width="700" height="400"></canvas>
+    </div>
+
+    <div class="right-panel" id="analysisPanel">
+      <h3 style="margin-top:0; margin-bottom:15px; font-size:16px; color:#2980b9; text-align:center;">Analiz Raporu</h3>
+      
+      <div class="info-block">
+        <div class="info-title">Üçgen Türü</div>
+        <div id="triangleType" class="info-value" style="color: #27ae60;">-</div>
+      </div>
+
+      <div class="info-block">
+        <div class="info-title">Kenarlar</div>
+        <div style="line-height: 1.6;">
+          |AB| = <span id="lenAB" style="font-weight:bold">-</span><br>
+          |AC| = <span id="lenAC" style="font-weight:bold">-</span><br>
+          |BC| = <span id="lenBC" style="font-weight:bold">-</span>
+        </div>
+      </div>
+
+      <div class="info-block" style="border:none;">
+        <div class="info-title">Durum</div>
+        <div id="statusInfo" style="font-style: italic; font-size:12px; color:#555;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const r1Slider = document.getElementById("r1Slider");
+    const r2Slider = document.getElementById("r2Slider");
+    const dSlider  = document.getElementById("dSlider");
+    
+    const r1Value = document.getElementById("r1Value");
+    const r2Value = document.getElementById("r2Value");
+    const dValue  = document.getElementById("dValue");
+
+    const showTriangle = document.getElementById("showTriangle");
+    const showSides    = document.getElementById("showSides");
+    const toggleAnalysis = document.getElementById("toggleAnalysis");
+    
+    const analysisPanel = document.getElementById("analysisPanel");
+    const triangleTypeEl = document.getElementById("triangleType");
+    const lenABEl = document.getElementById("lenAB");
+    const lenACEl = document.getElementById("lenAC");
+    const lenBCEl = document.getElementById("lenBC");
+    const statusInfoEl = document.getElementById("statusInfo");
+    const triangleLabelShape = document.getElementById("triangleLabelShape");
+
+    // --- AYARLAR ---
+    // Ölçek: 1 birim = 20 piksel (Böylece 20 birimlik mesafe 400px kaplar, sığar)
+    const PIXEL_SCALE = 20; 
+
+    // Paneli aç/kapa
+    toggleAnalysis.addEventListener("change", function() {
+      if(this.checked) {
+        analysisPanel.style.display = "block";
+      } else {
+        analysisPanel.style.display = "none";
+        triangleLabelShape.style.display = "none";
+      }
+      draw();
+    });
+
+    // Hassas karşılaştırma için (0.5'li sayılarda hata olmaması için)
+    function almostEqual(a, b) {
+      return Math.abs(a - b) < 0.01;
+    }
+
+    function classifyTriangle(a, b, c) {
+      if (almostEqual(a, b) && almostEqual(b, c)) return "Eşkenar Üçgen";
+      if (almostEqual(a, b) || almostEqual(b, c) || almostEqual(a, c)) return "İkizkenar Üçgen";
+      return "Çeşitkenar Üçgen";
+    }
+
+    function draw() {
+      // parseFloat ile ondalıklı sayıları alıyoruz
+      const valR1 = parseFloat(r1Slider.value);
+      const valR2 = parseFloat(r2Slider.value);
+      const valD  = parseFloat(dSlider.value);
+
+      r1Value.textContent = valR1;
+      r2Value.textContent = valR2;
+      dValue.textContent  = valD;
+
+      const pxR1 = valR1 * PIXEL_SCALE;
+      const pxR2 = valR2 * PIXEL_SCALE;
+      const pxD  = valD  * PIXEL_SCALE;
+
+      // Canvas boyutlarını güncelle
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      const centerY = canvas.height / 2;
+
+      // --- OTOMATİK ORTALAMA ---
+      const totalWidth = pxR1 + pxD + pxR2;
+      // Tuvalin ortasından, toplam genişliğin yarısı kadar sola git, sonra R1 kadar sağa gel (A noktası)
+      const startX = (canvas.width / 2) - (totalWidth / 2) + pxR1;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const A = { x: startX,       y: centerY };
+      const B = { x: startX + pxD, y: centerY };
+
+      // --- Çember 1 (Mavi) ---
+      ctx.strokeStyle = "rgba(41, 128, 185, 0.3)";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(A.x, A.y, pxR1, 0, 2 * Math.PI); ctx.stroke();
+      ctx.strokeStyle = "#2980b9";
+      ctx.beginPath(); ctx.arc(A.x, A.y, pxR1, 0, 2 * Math.PI); ctx.stroke();
+
+      // --- Çember 2 (Turuncu) ---
+      ctx.strokeStyle = "rgba(230, 126, 34, 0.3)";
+      ctx.beginPath(); ctx.arc(B.x, B.y, pxR2, 0, 2 * Math.PI); ctx.stroke();
+      ctx.strokeStyle = "#e67e22";
+      ctx.beginPath(); ctx.arc(B.x, B.y, pxR2, 0, 2 * Math.PI); ctx.stroke();
+
+      // Merkezler
+      ctx.fillStyle = "#333";
+      ctx.beginPath(); ctx.arc(A.x, A.y, 4, 0, 2*Math.PI); ctx.fill();
+      ctx.beginPath(); ctx.arc(B.x, B.y, 4, 0, 2*Math.PI); ctx.fill();
+      
+      ctx.font = "bold 14px Arial";
+      ctx.fillText("A", A.x - 15, A.y - 10);
+      ctx.fillText("B", B.x + 10, B.y - 10);
+
+      // --- Kesişim ---
+      let canForm = false;
+      let C = null;
+
+      // Üçgen eşitsizliği kontrolü (Hassas karşılaştırma için küçük tolerans payı verilebilir ama float ile çalışıyoruz)
+      // valD < valR1 + valR2 && valD > Math.abs(valR1 - valR2)
+      // Tam sınırda (eşitlikte) üçgen oluşmaz (düz çizgi olur), o yüzden < ve > kullanıyoruz.
+      if (valD < (valR1 + valR2) - 0.001 && valD > Math.abs(valR1 - valR2) + 0.001) {
+        canForm = true;
+        const a = (pxR1**2 - pxR2**2 + pxD**2) / (2 * pxD);
+        const h = Math.sqrt(Math.max(0, pxR1**2 - a**2));
+        const x2 = A.x + (a * (B.x - A.x)) / pxD;
+        const y2 = A.y + (a * (B.y - A.y)) / pxD;
+        C = { x: x2, y: y2 - h };
+
+        ctx.fillStyle = "#c0392b";
+        ctx.beginPath(); ctx.arc(C.x, C.y, 5, 0, 2*Math.PI); ctx.fill();
+        ctx.fillText("C", C.x, C.y - 15);
+      }
+
+      if (canForm && C) {
+        if (showTriangle.checked) {
+          ctx.strokeStyle = "#27ae60";
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.lineTo(C.x, C.y);
+          ctx.closePath(); ctx.stroke();
+          ctx.fillStyle = "rgba(39, 174, 96, 0.1)"; ctx.fill();
+        }
+
+        if (showSides.checked) {
+          lenABEl.textContent = valD; lenACEl.textContent = valR1; lenBCEl.textContent = valR2;
+          ctx.fillStyle = "#000"; ctx.font = "12px sans-serif";
+          ctx.fillText(valD, (A.x+B.x)/2, A.y + 20);
+          ctx.fillText(valR1, (A.x+C.x)/2 - 20, (A.y+C.y)/2);
+          ctx.fillText(valR2, (B.x+C.x)/2 + 10, (B.y+C.y)/2);
+        } else {
+          lenABEl.textContent = "-"; lenACEl.textContent = "-"; lenBCEl.textContent = "-";
+        }
+
+        const type = classifyTriangle(valD, valR1, valR2);
+        
+        if (toggleAnalysis.checked) {
+          triangleTypeEl.textContent = type;
+          statusInfoEl.textContent = "Üçgen oluştu.";
+          statusInfoEl.style.color = "#27ae60";
+
+          const rect = canvas.getBoundingClientRect();
+          const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          
+          triangleLabelShape.style.display = "block";
+          triangleLabelShape.textContent = type;
+          triangleLabelShape.style.left = (rect.left + scrollLeft + C.x + 20) + "px";
+          triangleLabelShape.style.top = (rect.top + scrollTop + C.y - 10) + "px";
+        } else {
+           triangleLabelShape.style.display = "none";
+        }
+
+      } else {
+        triangleTypeEl.textContent = "-";
+        triangleLabelShape.style.display = "none";
+        lenABEl.textContent = "-"; lenACEl.textContent = "-"; lenBCEl.textContent = "-";
+
+        if (toggleAnalysis.checked) {
+            if (valD >= valR1 + valR2) {
+                statusInfoEl.textContent = "Uzak (Kesişim yok)";
+            } else if (valD <= Math.abs(valR1 - valR2)) {
+                statusInfoEl.textContent = "İç içe (Kesişim yok)";
+            }
+            statusInfoEl.style.color = "#c0392b";
+        }
+      }
+    }
+
+    [r1Slider, r2Slider, dSlider].forEach(el => el.addEventListener("input", draw));
+    [showTriangle, showSides].forEach(el => el.addEventListener("change", draw));
+    
+    window.addEventListener("resize", draw);
+    window.addEventListener("scroll", draw);
+
+    draw();
+  </script>
+</body>
+</html>

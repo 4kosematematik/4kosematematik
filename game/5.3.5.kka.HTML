@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renkli Çokgen Dünyası</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif; /* Daha yuvarlak, çocuk dostu font */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Mor-Mavi Geçiş */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            background: rgba(255, 255, 255, 0.95); /* Hafif şeffaf beyaz */
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden;
+            min-height: 600px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* SOL PANEL: ŞEKİL ALANI */
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(to bottom, #e0c3fc 0%, #8ec5fc 100%); /* Pastel geçiş */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 4px solid #fff;
+        }
+
+        canvas {
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 8px solid #fff;
+            transition: transform 0.3s ease;
+        }
+        canvas:hover {
+            transform: scale(1.02);
+        }
+
+        /* SAĞ PANEL: SORU ALANI */
+        .right-panel {
+            flex: 1.2;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #fff;
+        }
+
+        .question-box { text-align: center; }
+
+        .q-badge {
+            display: inline-block;
+            background: #FF9A9E;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(255, 154, 158, 0.4);
+        }
+
+        .q-text {
+            font-size: 1.6em;
+            color: #2d3436;
+            margin-bottom: 35px;
+            font-weight: 800;
+            line-height: 1.4;
+        }
+
+        .highlight-txt {
+            color: #d63031;
+            background: #ff767533; /* Saydam kırmızı */
+            padding: 2px 10px;
+            border-radius: 8px;
+            border-bottom: 3px solid #d63031;
+        }
+
+        /* SEÇENEK KARTLARI */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            padding: 20px;
+            font-size: 1.3em;
+            font-family: 'Nunito', sans-serif;
+            border: none;
+            background: #f1f2f6;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            color: #57606f;
+            font-weight: 700;
+            box-shadow: 0 4px 0 #dfe4ea; /* Alt gölge efekti */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .option-btn:hover {
+            background: #fff;
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            color: #3742fa;
+        }
+
+        .option-btn.selected {
+            background-color: #70a1ff;
+            color: white;
+            box-shadow: 0 4px 0 #1e90ff;
+        }
+
+        .option-btn.correct {
+            background-color: #2ed573 !important;
+            color: white !important;
+            box-shadow: 0 4px 0 #26af61 !important;
+            transform: scale(1.05);
+        }
+
+        .option-btn.wrong {
+            background-color: #ff4757 !important;
+            color: white !important;
+            box-shadow: 0 4px 0 #e84118 !important;
+            opacity: 0.7;
+        }
+
+        /* AKSİYON BUTONLARI */
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 900;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: white;
+        }
+
+        #checkBtn {
+            background: linear-gradient(45deg, #3742fa, #5352ed);
+            box-shadow: 0 10px 20px rgba(55, 66, 250, 0.3);
+        }
+        #checkBtn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(55, 66, 250, 0.4); }
+        #checkBtn:disabled { background: #ced6e0; cursor: not-allowed; box-shadow: none; transform: none;}
+
+        #nextBtn {
+            background: linear-gradient(45deg, #ffa502, #ff7f50);
+            box-shadow: 0 10px 20px rgba(255, 165, 2, 0.3);
+            display: none;
+        }
+        #nextBtn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(255, 165, 2, 0.4); }
+
+        .feedback-msg {
+            height: 40px;
+            margin-bottom: 10px;
+            font-weight: 900;
+            font-size: 1.4em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .main-container { flex-direction: column; border-radius: 0; min-height: 100vh; }
+            .left-panel { border-bottom: 4px solid #fff; border-right: none; padding: 30px; }
+            .right-panel { padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="left-panel">
+        <canvas id="polyCanvas" width="380" height="380"></canvas>
+    </div>
+
+    <div class="right-panel">
+        <div class="question-box">
+            <span class="q-badge">BİLGİ YARIŞMASI</span>
+            
+            <div id="feedback" class="feedback-msg"></div>
+            
+            <div id="questionText" class="q-text">
+                Soru yükleniyor...
+            </div>
+
+            <div id="optionsContainer" class="options-grid">
+                </div>
+
+            <button id="checkBtn" class="action-btn" onclick="checkAnswer()">CEVABI KONTROL ET</button>
+            <button id="nextBtn" class="action-btn" onclick="generateRandomScenario()">SIRADAKİ SORU ➔</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('polyCanvas');
+    const ctx = canvas.getContext('2d');
+    const qText = document.getElementById('questionText');
+    const optContainer = document.getElementById('optionsContainer');
+    const checkBtn = document.getElementById('checkBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const feedback = document.getElementById('feedback');
+
+    const letters = "ABCDEFGH";
+    
+    let currentSides = 3;
+    let currentQuestionData = {};
+    let selectedOptionBtn = null;
+
+    // --- SENARYO ÜRETİCİ ---
+    function generateRandomScenario() {
+        currentSides = Math.floor(Math.random() * 6) + 3; // 3-8 arası
+        const qType = Math.floor(Math.random() * 4); // 0-3 arası soru tipi
+
+        prepareQuestion(currentSides, qType);
+        drawShape(currentSides);
+    }
+
+    // --- SORU HAZIRLAMA ---
+    function prepareQuestion(sides, type) {
+        const startIndex = Math.floor(Math.random() * sides);
+        const nextIndex = (startIndex + 1) % sides;
+        const L1 = letters[startIndex];
+        const L2 = letters[nextIndex];
+        
+        let qObj = {};
+
+        if (type === 0) { // KENAR
+            qObj = {
+                text: `<span class="highlight-txt">${L1}${L2} Kenarı</span> sembolle nasıl gösterilir?`,
+                correct: `[${L1}${L2}]`,
+                distractors: [`|${L1}${L2}|`, `${L1}${L2}`, `(${L1}${L2})`],
+                targetIndices: [startIndex, nextIndex],
+                highlightType: 'edge'
+            };
+        } 
+        else if (type === 1) { // UZUNLUK
+            qObj = {
+                text: `<span class="highlight-txt">${L1}${L2} Kenarının uzunluğu</span> nasıl ifade edilir?`,
+                correct: `|${L1}${L2}|`,
+                distractors: [`[${L1}${L2}]`, `${L1}${L2}`, `${L1}`],
+                targetIndices: [startIndex, nextIndex],
+                highlightType: 'edge'
+            };
+        } 
+        else if (type === 2) { // AÇI
+            qObj = {
+                text: `<span class="highlight-txt">${L1} Köşesindeki açı</span> nasıl gösterilir?`,
+                correct: `${L1}\u0302`,
+                distractors: [`[${L1}]`, `|${L1}|`, `s(${L1})`],
+                targetIndices: [startIndex],
+                highlightType: 'vertex'
+            };
+        } 
+        else { // İSİMLENDİRME
+            const suffixes = { 3: "Üçgeni", 4: "Dörtgeni", 5: "Beşgeni", 6: "Altıgeni", 7: "Yedigeni", 8: "Sekizgeni" };
+            let vertexStr = "";
+            for(let i=0; i<sides; i++) vertexStr += letters[i];
+
+            let correctName = `${vertexStr} ${suffixes[sides]}`;
+            
+            // Çeldiriciler
+            let d1 = vertexStr; 
+            let wrongSuffixSides = (sides === 3) ? 4 : sides - 1;
+            let d2 = `${vertexStr} ${suffixes[wrongSuffixSides]}`;
+            let d3 = `[${vertexStr}]`;
+
+            qObj = {
+                text: `Bu çokgen <b>tam olarak</b> nasıl isimlendirilir?`,
+                correct: correctName,
+                distractors: [d1, d2, d3],
+                targetIndices: [],
+                highlightType: 'all'
+            };
+        }
+
+        currentQuestionData = qObj;
+        renderUI(qObj);
+    }
+
+    // --- UI GÜNCELLEME ---
+    function renderUI(qData) {
+        qText.innerHTML = qData.text;
+        feedback.innerText = "";
+        checkBtn.style.display = "block";
+        checkBtn.disabled = true;
+        nextBtn.style.display = "none";
+        selectedOptionBtn = null;
+
+        let options = [qData.correct, ...qData.distractors];
+        options.sort(() => Math.random() - 0.5);
+
+        optContainer.innerHTML = "";
+        options.forEach(opt => {
+            let btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = opt;
+            btn.onclick = () => selectOption(btn);
+            optContainer.appendChild(btn);
+        });
+    }
+
+    function selectOption(btn) {
+        if (nextBtn.style.display === "block") return;
+        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedOptionBtn = btn;
+        checkBtn.disabled = false;
+    }
+
+    function checkAnswer() {
+        if (!selectedOptionBtn) return;
+        const answer = selectedOptionBtn.innerText;
+        const isCorrect = (answer === currentQuestionData.correct);
+        
+        document.querySelectorAll('.option-btn').forEach(b => {
+            b.onclick = null;
+            if (b.innerText === currentQuestionData.correct) b.classList.add('correct');
+            else if (b === selectedOptionBtn && !isCorrect) b.classList.add('wrong');
+        });
+
+        if (isCorrect) {
+            feedback.innerHTML = "🎉 Harika! Doğru Cevap";
+            feedback.style.color = "#2ed573";
+        } else {
+            feedback.innerHTML = "😕 Üzgünüm, Yanlış Cevap";
+            feedback.style.color = "#ff4757";
+        }
+        checkBtn.style.display = "none";
+        nextBtn.style.display = "block";
+    }
+
+    // --- GÖRSEL ÇİZİM (RENKLENDİRİLMİŞ) ---
+    function drawShape(sides) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const cx = canvas.width / 2;
+        const cy = canvas.height / 2;
+        const r = 130;
+        
+        let vertices = [];
+        for(let i=0; i<sides; i++) {
+            let theta = -Math.PI/2 + (i * 2 * Math.PI / sides);
+            let x = cx + r * Math.cos(theta);
+            let y = cy + r * Math.sin(theta);
+            vertices.push({x, y});
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(vertices[0].x, vertices[0].y);
+        for(let i=1; i<vertices.length; i++) ctx.lineTo(vertices[i].x, vertices[i].y);
+        ctx.closePath();
+        
+        // --- RENKLİ DOLGU VE KENAR ---
+        // Şeklin içine hafif bir gradyan verelim
+        let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, "rgba(116, 185, 255, 0.2)");
+        gradient.addColorStop(1, "rgba(162, 155, 254, 0.4)");
+        
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        // Kenar Çizgisi
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#5352ed"; // Morumsu mavi
+        ctx.stroke();
+
+        // --- VURGU (SORU TİPİNE GÖRE) ---
+        if (currentQuestionData.highlightType === 'all') {
+            // İsimlendirme sorusuysa tüm şekli parlat
+            ctx.fillStyle = "rgba(46, 213, 115, 0.3)";
+            ctx.fill();
+            ctx.strokeStyle = "#2ed573";
+            ctx.stroke();
+        }
+        else if (currentQuestionData.highlightType === 'edge') {
+            let idxs = currentQuestionData.targetIndices;
+            let v1 = vertices[idxs[0]];
+            let v2 = vertices[idxs[1]];
+            ctx.beginPath();
+            ctx.moveTo(v1.x, v1.y);
+            ctx.lineTo(v2.x, v2.y);
+            ctx.lineCap = "round";
+            ctx.strokeStyle = "#ff4757"; // Kırmızı vurgu
+            ctx.lineWidth = 8;
+            ctx.stroke();
+        } 
+        else if (currentQuestionData.highlightType === 'vertex') {
+            let idx = currentQuestionData.targetIndices[0];
+            let v = vertices[idx];
+            
+            // Açıyı vurgulayan yay
+            ctx.beginPath();
+            ctx.arc(v.x, v.y, 25, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(255, 71, 87, 0.3)";
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(v.x, v.y, 8, 0, Math.PI*2);
+            ctx.fillStyle = "#ff4757";
+            ctx.fill();
+        }
+
+        // --- HARFLER VE KÖŞE NOKTALARI ---
+        ctx.font = "bold 22px Nunito";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        vertices.forEach((v, i) => {
+            let label = letters[i];
+            let dx = v.x - cx;
+            let dy = v.y - cy;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            let lx = cx + (dist + 35) * (dx/dist);
+            let ly = cy + (dist + 35) * (dy/dist);
+
+            let isTarget = (currentQuestionData.targetIndices || []).includes(i);
+            
+            // Köşe Noktası (Mücevher gibi)
+            ctx.beginPath();
+            ctx.arc(v.x, v.y, 7, 0, Math.PI*2);
+            ctx.fillStyle = isTarget ? "#ff4757" : "#3742fa";
+            ctx.fill();
+            // Noktaya beyaz parlama ekle
+            ctx.beginPath();
+            ctx.arc(v.x - 2, v.y - 2, 2, 0, Math.PI*2);
+            ctx.fillStyle = "white";
+            ctx.fill();
+
+            // Harf Yazısı
+            ctx.fillStyle = isTarget ? "#ff4757" : "#2f3542";
+            if (isTarget) ctx.font = "900 26px Nunito";
+            else ctx.font = "bold 22px Nunito";
+            
+            ctx.fillText(label, lx, ly);
+        });
+    }
+
+    // Başlangıç
+    generateRandomScenario();
+</script>
+
+</body>
+</html>

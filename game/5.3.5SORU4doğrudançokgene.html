@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doğrularla Çokgen İnşası</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e0f7fa;
+            margin: 0;
+            padding: 10px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-family: 'Patrick Hand', cursive;
+            color: #006064;
+            font-size: 32px;
+            margin: 0 0 10px 0;
+            text-shadow: 1px 1px 0px white;
+            flex-shrink: 0;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 15px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1100px;
+            height: 100%;
+            max-height: 85vh;
+            box-sizing: border-box;
+        }
+
+        /* Sol: Canvas Alanı */
+        .canvas-area {
+            flex: 2;
+            position: relative;
+            border: 3px solid #006064;
+            border-radius: 8px;
+            background-color: #fff;
+            cursor: crosshair;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 4px;
+        }
+
+        /* Sağ: Panel */
+        .panel {
+            flex: 1;
+            min-width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .instruction-card {
+            background: #b2ebf2;
+            border-left: 5px solid #00acc1;
+            padding: 12px;
+            border-radius: 6px;
+            color: #006064;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .status-box {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 10px;
+            background: #fff9c4;
+            border-radius: 8px;
+            color: #f57f17;
+            border: 2px dashed #fbc02d;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .collection {
+            background: #e0f2f1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #80cbc4;
+            flex-grow: 1;
+        }
+
+        .collection h3 { 
+            margin: 0 0 10px 0; 
+            color: #00796b; 
+            font-family: 'Patrick Hand', cursive; 
+            font-size: 22px; 
+            text-align: center; 
+        }
+
+        .shape-list { list-style: none; padding: 0; margin: 0; }
+
+        .shape-item {
+            background: white;
+            margin-bottom: 6px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            color: #757575;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .shape-item.found {
+            background: #c8e6c9;
+            border-left-color: #2e7d32;
+            color: #1b5e20;
+            font-weight: bold;
+        }
+        .shape-item.found::after { content: '✔️'; }
+
+        .btn-group { display: flex; gap: 8px; margin-top: auto; }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        button:active { transform: translateY(2px); box-shadow: none; }
+
+        .btn-undo { background-color: #42a5f5; }
+        .btn-clear { background-color: #ef5350; }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(33, 33, 33, 0.95);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+            display: none;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transform: translate(10px, -20px); 
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>📏 Doğrularla Çokgen İnşası</h1>
+
+    <div class="main-container">
+        
+        <div class="canvas-area" id="canvasArea">
+            <canvas id="gridCanvas"></canvas>
+            <div id="tooltip" class="tooltip">İpucu</div>
+        </div>
+
+        <div class="panel">
+            <div class="instruction-card">
+                <strong>Yönerge:</strong>
+                <ul style="margin: 5px 0 0 15px; padding:0;">
+                    <li>Kareli alana tıkla, doğrular çiz.</li>
+                    <li>Şekli kapatmak için <strong>ilk noktaya</strong> tekrar tıkla.</li>
+                    <li>Şekil kapandığında doğrular silinir, geriye <strong>çokgen</strong> kalır.</li>
+                    <li>Silmek için şeklin ortasındaki <span style="color:red; font-weight:bold;">SİL</span> butonuna bas.</li>
+                </ul>
+            </div>
+
+            <div id="statusText" class="status-box">İlk doğruyu çizmek için tıkla!</div>
+
+            <div class="collection">
+                <h3>Bulunan Şekiller (0/5)</h3>
+                <ul class="shape-list">
+                    <li class="shape-item" id="li-3">Üçgen (3 Doğru)</li>
+                    <li class="shape-item" id="li-4">Dörtgen (4 Doğru)</li>
+                    <li class="shape-item" id="li-5">Beşgen (5 Doğru)</li>
+                    <li class="shape-item" id="li-6">Altıgen (6 Doğru)</li>
+                    <li class="shape-item" id="li-7">Yedigen+</li>
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn-undo" onclick="undoLastPoint()">Geri Al ↩️</button>
+                <button class="btn-clear" onclick="clearAll()">Hepsini Sil 🗑️</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gridCanvas');
+    const ctx = canvas.getContext('2d');
+    const statusText = document.getElementById('statusText');
+    const tooltip = document.getElementById('tooltip');
+    const canvasArea = document.getElementById('canvasArea');
+    
+    const gridSize = 25;
+    
+    let completedShapes = []; 
+    let currentPath = [];     
+    let hoveredDeleteBtn = null; 
+
+    function resizeCanvas() {
+        const rect = canvasArea.getBoundingClientRect();
+        const w = Math.floor((rect.width - 4) / gridSize) * gridSize;
+        const h = Math.floor((rect.height - 4) / gridSize) * gridSize;
+        canvas.width = w;
+        canvas.height = h;
+        drawScene();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('contextmenu', e => { e.preventDefault(); undoLastPoint(); });
+
+    function getMousePos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+    }
+
+    function snap(x, y) {
+        return {
+            x: Math.round(x / gridSize) * gridSize,
+            y: Math.round(y / gridSize) * gridSize
+        };
+    }
+
+    function handleMouseDown(e) {
+        if(e.button !== 0) return;
+        const raw = getMousePos(e);
+
+        if (hoveredDeleteBtn !== null) {
+            deleteShape(hoveredDeleteBtn);
+            return;
+        }
+
+        const snapped = snap(raw.x, raw.y);
+
+        if (currentPath.length === 0) {
+            currentPath.push(snapped);
+            statusText.innerText = "Doğruları kesiştir...";
+            statusText.style.color = "#006064";
+            drawScene();
+            return;
+        }
+
+        const start = currentPath[0];
+        const dist = Math.hypot(snapped.x - start.x, snapped.y - start.y);
+
+        if (currentPath.length >= 3 && dist < 10) {
+            finishShape();
+        } else {
+            const last = currentPath[currentPath.length-1];
+            if (last.x !== snapped.x || last.y !== snapped.y) {
+                currentPath.push(snapped);
+                drawScene();
+            }
+        }
+    }
+
+    function handleMouseMove(e) {
+        const raw = getMousePos(e);
+        const snapped = snap(raw.x, raw.y);
+        
+        let foundHover = null;
+        for (let i = completedShapes.length - 1; i >= 0; i--) {
+            const center = completedShapes[i].center;
+            const dx = Math.abs(raw.x - center.x);
+            const dy = Math.abs(raw.y - center.y);
+            if (dx < 25 && dy < 15) {
+                foundHover = i;
+                break;
+            }
+        }
+
+        if (foundHover !== hoveredDeleteBtn) {
+            hoveredDeleteBtn = foundHover;
+            drawScene(snapped);
+        }
+
+        if (hoveredDeleteBtn !== null) {
+            canvas.style.cursor = "pointer";
+            return;
+        } else {
+            canvas.style.cursor = "crosshair";
+        }
+
+        if (currentPath.length > 0) {
+            drawScene(snapped); 
+
+            if (currentPath.length >= 3) {
+                const start = currentPath[0];
+                const dist = Math.hypot(snapped.x - start.x, snapped.y - start.y);
+                if (dist < 10) {
+                    const pos = getMousePos(e);
+                    showTooltip(pos.x, pos.y, "Şekli Kapat", "#2e7d32");
+                    
+                    ctx.beginPath();
+                    ctx.arc(start.x, start.y, 8, 0, Math.PI*2);
+                    ctx.fillStyle = "#4caf50";
+                    ctx.fill();
+                } else {
+                    hideTooltip();
+                }
+            } else {
+                hideTooltip();
+            }
+        } else {
+            hideTooltip();
+            if (hoveredDeleteBtn === null) drawScene(null);
+        }
+    }
+
+    function showTooltip(x, y, text, color) {
+        tooltip.style.display = "block";
+        tooltip.style.left = (x) + "px"; 
+        tooltip.style.top = (y) + "px";
+        tooltip.innerText = text;
+        tooltip.style.backgroundColor = color;
+    }
+
+    function hideTooltip() {
+        tooltip.style.display = "none";
+    }
+
+    function finishShape() {
+        const sides = currentPath.length;
+        const center = getPolygonCenter(currentPath);
+        const hue = Math.floor(Math.random() * 360);
+        
+        completedShapes.push({
+            points: [...currentPath],
+            color: `hsla(${hue}, 70%, 85%, 0.6)`,
+            stroke: `hsl(${hue}, 70%, 40%)`,
+            type: sides,
+            center: center
+        });
+
+        analyzeShape(sides);
+        currentPath = []; 
+        drawScene();
+        hideTooltip();
+    }
+
+    function deleteShape(index) {
+        completedShapes.splice(index, 1);
+        hoveredDeleteBtn = null;
+        hideTooltip();
+        statusText.innerText = "Şekil silindi.";
+        statusText.style.color = "#d32f2f";
+        updateCollectionStatus();
+        drawScene();
+    }
+
+    function getPolygonCenter(points) {
+        let x = 0, y = 0;
+        points.forEach(p => { x += p.x; y += p.y; });
+        return { x: x / points.length, y: y / points.length };
+    }
+
+    function analyzeShape(sides) {
+        let name = "";
+        if (sides === 3) name = "Üçgen";
+        else if (sides === 4) name = "Dörtgen";
+        else if (sides === 5) name = "Beşgen";
+        else if (sides === 6) name = "Altıgen";
+        else name = sides + "gen";
+
+        // BURASI DÜZELTİLDİ: Boşluklar eklendi
+        statusText.innerHTML = `Tebrikler! <strong>${sides}</strong> doğru kesişti, bir <strong>${name}</strong> oluştu.`;
+        statusText.style.color = "#2e7d32";
+        updateCollectionStatus();
+    }
+
+    function updateCollectionStatus() {
+        document.querySelectorAll('.shape-item').forEach(el => el.classList.remove('found'));
+        const existingTypes = new Set(completedShapes.map(s => s.type));
+        
+        existingTypes.forEach(sides => {
+            let id = "";
+            if (sides === 3) id = "li-3";
+            else if (sides === 4) id = "li-4";
+            else if (sides === 5) id = "li-5";
+            else if (sides === 6) id = "li-6";
+            else if (sides >= 7) id = "li-7";
+            const el = document.getElementById(id);
+            if(el) el.classList.add('found');
+        });
+
+        const count = document.querySelectorAll('.shape-item.found').length;
+        document.querySelector('.collection h3').innerText = `Bulunan Şekiller (${count}/5)`;
+    }
+
+    function undoLastPoint() {
+        if (currentPath.length > 0) {
+            currentPath.pop();
+            drawScene();
+        }
+    }
+
+    function clearAll() {
+        if(confirm("Her şeyi silmek istediğine emin misin?")) {
+            currentPath = [];
+            completedShapes = [];
+            updateCollectionStatus();
+            statusText.innerText = "Tertemiz! Baştan başla.";
+            statusText.style.color = "#f57f17";
+            drawScene();
+        }
+    }
+
+    function drawInfiniteLine(p1, p2, isClosing) {
+        const dx = p2.x - p1.x;
+        const dy = p2.y - p1.y;
+        
+        ctx.beginPath();
+        ctx.moveTo(p1.x - dx * 100, p1.y - dy * 100);
+        ctx.lineTo(p2.x + dx * 100, p2.y + dy * 100);
+        
+        ctx.strokeStyle = isClosing ? "rgba(46, 125, 50, 0.6)" : "rgba(0, 96, 100, 0.5)"; 
+        ctx.lineWidth = 1;
+        ctx.setLineDash([10, 5]); 
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = isClosing ? "#2e7d32" : "#00838f";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    }
+
+    function drawScene(mousePos) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGrid();
+
+        completedShapes.forEach((shape, index) => {
+            const pts = shape.points;
+            
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            ctx.closePath();
+            ctx.fillStyle = shape.color;
+            ctx.fill();
+            
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = shape.stroke;
+            ctx.stroke();
+
+            ctx.fillStyle = shape.stroke;
+            pts.forEach(p => {
+                ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
+            });
+
+            drawDeleteButton(shape.center, index === hoveredDeleteBtn);
+        });
+
+        if (currentPath.length > 0) {
+            for (let i = 0; i < currentPath.length - 1; i++) {
+                drawInfiniteLine(currentPath[i], currentPath[i+1], false);
+            }
+
+            ctx.fillStyle = "#006064";
+            currentPath.forEach(p => {
+                ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2); ctx.fill();
+            });
+
+            if (mousePos && hoveredDeleteBtn === null) {
+                const last = currentPath[currentPath.length - 1];
+                const start = currentPath[0];
+                const dist = Math.hypot(mousePos.x - start.x, mousePos.y - start.y);
+                const isClosing = (currentPath.length >= 3 && dist < 10);
+                const target = isClosing ? start : mousePos;
+                
+                drawInfiniteLine(last, target, isClosing);
+            }
+        }
+    }
+
+    function drawDeleteButton(pos, isHovered) {
+        const w = 40;
+        const h = 24;
+        const x = pos.x - w/2;
+        const y = pos.y - h/2;
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(x, y, w, h, 6);
+        } else {
+            ctx.rect(x, y, w, h);
+        }
+        
+        ctx.fillStyle = isHovered ? "#d32f2f" : "#ef5350"; 
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("SİL", pos.x, pos.y);
+    }
+
+    function drawGrid() {
+        ctx.strokeStyle = "#eceff1";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = 0; x <= canvas.width; x += gridSize) {
+            ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height);
+        }
+        for (let y = 0; y <= canvas.height; y += gridSize) {
+            ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
+        }
+        ctx.stroke();
+    }
+
+</script>
+
+</body>
+</html>

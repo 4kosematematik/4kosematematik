@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çokgen Elemanlarını Keşfet</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .container {
+            position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+            touch-action: none; /* Mobilde kaydırmayı engelle */
+        }
+        #info-text {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #7f8c8d;
+            height: 30px;
+        }
+        #btn-restart {
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 18px;
+            background-color: #34495e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            display: inline-block;
+        }
+        #btn-restart:hover {
+            background-color: #2c3e50;
+        }
+        #btn-restart:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🔷 Çokgenin Temel Elemanları</h1>
+
+    <div class="container">
+        <canvas id="gameCanvas" width="800" height="500"></canvas>
+        <div id="info-text">Kutucukları okların gösterdiği yere sürükle!</div>
+        <button id="btn-restart" onclick="resetGame()">🔄 Baştan Yap</button>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const infoText = document.getElementById('info-text');
+
+    // --- Renk Paleti ---
+    const COLORS = {
+        vertex:   { main: "#e74c3c", light: "#fadbd8" }, // Kırmızı (Köşe)
+        side:     { main: "#3498db", light: "#d6eaf8" }, // Mavi (Kenar)
+        angle:    { main: "#9b59b6", light: "#ebdef0" }, // Mor (Açı)
+        diagonal: { main: "#27ae60", light: "#d5f5e3" }  // Yeşil (Köşegen)
+    };
+
+    // --- Geometri (Düzgün Beşgen) ---
+    const centerX = 450;
+    const centerY = 250;
+    const radius = 150;
+    let points = [];
+
+    // Beşgen noktalarını hesapla
+    for (let i = 0; i < 5; i++) {
+        // -Math.PI/2 diyerek tepeden başlatıyoruz
+        let angle = (Math.PI * 2 * i / 5) - Math.PI / 2;
+        points.push({
+            x: centerX + Math.cos(angle) * radius,
+            y: centerY + Math.sin(angle) * radius
+        });
+    }
+
+    // --- Oyun Durumu ---
+    let labels = [];
+    let targets = []; // Sadece sürükleme hedef noktaları (tekil)
+    let draggingItem = null;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    let completed = false;
+    let particles = []; // Konfeti için
+
+    function initGame() {
+        completed = false;
+        particles = [];
+        infoText.innerText = "Kutucukları okların gösterdiği yere sürükle!";
+        infoText.style.color = "#7f8c8d";
+
+        // Etiketler (Sol tarafta kutular)
+        labels = [
+            { id: 1, type: 'vertex', text: "Köşe",    x: 30, y: 80,  w: 100, h: 40, color: COLORS.vertex.main, locked: false, originX: 30, originY: 80 },
+            { id: 2, type: 'side',   text: "Kenar",   x: 30, y: 160, w: 100, h: 40, color: COLORS.side.main,   locked: false, originX: 30, originY: 160 },
+            { id: 3, type: 'angle',  text: "İç Açı",  x: 30, y: 240, w: 100, h: 40, color: COLORS.angle.main,  locked: false, originX: 30, originY: 240 },
+            { id: 4, type: 'diagonal', text: "Köşegen", x: 30, y: 320, w: 100, h: 40, color: COLORS.diagonal.main, locked: false, originX: 30, originY: 320 }
+        ];
+
+        // Hedef Noktaları (Kullanıcı nereye bırakacak?)
+        // Bu koordinatlar görseldeki oklara denk gelecek şekilde ayarlandı.
+        targets = [
+            { type: 'vertex',   x: points[0].x, y: points[0].y - 30 }, // Tepe noktası üstü
+            { type: 'side',     x: (points[1].x + points[2].x)/2 + 40, y: (points[1].y + points[2].y)/2 }, // Sağ kenar yanı
+            { type: 'angle',    x: points[2].x + 30, y: points[2].y + 10 }, // Sağ alt köşe yanı
+            { type: 'diagonal', x: centerX, y: centerY } // Merkeze bırakırsa kabul et (Köşegen için)
+        ];
+
+        draw();
+    }
+
+    // --- Çizim Motoru ---
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1. Temel Şekil (Soluk Gri)
+        // Her zaman altta bir hayalet şekil olsun
+        drawPolygonBase("#ecf0f1", 2);
+
+        // 2. KİLİTLENMİŞ ÖZELLİKLERİ ÇİZ (Global Gösterim)
+        // Eğer kullanıcı bir parçayı yerine koyduysa, o özelliğin TÜMÜNÜ çiz.
+        
+        // A) Köşegenler (En altta)
+        if (isLocked('diagonal')) {
+            drawAllDiagonals();
+        }
+
+        // B) İç Açılar
+        if (isLocked('angle')) {
+            drawAllAngles();
+        }
+
+        // C) Kenarlar
+        if (isLocked('side')) {
+            drawAllSides();
+        } else {
+             // Kilitli değilse ana hatları siyah çiz
+            drawPolygonBase("#333", 3);
+        }
+
+        // D) Köşeler (En üstte)
+        if (isLocked('vertex')) {
+            drawAllVertices();
+        }
+
+        // 3. HEDEF GÖSTERGELERİ (Oklar ve Noktalar)
+        // Sadece henüz kilitlenmemiş olanları göster
+        drawIndicators();
+
+        // 4. ETİKETLER (Kutular)
+        labels.forEach(l => {
+            // Gölge
+            if (!l.locked && l !== draggingItem) {
+                ctx.fillStyle = "rgba(0,0,0,0.1)";
+                ctx.fillRect(l.x + 4, l.y + 4, l.w, l.h);
+            }
+
+            ctx.fillStyle = l.color;
+            // Rounded rect benzeri çizim
+            ctx.beginPath();
+            ctx.roundRect(l.x, l.y, l.w, l.h, 10);
+            ctx.fill();
+            
+            // Çerçeve
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Metin
+            ctx.fillStyle = "white";
+            ctx.font = "bold 16px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(l.text, l.x + l.w/2, l.y + l.h/2);
+            
+            // Eğer yerleştiyse tik işareti
+            if (l.locked) {
+                ctx.fillText("✔", l.x + l.w - 15, l.y + 10);
+            }
+        });
+
+        // 5. Konfeti
+        if (completed) updateParticles();
+    }
+
+    // --- Yardımcı Çizim Fonksiyonları ---
+
+    function drawPolygonBase(color, width) {
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for(let i=1; i<5; i++) ctx.lineTo(points[i].x, points[i].y);
+        ctx.closePath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.stroke();
+    }
+
+    function drawAllVertices() {
+        ctx.fillStyle = COLORS.vertex.main;
+        points.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 8, 0, Math.PI*2);
+            ctx.fill();
+            // Etrafına halka
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 14, 0, Math.PI*2);
+            ctx.strokeStyle = COLORS.vertex.main;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+    }
+
+    function drawAllSides() {
+        ctx.strokeStyle = COLORS.side.main;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for(let i=1; i<5; i++) ctx.lineTo(points[i].x, points[i].y);
+        ctx.closePath();
+        ctx.stroke();
+    }
+
+    function drawAllAngles() {
+        ctx.fillStyle = COLORS.angle.light;
+        ctx.strokeStyle = COLORS.angle.main;
+        ctx.lineWidth = 2;
+
+        points.forEach((p, i) => {
+            // Önceki ve sonraki noktaları bul
+            let prev = points[(i - 1 + 5) % 5];
+            let next = points[(i + 1) % 5];
+
+            // Açıyı hesapla (atan2)
+            let ang1 = Math.atan2(prev.y - p.y, prev.x - p.x);
+            let ang2 = Math.atan2(next.y - p.y, next.x - p.x);
+
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.arc(p.x, p.y, 30, ang1, ang2, true); // Saat yönü tersi
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        });
+    }
+
+    function drawAllDiagonals() {
+        ctx.strokeStyle = COLORS.diagonal.main;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]); // Kesikli çizgi
+        
+        // Tüm köşeleri birbirine bağla (Komşular hariç)
+        for(let i=0; i<5; i++) {
+            for(let j=i+2; j<5; j++) {
+                // Son nokta ile ilk nokta komşu olduğu için (0 ve 4) çizme
+                if (i===0 && j===4) continue; 
+                
+                ctx.beginPath();
+                ctx.moveTo(points[i].x, points[i].y);
+                ctx.lineTo(points[j].x, points[j].y);
+                ctx.stroke();
+            }
+        }
+        ctx.setLineDash([]); // Normale dön
+    }
+
+    function drawIndicators() {
+        // Oklar ve hedef noktaları
+        ctx.setLineDash([2, 2]);
+        ctx.strokeStyle = "#95a5a6";
+        ctx.lineWidth = 1;
+
+        targets.forEach(t => {
+            // Eğer bu tipteki etiket kilitliyse gösterme
+            if (isLocked(t.type)) return;
+
+            // Hedef noktası (Daire)
+            ctx.beginPath();
+            ctx.arc(t.x, t.y, 15, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(0,0,0,0.05)";
+            ctx.fill();
+            ctx.stroke();
+
+            // Ok çizimi (Basitçe şekilden hedefe kesikli çizgi)
+            let shapeX, shapeY;
+            if (t.type === 'vertex') { shapeX = points[0].x; shapeY = points[0].y; }
+            else if (t.type === 'side') { shapeX = (points[1].x + points[2].x)/2; shapeY = (points[1].y + points[2].y)/2; }
+            else if (t.type === 'angle') { shapeX = points[2].x; shapeY = points[2].y; }
+            else if (t.type === 'diagonal') { 
+                // Örnek bir köşegen çizelim göstermek için
+                ctx.beginPath();
+                ctx.moveTo(points[4].x, points[4].y);
+                ctx.lineTo(points[1].x, points[1].y);
+                ctx.strokeStyle = "#ccc";
+                ctx.stroke();
+                shapeX = (points[4].x + points[1].x)/2; shapeY = (points[4].y + points[1].y)/2; 
+            }
+            
+            if (t.type !== 'diagonal') {
+                ctx.beginPath();
+                ctx.moveTo(shapeX, shapeY);
+                ctx.lineTo(t.x, t.y);
+                ctx.strokeStyle = "#95a5a6";
+                ctx.stroke();
+            }
+        });
+        ctx.setLineDash([]);
+    }
+
+    // --- Mantık ve Etkileşim ---
+    function isLocked(type) {
+        const item = labels.find(l => l.type === type);
+        return item ? item.locked : false;
+    }
+
+    function getMousePos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+        const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
+    function onDown(e) {
+        e.preventDefault();
+        const m = getMousePos(e);
+        // Tersten kontrol (Üstteki elemanı seçmek için)
+        for (let i = labels.length - 1; i >= 0; i--) {
+            let l = labels[i];
+            if (!l.locked && 
+                m.x > l.x && m.x < l.x + l.w &&
+                m.y > l.y && m.y < l.y + l.h) {
+                draggingItem = l;
+                dragOffsetX = m.x - l.x;
+                dragOffsetY = m.y - l.y;
+                infoText.innerText = `${l.text} taşınıyor...`;
+                return;
+            }
+        }
+    }
+
+    function onMove(e) {
+        if (!draggingItem) return;
+        e.preventDefault();
+        const m = getMousePos(e);
+        draggingItem.x = m.x - dragOffsetX;
+        draggingItem.y = m.y - dragOffsetY;
+        draw();
+    }
+
+    function onUp(e) {
+        if (!draggingItem) return;
+        e.preventDefault();
+
+        // Hedef kontrolü
+        const target = targets.find(t => t.type === draggingItem.type);
+        // Kutunun merkezi
+        const cx = draggingItem.x + draggingItem.w / 2;
+        const cy = draggingItem.y + draggingItem.h / 2;
+
+        const dist = Math.hypot(cx - target.x, cy - target.y);
+
+        if (dist < 60) { // Tolerans mesafesi
+            // BAŞARILI
+            draggingItem.locked = true;
+            // Kutu hedefin üzerine değil, açıklama olarak kenara ya da orijinal yerine dönsün
+            // Ama kilitli olduğunu gösterelim. Görselliği bozmamak için orijinal yerine çekip rengini parlatalım.
+            draggingItem.x = draggingItem.originX; 
+            draggingItem.y = draggingItem.originY;
+            
+            infoText.innerText = "Doğru! 🎉 Şimdi şekle bak!";
+            infoText.style.color = draggingItem.color;
+            
+            checkCompletion();
+        } else {
+            // BAŞARISIZ
+            draggingItem.x = draggingItem.originX;
+            draggingItem.y = draggingItem.originY;
+            infoText.innerText = "Yanlış yer, tekrar dene.";
+            infoText.style.color = "red";
+        }
+
+        draggingItem = null;
+        draw();
+    }
+
+    function checkCompletion() {
+        if (labels.every(l => l.locked)) {
+            completed = true;
+            infoText.innerText = "TEBRİKLER! TÜM ELEMANLARI BULDUN! 🌟";
+            createConfetti();
+        }
+    }
+
+    function resetGame() {
+        initGame();
+    }
+
+    // --- Konfeti Animasyonu ---
+    function createConfetti() {
+        for(let i=0; i<80; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - 100,
+                vx: (Math.random() - 0.5) * 5,
+                vy: Math.random() * 5 + 2,
+                color: Object.values(COLORS)[Math.floor(Math.random()*4)].main
+            });
+        }
+        loopConfetti();
+    }
+    
+    function loopConfetti() {
+        if (!completed) return;
+        updateParticles();
+        draw();
+        requestAnimationFrame(loopConfetti);
+    }
+
+    function updateParticles() {
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, 6, 6);
+            if(p.y > canvas.height) p.y = -10;
+        });
+    }
+
+    // --- Event Listeners ---
+    canvas.addEventListener('mousedown', onDown);
+    canvas.addEventListener('mousemove', onMove);
+    canvas.addEventListener('mouseup', onUp);
+    canvas.addEventListener('touchstart', onDown, {passive:false});
+    canvas.addEventListener('touchmove', onMove, {passive:false});
+    canvas.addEventListener('touchend', onUp, {passive:false});
+
+    // Başlat
+    initGame();
+
+</script>
+</body>
+</html>

@@ -5,166 +5,1289 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>5. Sınıf - 3. Tema</title>
     <script>
-        document.addEventListener("contextmenu", function(e) {
+        document.addEventListener("contextmenu", function (e) {
             e.preventDefault();
         });
 
-        document.addEventListener("keydown", function(e) {
+        document.addEventListener("keydown", function (e) {
             if ((e.ctrlKey && ["c", "u", "s", "a"].includes(e.key.toLowerCase())) || e.key === "PrintScreen") {
                 e.preventDefault();
             }
         });
 
-        document.addEventListener("copy", function(e) {
+        document.addEventListener("copy", function (e) {
             e.preventDefault();
         });
     </script>
-    <link rel="icon" href="img/4kösemat.png" type="image/png" />
+    <link rel="icon" href="img/4kösemat.png" type="image/png"/>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* Ortak sayfa numarası stili */
+        .page-number {
+            position: absolute;
+            bottom: 20px;
+            left: 20px; /* sol için default */
+            z-index: 9999;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            pointer-events: none;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+        /* Sağ sayfalar için sağa hizala */
+        .right-page .page-number {
+            left: auto;
+            right: 20px;
+        }
+        /* page ve page-content-relative */
+        .page, .page-content {
+            position: relative;
+        }
+
+        /* rotate arrow if desired */
+        .arrow-icon.rotate {
+            transform: rotate(-90deg);
+        }
+    </style>
 </head>
 <body>
 <div class="page-container">
-<header>
-    <nav class="navbar">
-        <a href="index.html">
-            <img src="img/4kösematematik.png" alt="Logo" class="logo" />
-        </a>
-        <div class="nav-buttons">
-            <a href="siniflar.html" class="btn">Sınıflar</a>
-            <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
-            <!-- KULLANICI DROPDOWN -->
-            <div class="user-dropdown">
-                <button id="user-btn" class="btn dropbtn">
-                    <span id="user-name">Giriş Yap</span>
-                    <i id="user-arrow"></i>
-                </button>
-                <div class="dropdown-content" id="user-menu">
-                    <a href="#" id="logout-btn">Çıkış Yap</a>
+    <header>
+        <nav class="navbar">
+            <a href="index.html">
+                <img src="img/4kösematematik.png" alt="Logo" class="logo"/>
+            </a>
+            <div class="nav-buttons">
+                <a href="siniflar.html" class="btn">Sınıflar</a>
+                <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
+                <!-- KULLANICI DROPDOWN -->
+                <div class="user-dropdown">
+                    <button id="user-btn" class="btn dropbtn">
+                        <span id="user-name">Giriş Yap</span>
+                        <i id="user-arrow"></i>
+                    </button>
+                    <div class="dropdown-content" id="user-menu">
+                        <a href="#" id="logout-btn">Çıkış Yap</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1>5. Sınıf - Tema 3: Geometrik Şekiller</h1>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım1-content', this)">
+                <h2 id="kazanım1">
+                    5.3.1. Temel geometrik çizimler için matematiksel araç ve teknolojiden yararlanabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım1-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <a href="pdf/5-3-1.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım2-content', this)">
+                <h2 id="kazanım2">
+                    5.3.2. Temel geometrik çizimlere dayalı deneyimlerini yansıtabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım2-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <a href="pdf/5-3-2.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım3-content', this)">
+                <h2 id="kazanım3">
+                    5.3.3. Açıları ölçmek için matematiksel araç ve teknolojiden yararlanabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım3-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <a href="pdf/5-3-3.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım4-content', this)">
+                <h2 id="kazanım4">
+                    5.3.4. Düzlemde iki veya üç doğrunun birbirine göre durumuna bağlı olarak oluşabilecek açılara dair
+                    çıkarım yapabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım4-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <a href="pdf/5-3-4.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım5-content', this)">
+                <h2 id="kazanım5">
+                    5.3.5. Çokgenleri düzlemde ardışık olarak kesişen doğruların oluşturduğu kapalı şekiller olarak
+                    yorumlayabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım5-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <a href="pdf/5-3-5.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım6-content', this)">
+                <h2 id="kazanım6">
+                    5.3.6. Çokgenlerin özellikleri ile ilgili edindiği deneyimleri yansıtabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım6-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <img src="img/5-3-6.png" alt="5.1.1 Görsel" class="responsive-img"><br>
+                <a href="pdf/5.3.6.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
+                <a href="pdf/5-3-6.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
+        </div>
+        <div class="content-box">
+            <div class="toggle-header" onclick="toggleList('kazanım7-content', this)">
+                <h2 id="kazanım7">
+                    5.3.7. Matematiksel araç ve teknoloji yardımıyla düzlemde iki noktada kesişen çember çiftinin
+                    merkezleri
+                    ve kesişim noktalarından biri ile inşa edilen üçgenlerin kenar özelliklerine yönelik muhakeme
+                    yapabilme
+                    <span class="arrow-icon">▼</span>
+                </h2>
+            </div>
+            <div id="kazanım7-content" class="tema-list" style="display: none;">
+                <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
+                    Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise
+                    bilgilendirme kağıdını görüntüleyin.</p>
+                <img src="img/5-3-7.png" alt="5.1.1 Görsel" class="responsive-img"><br>
+                <a href="pdf/5.3.7.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
+                <a href="pdf/5-3-7.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
+            </div>
+        </div>
+        <!-- KİTAP -->
+        <div class="book-container">
+            <button id="openBookBtn">Kitabı Tam Ekranda Aç</button>
+
+            <!-- Normal Boyut Kitap -->
+            <div class="book-wrapper" id="normalBook">
+                <button class="nav-btn prev" onclick="turnPage(currentPage - 1)" disabled>❮</button>
+                <button class="nav-btn next" onclick="turnPage(currentPage + 1)">❯</button>
+
+                <div id="book" class="book">
+                    <!-- 1. Çift -->
+                    <div class="page-pair" data-set="1">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-1.png" alt="Sayfa 1" class="page-image">
+                                <div class="page-number">Sayfa 1</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game/5.3.5.düzgün.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 2
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diğer 3 çift aynı şekilde -->
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 3" class="page-image">
+                                <div class="page-number">Sayfa 3</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <!--<iframe
+                                    src="game/5.3.5.kka.HTML"
+                                    width="100%"
+                                    height="100%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>-->
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 4
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="3">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-1.png" alt="Sayfa 5" class="page-image">
+                                <div class="page-number">Sayfa 5</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game/5.3.5.soruu.html"
+                                    width="100%"
+                                    height="100%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 6
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 7" class="page-image">
+                                <div class="page-number">Sayfa 7</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game/5.3.5SORU1satranç.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 8
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 9" class="page-image">
+                                <div class="page-number">Sayfa 9</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page">
+                            <canvas class="full-page-canvas"></canvas>
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 10" class="page-image">
+                                <div class="page-number">Sayfa 10</div>
+                            </div>
+                            <div class="drawing-toolbar">
+                                <!-- aynı toolbar -->
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 11" class="page-image">
+                                <div class="page-number">Sayfa 11</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 12
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 13" class="page-image">
+                                <div class="page-number">Sayfa 13</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page">
+                            <canvas class="full-page-canvas"></canvas>
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 14" class="page-image">
+                                <div class="page-number">Sayfa 14</div>
+                            </div>
+                            <div class="drawing-toolbar">
+                                <!-- aynı toolbar -->
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 15" class="page-image">
+                                <div class="page-number">Sayfa 15</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 16
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 17" class="page-image">
+                                <div class="page-number">Sayfa 17</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 18
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 19" class="page-image">
+                                <div class="page-number">Sayfa 19</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 20
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 21" class="page-image">
+                                <div class="page-number">Sayfa 21</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 22
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 23" class="page-image">
+                                <div class="page-number">Sayfa 23</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 24
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 25" class="page-image">
+                                <div class="page-number">Sayfa 25</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 26
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 27" class="page-image">
+                                <div class="page-number">Sayfa 27</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 28
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 29" class="page-image">
+                                <div class="page-number">Sayfa 29</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 30
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 31" class="page-image">
+                                <div class="page-number">Sayfa 31</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 32
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 33" class="page-image">
+                                <div class="page-number">Sayfa 33</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 34
+                            </div>
+                        </div>
+                    </div>
+                    <div class="page-pair" data-set="2">
+                        <div class="page left-page">
+                            <!-- Canvas en üstte -->
+                            <canvas class="full-page-canvas"></canvas>
+
+                            <!-- Resim ve numara (canvas’ın altında ama görünür) -->
+                            <div class="page-content">
+                                <img src="img/5-1-3.png" alt="Sayfa 35" class="page-image">
+                                <div class="page-number">Sayfa 35</div>
+                            </div>
+
+                            <!-- Araç çubuğu en altta -->
+                            <div class="drawing-toolbar">
+                                <button class="tool-btn pencil active" data-tool="pencil" title="Kalem"><i
+                                        class="fas fa-pen"></i></button>
+                                <button class="tool-btn eraser" data-tool="eraser" title="Silgi"><i
+                                        class="fas fa-eraser"></i></button>
+                                <div class="color-picker">
+                                    <div class="color-btn active" style="background:#000" data-color="#000"></div>
+                                    <div class="color-btn" style="background:#e74c3c" data-color="#e74c3c"></div>
+                                    <div class="color-btn" style="background:#27ae60" data-color="#27ae60"></div>
+                                    <div class="color-btn" style="background:#2980b9" data-color="#2980b9"></div>
+                                    <div class="color-btn" style="background:#f39c12" data-color="#f39c12"></div>
+                                    <div class="color-btn" style="background:#9b59b6" data-color="#9b59b6"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="page right-page" style="background: #f8f9fa; padding: 0; overflow: hidden;">
+                            <iframe
+                                    src="game.html"
+                                    width="100%"
+                                    height="120%"
+                                    frameborder="0"
+                                    scrolling="no"
+                                    style="position: absolute; top: 0; left: 0; border: none; z-index: 5;">
+                            </iframe>
+
+                            <!-- Sayfa numarası altta kalsın -->
+                            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(0,0,0,0.7); color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                                Sayfa 36
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </nav>
-</header>
 
-<main class="container">
-    <h1>5. Sınıf - Tema 3: Geometrik Şekiller</h1>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım1-content', this)">
-            <h2 id="kazanım1">
-                5.3.1. Temel geometrik çizimler için matematiksel araç ve teknolojiden yararlanabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
+        <!-- POPUP MODAL -->
+        <div class="book-modal" id="bookModal">
+            <button class="close-modal" onclick="closeModal()">✕</button>
+            <div class="book-wrapper">
+                <button class="nav-btn prev" onclick="turnPage(currentPage - 1)">❮</button>
+                <button class="nav-btn next" onclick="turnPage(currentPage + 1)">❯</button>
+                <div id="bookModalContent" class="book"></div>
+            </div>
         </div>
-        <div id="kazanım1-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <a href="pdf/5-3-1.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım2-content', this)">
-            <h2 id="kazanım2">
-                5.3.2. Temel geometrik çizimlere dayalı deneyimlerini yansıtabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
-        </div>
-        <div id="kazanım2-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <a href="pdf/5-3-2.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım3-content', this)">
-            <h2 id="kazanım3">
-                5.3.3. Açıları ölçmek için matematiksel araç ve teknolojiden yararlanabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
-        </div>
-        <div id="kazanım3-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <a href="pdf/5-3-3.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım4-content', this)">
-            <h2 id="kazanım4">
-                5.3.4. Düzlemde iki veya üç doğrunun birbirine göre durumuna bağlı olarak oluşabilecek açılara dair çıkarım yapabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
-        </div>
-        <div id="kazanım4-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <a href="pdf/5-3-4.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım5-content', this)">
-            <h2 id="kazanım5">
-                5.3.5. Çokgenleri düzlemde ardışık olarak kesişen doğruların oluşturduğu kapalı şekiller olarak yorumlayabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
-        </div>
-        <div id="kazanım5-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <a href="pdf/5-3-5.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım6-content', this)">
-            <h2 id="kazanım6">
-                5.3.6. Çokgenlerin özellikleri ile ilgili edindiği deneyimleri yansıtabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
-        </div>
-        <div id="kazanım6-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <img src="img/5-3-6.png" alt="5.1.1 Görsel" class="responsive-img"><br>
-            <a href="pdf/5.3.6.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
-            <a href="pdf/5-3-6.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-    <div class="content-box">
-        <div class="toggle-header" onclick="toggleList('kazanım7-content', this)">
-            <h2 id="kazanım7">
-                5.3.7. Matematiksel araç ve teknoloji yardımıyla düzlemde iki noktada kesişen çember çiftinin merkezleri
-                ve kesişim noktalarından biri ile inşa edilen üçgenlerin kenar özelliklerine yönelik muhakeme yapabilme
-                <span class="arrow-icon">▼</span>
-            </h2>
-        </div>
-        <div id="kazanım7-content" class="tema-list" style="display: none;">
-            <p>Bu kazanım ile hazırlanmış etkinlik kağıdı için tıklayınız.<br>
-                Bu etkinlik kağıdı için hazırlanmış interaktif araçları ve daha fazla bilgiyi edinmek için ise bilgilendirme kağıdını görüntüleyin.</p>
-            <img src="img/5-3-7.png" alt="5.1.1 Görsel" class="responsive-img"><br>
-            <a href="pdf/5.3.7.pdf" target="_blank" class="mini-btn">Çalışma Kağıdı Görüntüle</a>
-            <a href="pdf/5-3-7.pdf" target="_blank" class="mini-btn">Bilgilendirme Kağıdı Görüntüle</a>
-        </div>
-    </div>
-</main>
+    </main>
+</div>
 <footer class="site-footer">
     <p>destek4kosematematik@gmail.com <br> Copyright © 2025 Tüm Hakları Saklıdır.</p>
 </footer>
 <script>
-    function toggleList(id, headerElement) {
-        const content = document.getElementById(id);
-        const arrow = headerElement.querySelector('.arrow-icon');
+    // currentPage başlangıç
+    let currentPage = 0;
+    let totalPairs = 0;
+    let isModalOpen = false;
 
-        if (content.style.display === 'block') {
-            content.style.display = 'none';
-            arrow.classList.remove('rotate');
-        } else {
-            content.style.display = 'block';
-            arrow.classList.add('rotate');
+    // ÇİZİM FONKSİYONU
+    function initDrawing(canvas, toolbar) {
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let tool = 'pencil';
+        let color = '#000';
+
+        // Canvas boyutu ayarla
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
         }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Araç ve renk seçimi
+        toolbar.addEventListener('click', e => {
+            const toolBtn = e.target.closest('.tool-btn');
+            const colorBtn = e.target.closest('.color-btn');
+
+            if (toolBtn) {
+                toolbar.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                toolBtn.classList.add('active');
+                tool = toolBtn.dataset.tool;
+            }
+            if (colorBtn) {
+                toolbar.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+                colorBtn.classList.add('active');
+                color = colorBtn.dataset.color;
+            }
+        });
+
+        // Çizim olayları
+        const start = (e) => {
+            if (tool === 'pencil' || tool === 'eraser') {
+                drawing = true;
+                ctx.beginPath();
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.type.includes('touch') ? e.touches[0].clientX : e.clientX) - rect.left;
+                const y = (e.type.includes('touch') ? e.touches[0].clientY : e.clientY) - rect.top;
+                ctx.moveTo(x, y);
+            }
+        };
+
+        const draw = (e) => {
+            if (!drawing) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.type.includes('touch') ? e.touches[0].clientX : e.clientX) - rect.left;
+            const y = (e.type.includes('touch') ? e.touches[0].clientY : e.clientY) - rect.top;
+
+            ctx.globalCompositeOperation = tool === 'eraser' ? 'destination-out' : 'source-over';
+            ctx.strokeStyle = tool === 'eraser' ? '#000' : color;
+            ctx.lineWidth = tool === 'eraser' ? 20 : 5;
+            ctx.lineCap = 'round';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        };
+
+        const stop = () => {
+            drawing = false;
+        };
+
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stop);
+        canvas.addEventListener('mouseout', stop);
+
+        canvas.addEventListener('touchstart', start);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stop);
     }
 
+    // TÜM CANVAS'LARI BAŞLAT (root param ile modal veya normal için)
+    function initAllDrawings(root = document) {
+        root.querySelectorAll('.full-page-canvas').forEach(canvas => {
+            const page = canvas.closest('.page');
+            const toolbar = page ? page.querySelector('.drawing-toolbar') : null;
+            if (toolbar) {
+                initDrawing(canvas, toolbar);
+            }
+        });
+    }
+
+    // SAYFA PAIR SAYISINI GÜNCELLE
+    function refreshTotalPairs(root = document) {
+        totalPairs = root.querySelectorAll('.page-pair').length;
+    }
+
+    // SAYFA NUMARALARINI GÜNCELLEME
+    function updatePageNumbers(root = document) {
+        const pairs = Array.from(root.querySelectorAll('.page-pair'));
+        pairs.forEach((pair, i) => {
+            const leftNum = i * 2 + 1;
+            const rightNum = leftNum + 1;
+
+            const leftPage = pair.querySelector('.left-page');
+            const rightPage = pair.querySelector('.right-page');
+
+            // Left page number element (varsa kullan yoksa oluştur)
+            if (leftPage) {
+                let leftNumEl = leftPage.querySelector('.page-number');
+                if (!leftNumEl) {
+                    // bazı yapılar inline 'Sayfa X' div'i içeriyor olabilir; önce bunları kontrol et
+                    const anyChild = Array.from(leftPage.children).find(ch => {
+                        const txt = (ch.textContent || '').trim();
+                        return txt.startsWith('Sayfa');
+                    });
+                    if (anyChild) {
+                        leftNumEl = anyChild;
+                        leftNumEl.classList.add('page-number');
+                    } else {
+                        const pc = leftPage.querySelector('.page-content') || leftPage;
+                        leftNumEl = document.createElement('div');
+                        leftNumEl.className = 'page-number';
+                        pc.appendChild(leftNumEl);
+                    }
+                }
+                leftNumEl.textContent = 'Sayfa ' + leftNum;
+                leftPage.style.position = leftPage.style.position || 'relative';
+            }
+
+            // Right page number element
+            if (rightPage) {
+                let rightNumEl = rightPage.querySelector('.page-number');
+
+                if (!rightNumEl) {
+                    const anyChild = Array.from(rightPage.children).find(ch => {
+                        const txt = (ch.textContent || '').trim();
+                        return txt.startsWith('Sayfa');
+                    });
+                    if (anyChild) {
+                        rightNumEl = anyChild;
+                        rightNumEl.classList.add('page-number');
+                    } else {
+                        const pc = rightPage.querySelector('.page-content') || rightPage;
+                        rightNumEl = document.createElement('div');
+                        rightNumEl.className = 'page-number';
+                        pc.appendChild(rightNumEl);
+                    }
+                }
+                rightNumEl.textContent = 'Sayfa ' + rightNum;
+                rightPage.style.position = rightPage.style.position || 'relative';
+            }
+        });
+    }
+
+    // Sayfa yüklendiğinde ve modal açıldığında çalıştır
+    window.addEventListener('load', () => {
+        // normal görünüm için toplam pair ve numaraları belirle
+        refreshTotalPairs(document);
+        initAllDrawings(document);
+        updatePageNumbers(document);
+        updateNavButtons();
+        resizeCanvas();
+    });
+
+    document.getElementById('openBookBtn')?.addEventListener('click', () => {
+        // modal açılmadan önce bir işlem yok; openModal fonksiyonu içinde kopyalama sonrası init çalışacak
+    });
+
+    // Modal Aç/Kapat
+    function openModal() {
+        const modalContent = document.getElementById('bookModalContent');
+        modalContent.innerHTML = document.getElementById('book').innerHTML;
+        document.getElementById('bookModal').classList.add('active');
+        document.getElementById('normalBook').style.display = 'none';
+        document.getElementById('openBookBtn').style.display = 'none';
+        isModalOpen = true;
+        // modal DOM oluştuktan sonra init ve numara güncelle
+        setTimeout(() => {
+            refreshTotalPairs(modalContent);
+            initAllDrawings(modalContent);
+            updatePageNumbers(modalContent);
+            // modal görünürken global totalPairs referansı modal içeriğe göre ayarlansın
+            // (turnPage fonksiyonu modal/normal ayrımı yapıyor; yine de boundary kontrol için güncelle)
+        }, 50);
+        updateNavButtons();
+    }
+
+    function closeModal() {
+        document.getElementById('bookModal').classList.remove('active');
+        document.getElementById('normalBook').style.display = 'block';
+        document.getElementById('openBookBtn').style.display = 'block';
+        isModalOpen = false;
+        currentPage = 0;
+        document.querySelectorAll('.page-pair').forEach(p => p.classList.remove('flipped'));
+        // normal görünümde totalPairs tekrar hesapla
+        refreshTotalPairs(document);
+        updateNavButtons();
+        updatePageNumbers(document);
+    }
+
+    // Sayfa Çevirme
+    function turnPage(to) {
+        // hangi root'ta işlem yapıyoruz belirle
+        const root = isModalOpen ? document.getElementById('bookModalContent') : document.getElementById('normalBook');
+        const pairs = root.querySelectorAll('.page-pair');
+        const localTotal = pairs.length;
+
+        if (to < 0 || to >= localTotal || to === currentPage) return;
+        const diff = to > currentPage ? 1 : -1;
+        const steps = Math.abs(to - currentPage);
+        let step = 0;
+        const interval = setInterval(() => {
+            if (step >= steps) {
+                clearInterval(interval);
+                currentPage = to;
+                updateNavButtons();
+                return;
+            }
+            const index = currentPage + (diff > 0 ? step : -step - 1);
+            if (pairs[index]) pairs[index].classList.toggle('flipped');
+            step++;
+        }, 600);
+    }
+
+    function updateNavButtons() {
+        // buton durumunu modal veya normal için ayarla
+        const root = isModalOpen ? document.getElementById('bookModalContent') : document.getElementById('normalBook');
+        const localTotal = root ? root.querySelectorAll('.page-pair').length : 0;
+        document.querySelectorAll('.nav-btn.prev').forEach(b => b.disabled = currentPage === 0);
+        document.querySelectorAll('.nav-btn.next').forEach(b => b.disabled = currentPage === localTotal - 1 || localTotal === 0);
+    }
+
+    // Olaylar
+    document.getElementById('openBookBtn')?.addEventListener('click', openModal);
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && isModalOpen) closeModal();
+        if (e.key === 'ArrowRight') turnPage(currentPage + 1);
+        if (e.key === 'ArrowLeft') turnPage(currentPage - 1);
+    });
+
+    function toggleList(id, el) {
+        const content = document.getElementById(id);
+        const arrow = el.querySelector('.arrow-icon');
+        content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        arrow.classList.toggle('rotate');
+    }
+
+    function resizeCanvas() {
+        document.querySelectorAll('.full-page-canvas').forEach(canvas => {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        });
+    }
+
+    window.addEventListener('resize', () => {
+        resizeCanvas();
+        // ekran yeniden boyutlandığında sayfa numaralarının pozisyonu korunmalı
+        updatePageNumbers(document);
+        if (isModalOpen) updatePageNumbers(document.getElementById('bookModalContent'));
+    });
 </script>
-</div>
+
 <script src="login.js"></script>
 <script src="chatbot-data.js"></script>
 <script src="chatbot.js"></script>

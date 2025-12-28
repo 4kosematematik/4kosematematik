@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometri Dedektifi v3</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fdf6e3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            user-select: none;
+        }
+        h1 { color: #5d4037; text-shadow: 1px 1px 2px #aaa; margin-bottom: 10px; }
+        
+        .main-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .board-wrapper {
+            position: relative;
+            padding: 15px;
+            background: #8d6e63;
+            border-radius: 12px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            border: 4px solid #6d4c41;
+        }
+        canvas {
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            width: 320px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 6px solid #ff7043;
+            min-height: 400px;
+        }
+        
+        #instruction-panel h3 { color: #e64a19; border-bottom: 2px solid #ffcc80; padding-bottom: 10px; }
+        .step-list { padding-left: 20px; color: #555; line-height: 1.6; }
+        .highlight { color: #d32f2f; font-weight: bold; }
+
+        .question-box { display: none; animation: slideIn 0.4s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        .btn-group { margin-bottom: 20px; }
+        .label { font-weight: bold; display: block; margin-bottom: 8px; color: #444; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        button.option-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 2px solid #eee;
+            background: #fafafa;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 15px;
+            color: #555;
+            position: relative;
+        }
+        button.option-btn:hover { background-color: #fff3e0; border-color: #ffb74d; }
+        button.option-btn.selected { 
+            background-color: #fff8e1; 
+            border-color: #ff9800; 
+            color: #e65100; 
+            font-weight: bold; 
+            box-shadow: 0 2px 5px rgba(255, 152, 0, 0.2);
+        }
+        button.option-btn.selected::after { content: '✔'; position: absolute; right: 15px; font-size: 18px; }
+
+        #btn-check {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px #1b5e20;
+            transition: transform 0.1s;
+        }
+        #btn-check:active { transform: translateY(4px); box-shadow: 0 0 #1b5e20; }
+
+        #feedback { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; text-align: center; font-size: 16px; line-height: 1.5; }
+        .correct { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; }
+        .wrong { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; }
+
+        .back-btn { margin-top: 10px; background: none; border: none; color: #777; text-decoration: underline; cursor: pointer; font-size: 14px; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <h1>📐 Geometri Dedektifi: Üçgen Avı</h1>
+
+    <div class="main-container">
+        <div class="board-wrapper">
+            <canvas id="geoCanvas" width="500" height="500"></canvas>
+        </div>
+
+        <div class="controls">
+            <div id="instruction-panel">
+                <h3>🕵️‍♂️ Görevimiz: Üçgenleri Bulmak!</h3>
+                <p>Tahtada isimlendirilmiş doğru parçaları var.</p>
+                <ol class="step-list">
+                    <li>İstediğin bir <strong>doğru parçasına</strong> (Örn: AB) tıkla.</li>
+                    <li><span class="highlight">P Noktası</span> ile birleşip oluşan üçgeni izle. 🔺</li>
+                    <li>Oluşan üçgenin <strong>Açı</strong> ve <strong>Kenar</strong> özelliklerini düşün.</li>
+                    <li>Sağdaki panelden özelliklerini seç ve <strong>Kontrol Et</strong>!</li>
+                </ol>
+                <p style="text-align:center; color:#e64a19; font-weight:bold; margin-top:20px;">👇 Başlamak için bir çizgiye tıkla!</p>
+            </div>
+
+            <div id="quiz-panel" class="question-box">
+                <h3 id="question-title" style="text-align:center; margin-bottom:15px; color:#333;">... Üçgeni</h3>
+                
+                <div class="btn-group" id="angle-group">
+                    <span class="label">1. Açılarına Göre Seç:</span>
+                    <button class="option-btn" onclick="selectOption('angle', 'dik')">Dik Açılı Üçgen (90°)</button>
+                    <button class="option-btn" onclick="selectOption('angle', 'dar')">Dar Açılı Üçgen (<90°)</button>
+                    <button class="option-btn" onclick="selectOption('angle', 'genis')">Geniş Açılı Üçgen (>90°)</button>
+                </div>
+
+                <div class="btn-group" id="side-group">
+                    <span class="label">2. Kenarlarına Göre Seç:</span>
+                    <button class="option-btn" onclick="selectOption('side', 'cesit')">Çeşitkenar Üçgen</button>
+                    <button class="option-btn" onclick="selectOption('side', 'ikiz')">İkizkenar Üçgen</button>
+                    <button class="option-btn" onclick="selectOption('side', 'es')">Eşkenar Üçgen</button>
+                </div>
+
+                <button id="btn-check" onclick="checkAnswer()">KONTROL ET ✅</button>
+                <div id="feedback"></div>
+                <button class="back-btn" onclick="resetSelection()">⬅ Farklı bir çizgi seç</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('geoCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Grid Ayarları
+    const gridSize = 50; 
+    const rows = 9;
+    const cols = 9;
+    const offsetX = 50;
+    const offsetY = 50;
+
+    const pointP = { x: 3, y: 4, label: "P" };
+
+    // Doğru Parçaları Verisi
+    // DİKKAT: LI doğru parçası 1 birim aşağı kaydırıldı (y:2-4 yerine y:3-5 yapıldı).
+    // Bu durumda P(3,4) noktası LI(1,3-5) doğrusunun tam ortasının karşısına gelir.
+    // Bu da üçgeni "Dik" olmaktan çıkarıp "İkizkenar" yapar.
+    const segments = [
+        { id: 1, p1: {x: 1, y: 6}, p2: {x: 1, y: 8}, label: "GH", typeAngle: "genis", typeSide: "cesit" }, 
+        { id: 2, p1: {x: 1, y: 3}, p2: {x: 1, y: 5}, label: "LI", typeAngle: "dar", typeSide: "ikiz" }, // GÜNCELLENDİ: 1 birim aşağı
+        { id: 3, p1: {x: 7, y: 6}, p2: {x: 7, y: 8}, label: "AB", typeAngle: "dik", typeSide: "cesit" }, 
+        { id: 4, p1: {x: 7, y: 3}, p2: {x: 7, y: 5}, label: "CD", typeAngle: "dar", typeSide: "ikiz" }, 
+        { id: 5, p1: {x: 7, y: 0}, p2: {x: 7, y: 2}, label: "EF", typeAngle: "genis", typeSide: "cesit" } 
+    ];
+
+    let selectedSegment = null;
+    let userSelection = { angle: null, side: null };
+
+    // --- Çizim ---
+    function drawBoard() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Grid Noktaları
+        ctx.fillStyle = "#4e342e";
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                ctx.beginPath();
+                ctx.arc(offsetX + c * gridSize, offsetY + r * gridSize, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Doğru Parçaları
+        segments.forEach(seg => {
+            const isSelected = selectedSegment && selectedSegment.id === seg.id;
+            
+            ctx.beginPath();
+            ctx.moveTo(toPixel(seg.p1.x), toPixel(seg.p1.y, 'y'));
+            ctx.lineTo(toPixel(seg.p2.x), toPixel(seg.p2.y, 'y'));
+            ctx.lineWidth = isSelected ? 6 : 5;
+            ctx.strokeStyle = isSelected ? "#1976d2" : "#212121"; 
+            ctx.lineCap = "round";
+            ctx.stroke();
+
+            // Uç Noktalar
+            drawPin(seg.p1.x, seg.p1.y, isSelected ? "#1976d2" : "#212121");
+            drawPin(seg.p2.x, seg.p2.y, isSelected ? "#1976d2" : "#212121");
+
+            // --- YENİ EKLENEN: Harfleri Yazdır ---
+            ctx.font = "bold 16px Arial";
+            ctx.fillStyle = "#333";
+            const textOffset = 25;
+            
+            // Eğer çizgi soldaysa (x=1) harfleri sola yaz, sağdaysa (x=7) sağa yaz.
+            // p1 her zaman üstteki veya alttaki olabilir, görseldeki harf sırasını korumak için:
+            // label[0] -> p1, label[1] -> p2 varsayımı ile (sıralama farketmez, uçlara isim veriyoruz)
+            
+            if (seg.p1.x < 4) { // Sol taraf
+                ctx.textAlign = "right";
+                ctx.fillText(seg.label[0], toPixel(seg.p1.x) - textOffset, toPixel(seg.p1.y, 'y') + 5);
+                ctx.fillText(seg.label[1], toPixel(seg.p2.x) - textOffset, toPixel(seg.p2.y, 'y') + 5);
+            } else { // Sağ taraf
+                ctx.textAlign = "left";
+                ctx.fillText(seg.label[1], toPixel(seg.p1.x) + textOffset, toPixel(seg.p1.y, 'y') + 5); // Harf sırası görselle uyuşsun diye tersledim
+                ctx.fillText(seg.label[0], toPixel(seg.p2.x) + textOffset, toPixel(seg.p2.y, 'y') + 5);
+            }
+        });
+
+        // P Noktası
+        drawPin(pointP.x, pointP.y, "#d32f2f", 7);
+        ctx.fillStyle = "#d32f2f";
+        ctx.font = "bold 22px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("P", toPixel(pointP.x) + 15, toPixel(pointP.y, 'y') + 8);
+
+        // Üçgen Tamamlama
+        if (selectedSegment) {
+            ctx.beginPath();
+            ctx.moveTo(toPixel(selectedSegment.p1.x), toPixel(selectedSegment.p1.y, 'y'));
+            ctx.lineTo(toPixel(pointP.x), toPixel(pointP.y, 'y'));
+            ctx.lineTo(toPixel(selectedSegment.p2.x), toPixel(selectedSegment.p2.y, 'y'));
+            ctx.closePath(); 
+
+            ctx.strokeStyle = "#ff5722"; 
+            ctx.lineWidth = 3;
+            ctx.setLineDash([10, 6]); 
+            ctx.stroke();
+            ctx.setLineDash([]); 
+            
+            ctx.fillStyle = "rgba(255, 87, 34, 0.15)";
+            ctx.fill();
+        }
+    }
+
+    function drawPin(gx, gy, color, size = 5) {
+        ctx.beginPath();
+        ctx.arc(toPixel(gx), toPixel(gy, 'y'), size, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+
+    function toPixel(val, axis = 'x') {
+        return (axis === 'x') ? offsetX + val * gridSize : offsetY + val * gridSize;
+    }
+
+    // --- Etkileşim ---
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+
+        segments.forEach(seg => {
+            const x1 = toPixel(seg.p1.x), y1 = toPixel(seg.p1.y, 'y');
+            const x2 = toPixel(seg.p2.x), y2 = toPixel(seg.p2.y, 'y');
+            
+            if (Math.hypot(clickX - x1, clickY - y1) < 30 ||
+                Math.hypot(clickX - x2, clickY - y2) < 30 ||
+                Math.hypot(clickX - (x1+x2)/2, clickY - (y1+y2)/2) < 40) {
+                
+                selectSegment(seg);
+            }
+        });
+    });
+
+    function selectSegment(seg) {
+        selectedSegment = seg;
+        drawBoard();
+        
+        document.getElementById('instruction-panel').style.display = 'none';
+        document.getElementById('quiz-panel').style.display = 'block';
+        
+        // Başlığı güncelle (Örn: "LIP Üçgeni")
+        // Harfleri sıralı yazmak daha şık: Label harfleri + P
+        const triName = seg.label[0] + seg.label[1] + "P";
+        document.getElementById('question-title').innerText = triName + " Üçgeninin Özellikleri";
+
+        document.getElementById('feedback').innerHTML = "";
+        document.getElementById('feedback').className = "";
+        userSelection = { angle: null, side: null };
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+    }
+
+    function selectOption(category, value) {
+        userSelection[category] = value;
+        const container = category === 'angle' ? document.getElementById('angle-group') : document.getElementById('side-group');
+        container.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        event.target.classList.add('selected');
+    }
+
+    function checkAnswer() {
+        const fbDiv = document.getElementById('feedback');
+
+        if (!userSelection.angle || !userSelection.side) {
+            fbDiv.innerHTML = "⚠️ Lütfen hem açı hem de kenar özelliğini seçmelisin.";
+            fbDiv.className = "";
+            return;
+        }
+
+        const isAngleCorrect = userSelection.angle === selectedSegment.typeAngle;
+        const isSideCorrect = userSelection.side === selectedSegment.typeSide;
+
+        if (isAngleCorrect && isSideCorrect) {
+            fbDiv.innerHTML = "🎉 HARİKA! Doğru bildin.<br>Bu bir " + getTriangleName(userSelection);
+            fbDiv.className = "correct";
+        } else {
+            let msg = "🤔 Tekrar düşünelim:<br>";
+            if (!isAngleCorrect) msg += "• Açısını tekrar incele.<br>";
+            if (!isSideCorrect) msg += "• Kenar uzunluklarını tekrar say.";
+            fbDiv.innerHTML = msg;
+            fbDiv.className = "wrong";
+        }
+    }
+
+    function getTriangleName(sel) {
+        const angles = {dik: "Dik Açılı", dar: "Dar Açılı", genis: "Geniş Açılı"};
+        const sides = {cesit: "Çeşitkenar", ikiz: "İkizkenar", es: "Eşkenar"};
+        return `${angles[sel.angle]} ${sides[sel.side]} Üçgen`;
+    }
+
+    function resetSelection() {
+        selectedSegment = null;
+        drawBoard();
+        document.getElementById('instruction-panel').style.display = 'block';
+        document.getElementById('quiz-panel').style.display = 'none';
+    }
+
+    drawBoard();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayna Kırıkları: Eğitici Oyun</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1d;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            user-select: none;
+        }
+
+        h1 { margin-bottom: 20px; color: #f1c40f; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; }
+
+        .layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .canvas-box {
+            position: relative;
+            padding: 0;
+            width: 600px;
+            height: 400px;
+            background: #2b2b2b;
+            border-radius: 4px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            overflow: hidden;
+        }
+
+        canvas {
+            background: #121212;
+            display: block;
+            cursor: crosshair;
+        }
+
+        .sidebar {
+            width: 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #252525;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+
+        h3 { margin-top: 0; color: #aaa; text-align: center; font-size: 1.1em; }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            margin: 20px 0;
+            height: 6px;
+            background: #444;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            background: #f1c40f;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* YENİ EKLENEN BİLGİLENDİRME KUTUSU */
+        .info-box {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            border-left: 5px solid #2196f3;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            animation: pulse 2s infinite; /* Dikkat çekmesi için animasyon */
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4); }
+            70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(33, 150, 243, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 12px 5px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+            font-size: 0.9em;
+        }
+        
+        .btn-tri { background: #e74c3c; }
+        .btn-quad { background: #3498db; }
+        .btn-pent { background: #9b59b6; }
+        
+        .btn-reset {
+            background: #555;
+            color: #ccc;
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-reset:hover { background: #777; color: white; }
+
+        button:hover { filter: brightness(1.2); transform: translateY(-2px); }
+        button:active { transform: translateY(0); }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 6px;
+            min-height: 20px;
+            font-size: 1em;
+        }
+
+        .frame-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 15px solid transparent;
+            border-image: linear-gradient(45deg, #b8860b, #ffd700, #ffec8b, #b8860b) 1;
+            pointer-events: none;
+            z-index: 10;
+            transition: opacity 0.5s ease;
+            box-sizing: border-box;
+        }
+
+        .score-board {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.2em;
+            color: #f1c40f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🪞 Ayna Kırıkları: 9 Parçayı Bul</h1>
+
+<div class="layout">
+    
+    <div class="canvas-box">
+        <canvas id="canvas" width="600" height="400"></canvas>
+        <div id="frame" class="frame-overlay"></div>
+    </div>
+
+    <div class="sidebar">
+        <div class="panel">
+            <h3>🔨 1. Aşama: Hazırlık</h3>
+            <p style="text-align:center; color:#888; font-size:0.9em;">Aynayı kırmak için çubuğu sağa çek.</p>
+            <input type="range" id="slider" min="0" max="100" value="0">
+            
+            <button class="btn-reset" onclick="resetGame()">
+                <span>↺</span> SIFIRLA / TEKRARLA
+            </button>
+        </div>
+
+        <div id="gamePanel" class="panel" style="opacity:0; pointer-events:none; transition: opacity 0.5s;">
+            <h3 style="color:#f1c40f;">🧩 2. Aşama: Sınıflandırma</h3>
+            
+            <div id="instructionText" class="info-box">
+                👆 Lütfen bir parçaya TIKLA ve türünü SEÇ!
+            </div>
+            
+            <div class="btn-grid">
+                <button class="btn-tri" onclick="guess('Üçgen')">ÜÇGEN</button>
+                <button class="btn-quad" onclick="guess('Dörtgen')">DÖRTGEN</button>
+                <button class="btn-pent" onclick="guess('Beşgen')">BEŞGEN</button>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+            <div class="score-board">Puan: <span id="score">0</span> / 9</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('slider');
+    const gamePanel = document.getElementById('gamePanel');
+    const feedback = document.getElementById('feedback');
+    const frame = document.getElementById('frame');
+    const scoreEl = document.getElementById('score');
+    const instructionText = document.getElementById('instructionText'); // Bilgi kutusu
+
+    const W = 600;
+    const H = 400;
+
+    // --- NOKTA HARİTASI ---
+    const P = {
+        TL: {x:0, y:0},    TC: {x:200, y:0},  TC2:{x:300, y:0}, TC3:{x:500, y:0}, TR: {x:600, y:0},
+        L1: {x:0, y:100},  L2: {x:0, y:250},
+        R1: {x:600, y:150}, R2: {x:600, y:300},
+        B1: {x:200, y:400}, B2: {x:300, y:400}, B3: {x:400, y:400}, BR: {x:600, y:400}, BL: {x:0, y:400},
+        I1: {x: 260, y: 160},
+        I2: {x: 440, y: 180},
+        I3: {x: 420, y: 360}
+    };
+
+    // --- PARÇALAR ---
+    const shards = [
+        { id:1, type:"Üçgen", pts: [P.TL, P.TC, P.L1], found:false },
+        { id:2, type:"Beşgen", pts: [P.L1, P.TC, P.TC2, P.I1, P.L2], found:false },
+        { id:3, type:"Dörtgen", pts: [P.TC2, P.TC3, P.I2, P.I1], found:false },
+        { id:4, type:"Dörtgen", pts: [P.TC3, P.TR, P.R1, P.I2], found:false },
+        { id:5, type:"Dörtgen", pts: [P.L2, P.I1, P.B1, P.BL], found:false },
+        { id:6, type:"Beşgen", pts: [P.I1, P.I2, P.I3, P.B2, P.B1], found:false },
+        { id:7, type:"Dörtgen", pts: [P.I2, P.R1, P.R2, P.I3], found:false },
+        { id:8, type:"Üçgen", pts: [P.I3, P.B3, P.B2], found:false }, 
+        { id:9, type:"Dörtgen", pts: [P.I3, P.R2, P.BR, P.B3], found:false }
+    ];
+
+    shards.forEach(s => {
+        let sx = 0, sy = 0;
+        s.pts.forEach(p => { sx += p.x; sy += p.y; });
+        s.cx = sx / s.pts.length;
+        s.cy = sy / s.pts.length;
+    });
+
+    let selectedShard = null;
+    let isBroken = false;
+
+    // --- OYUN MANTIĞI ---
+
+    function render() {
+        ctx.clearRect(0, 0, W, H);
+        const val = parseInt(slider.value);
+        isBroken = val === 100;
+
+        if(isBroken) {
+            gamePanel.style.opacity = 1;
+            gamePanel.style.pointerEvents = "all";
+            frame.style.opacity = 0;
+        } else {
+            gamePanel.style.opacity = 0;
+            gamePanel.style.pointerEvents = "none";
+            frame.style.opacity = 1;
+        }
+
+        if (!isBroken) {
+            // AŞAMA 1
+            let grad = ctx.createLinearGradient(0, 0, W, H);
+            grad.addColorStop(0, "#ece9e6"); grad.addColorStop(1, "#ffffff");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,W,H);
+
+            ctx.beginPath();
+            ctx.strokeStyle = "#555"; ctx.lineWidth = 2;
+            const lines = [[P.L1, P.TC], [P.L2, P.R1], [P.TC2, P.B1], [P.TC3, P.B3], [P.B2, P.R2]];
+            
+            lines.forEach((l, i) => {
+                if(val > i * 20) {
+                    ctx.moveTo(l[0].x, l[0].y); ctx.lineTo(l[1].x, l[1].y);
+                }
+            });
+            ctx.stroke();
+
+        } else {
+            // AŞAMA 2
+            ctx.fillStyle = "#1a1a1a"; 
+            ctx.fillRect(0,0,W,H);
+
+            shards.forEach(s => {
+                const dx = s.cx - W/2; const dy = s.cy - H/2;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                const explode = 25; 
+                const ox = (dx/dist) * explode; const oy = (dy/dist) * explode;
+
+                drawShard(s, ox, oy);
+            });
+        }
+    }
+
+    function drawShard(s, ox, oy) {
+        ctx.beginPath();
+        ctx.moveTo(s.pts[0].x + ox, s.pts[0].y + oy);
+        for(let i=1; i<s.pts.length; i++) ctx.lineTo(s.pts[i].x + ox, s.pts[i].y + oy);
+        ctx.closePath();
+
+        if (s.found) {
+            ctx.fillStyle = "#27ae60"; 
+            ctx.strokeStyle = "#2ecc71";
+            ctx.fill(); ctx.stroke();
+            ctx.fillStyle = "white"; ctx.font="24px Arial"; 
+            ctx.fillText("✓", s.cx+ox-8, s.cy+oy+8);
+        } 
+        else if (s === selectedShard) {
+            ctx.fillStyle = "#f1c40f"; 
+            ctx.strokeStyle = "#f39c12";
+            ctx.lineWidth = 3; ctx.fill(); ctx.stroke(); ctx.lineWidth = 1;
+        } 
+        else {
+            let grad = ctx.createLinearGradient(s.cx+ox-50, s.cy+oy-50, s.cx+ox+50, s.cy+oy+50);
+            grad.addColorStop(0, "#fff"); grad.addColorStop(1, "#bdc3c7");
+            ctx.fillStyle = grad; ctx.strokeStyle = "#444";
+            ctx.fill(); ctx.stroke();
+        }
+    }
+
+    function isInside(pt, poly, ox, oy) {
+        let c = false;
+        for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+            let pi = {x:poly[i].x+ox, y:poly[i].y+oy};
+            let pj = {x:poly[j].x+ox, y:poly[j].y+oy};
+            if (((pi.y > pt.y) != (pj.y > pt.y)) && (pt.x < (pj.x - pi.x) * (pt.y - pi.y) / (pj.y - pi.y) + pi.x)) c = !c;
+        }
+        return c;
+    }
+
+    window.resetGame = function() {
+        slider.value = 0;
+        shards.forEach(s => s.found = false);
+        selectedShard = null;
+        scoreEl.innerText = "0";
+        feedback.innerText = "";
+        feedback.style.background = "transparent";
+        instructionText.innerHTML = "👆 Lütfen bir parçaya TIKLA ve türünü SEÇ!";
+        instructionText.style.backgroundColor = "#e3f2fd";
+        instructionText.style.color = "#0d47a1";
+        instructionText.style.borderLeftColor = "#2196f3";
+        render();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        if (!isBroken) return;
+        const rect = canvas.getBoundingClientRect();
+        const m = {x: e.clientX - rect.left, y: e.clientY - rect.top};
+
+        shards.forEach(s => {
+            if(s.found) return;
+            const dx = s.cx - W/2; const dy = s.cy - H/2;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            const ox = (dx/dist) * 25; const oy = (dy/dist) * 25;
+
+            if (isInside(m, s.pts, ox, oy)) {
+                selectedShard = s;
+                feedback.innerText = "";
+                feedback.style.background = "transparent";
+                
+                // Yönlendirme Metnini Güncelle
+                instructionText.innerHTML = "🤔 Şimdi butonlardan türünü SEÇ!";
+                instructionText.style.backgroundColor = "#fff3e0";
+                instructionText.style.color = "#e65100";
+                instructionText.style.borderLeftColor = "#ff9800";
+                
+                render();
+            }
+        });
+    });
+
+    window.guess = function(type) {
+        if(!selectedShard) {
+            feedback.innerText = "⚠️ Önce bir parça seç!";
+            feedback.style.background = "#e74c3c"; feedback.style.color = "white";
+            return;
+        }
+        if(selectedShard.type === type) {
+            feedback.innerText = "DOĞRU! 🎉";
+            feedback.style.background = "#27ae60"; feedback.style.color = "white";
+            selectedShard.found = true;
+            selectedShard = null;
+            
+            // Doğru bilince metni güncelle
+            instructionText.innerHTML = "✨ Harika! Başka bir parça seç.";
+            instructionText.style.backgroundColor = "#e8f5e9";
+            instructionText.style.color = "#2e7d32";
+            instructionText.style.borderLeftColor = "#4caf50";
+
+            const score = shards.filter(s=>s.found).length;
+            scoreEl.innerText = score;
+            if(score===9) {
+                feedback.innerText = "TEBRİKLER! BİTTİ! 🏆";
+                feedback.style.background = "#f1c40f"; feedback.style.color="#333";
+                instructionText.innerHTML = "🏆 OYUN BİTTİ! Tebrikler!";
+            }
+        } else {
+            feedback.innerText = "YANLIŞ! ❌";
+            feedback.style.background = "#c0392b"; feedback.style.color = "white";
+            instructionText.innerHTML = "❌ Yanlış oldu, kenarları tekrar say.";
+        }
+        render();
+    }
+
+    slider.addEventListener('input', render);
+    render(); 
+
+</script>
+
+</body>
+</html>

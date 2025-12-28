@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canlı Fıskiye Simülasyonu V10 (Dengeli Görünüm)</title>
+    <style>
+        :root {
+            --primary-color: #0277bd;
+            --accent-color: #fdd835;
+            --bg-gradient: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            --panel-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        h1 {
+            color: #01579b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            height: 550px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .canvas-container {
+            flex: 2;
+            background: #81d4fa;
+            border-radius: 15px;
+            position: relative;
+            border: 2px solid #fff;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 10px;
+            min-width: 300px;
+        }
+
+        .control-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .control-box h3 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        button:hover { transform: translateX(5px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        button:active { transform: translateX(2px); }
+
+        #btn-case1 { background: linear-gradient(90deg, #ff9800, #f57c00); }
+        #btn-case2 { background: linear-gradient(90deg, #9c27b0, #7b1fa2); }
+        #btn-case3 { background: linear-gradient(90deg, #2196f3, #1976d2); }
+        #btn-reset { background: #546e7a; text-align: center; margin-top: auto; }
+
+        .info-panel {
+            flex-grow: 1;
+            background: #e1f5fe;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #b3e5fc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 15px;
+            color: #0277bd;
+            animation: popIn 0.5s ease;
+        }
+        
+        .result-checkbox-container {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #b3e5fc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            transition: background 0.2s;
+        }
+        .result-checkbox-container:hover { background: #f1f8e9; }
+        .result-checkbox-container input { transform: scale(1.2); cursor: pointer; }
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        .highlight-text { 
+            font-weight: bold; 
+            font-size: 20px; 
+            color: #d32f2f; 
+            margin-top: 10px; 
+            display: none;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+        }
+
+        @media (max-width: 800px) {
+            .main-wrapper { flex-direction: column; height: auto; }
+            .sidebar { min-width: 100%; }
+            canvas { min-height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>💧 Akıllı Sulama Sistemi</h1>
+
+    <div class="main-wrapper">
+        <div class="canvas-container">
+            <canvas id="gardenCanvas" width="800" height="500"></canvas>
+        </div>
+
+        <div class="sidebar">
+            <div class="control-box">
+                <h3>⚙️ Senaryolar</h3>
+                <button id="btn-case1" onclick="startSimulation(1)">1. Normal Hız (20cm - 20cm)</button>
+                <button id="btn-case2" onclick="startSimulation(2)">2. Biri Hızlı (20cm - 25cm)</button>
+                <button id="btn-case3" onclick="startSimulation(3)">3. Düşük Hız (15cm - 15cm)</button>
+            </div>
+
+            <div id="info-panel" class="info-panel">
+                <span style="font-size: 40px; margin-bottom: 10px;">⛲</span>
+                <div>Başlamak için yukarıdaki durumlardan birini seçin.</div>
+            </div>
+
+            <button id="btn-reset" onclick="resetCanvas()">Sistemi Sıfırla</button>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('gardenCanvas');
+    const ctx = canvas.getContext('2d');
+    const infoPanel = document.getElementById('info-panel');
+
+    // --- AYARLAR ---
+    const scale = 10; 
+    
+    // YER SEVİYESİ (groundY):
+    // 220px yaparak sahneyi biraz daha aşağı aldık. 
+    // Böylece hem yukarıda boşluk kaldı hem de aşağıda üçgenler rahatça sığıyor.
+    const groundY = 220; 
+    
+    const distCm = 20;
+    const distPx = distCm * scale;
+    const canvasCenterX = 800 / 2;
+    // Fıskiye merkezlerini tam zemin çizgisine koyuyoruz
+    const center1 = { x: canvasCenterX - distPx/2, y: groundY };
+    const center2 = { x: canvasCenterX + distPx/2, y: groundY };
+
+    let animId;
+    let currentR1 = 0, currentR2 = 0;
+    let targetR1 = 0, targetR2 = 0;
+    let animationRunning = false;
+    let activeScenario = 0;
+    let particles = [];
+
+    function drawScene() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. GÖKYÜZÜ
+        let skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+        skyGrad.addColorStop(0, "#81d4fa");
+        skyGrad.addColorStop(1, "#29b6f6");
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, canvas.width, groundY);
+
+        // 2. YER/ÇİMEN
+        let groundGrad = ctx.createLinearGradient(0, groundY, 0, canvas.height);
+        groundGrad.addColorStop(0, "#43a047");
+        groundGrad.addColorStop(1, "#2e7d32");
+        ctx.fillStyle = groundGrad;
+        ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+        drawGroundPipe();
+        drawSprinklerDetailed(center1.x, center1.y);
+        drawSprinklerDetailed(center2.x, center2.y);
+
+        if (animationRunning) {
+            updateAndDrawParticles();
+        }
+        
+        // Çemberleri çiz (Animasyon sırasında büyür)
+        if (currentR1 > 0) drawFullCircle(center1.x, center1.y, currentR1);
+        if (currentR2 > 0) drawFullCircle(center2.x, center2.y, currentR2);
+
+        drawDistanceMarker();
+
+        if (!animationRunning && activeScenario > 0 && currentR1 >= targetR1 * scale) {
+            drawTriangleAndAnalysis();
+        }
+    }
+
+    function drawGroundPipe() {
+        ctx.fillStyle = "#37474f";
+        // Boru tam yerin altında (groundY + 15)
+        ctx.fillRect(center1.x, groundY + 15, center2.x - center1.x, 10);
+        
+        // Çimen efektleri
+        ctx.strokeStyle = "#81c784";
+        ctx.lineWidth = 2;
+        for(let i=0; i<canvas.width; i+=12) {
+            ctx.beginPath();
+            ctx.moveTo(i, groundY);
+            ctx.lineTo(i + 5, groundY - 8 + Math.random()*5);
+            ctx.stroke();
+        }
+    }
+
+    function drawSprinklerDetailed(x, y) {
+        // y burada groundY (zemin seviyesi)
+        
+        // Gövde (Zeminin altına doğru - Gömülü kısım)
+        ctx.fillStyle = "#263238";
+        ctx.fillRect(x - 6, y, 12, 20); 
+
+        // Üst boru (Zeminin üstüne doğru)
+        ctx.fillRect(x - 4, y - 20, 8, 20); 
+
+        // Kafa
+        ctx.fillStyle = "#fdd835";
+        ctx.beginPath();
+        ctx.roundRect(x - 10, y - 26, 20, 8, 2); 
+        ctx.fill();
+        ctx.strokeStyle = "#f57f17";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    function drawDistanceMarker() {
+        // Etiketi çemberin üstüne, gökyüzüne doğru koyalım (çünkü üçgen aşağıda)
+        const markerY = groundY - 40; 
+        ctx.beginPath();
+        ctx.moveTo(center1.x, markerY);
+        ctx.lineTo(center2.x, markerY);
+        ctx.strokeStyle = "rgba(255,255,255,0.8)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = "#fff";
+        ctx.beginPath(); ctx.arc(center1.x, markerY, 3, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(center2.x, markerY, 3, 0, Math.PI*2); ctx.fill();
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 14px 'Segoe UI'";
+        ctx.shadowColor="rgba(0,0,0,0.5)"; ctx.shadowBlur=4;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        ctx.fillText("Sabit Mesafe: 20 cm", (center1.x + center2.x)/2, markerY - 5);
+        ctx.shadowBlur=0;
+    }
+
+    function updateAndDrawParticles() {
+        if (currentR1 < targetR1 * scale) createParticles(center1.x, center1.y - 25);
+        if (currentR2 < targetR2 * scale) createParticles(center2.x, center2.y - 25);
+
+        ctx.fillStyle = "rgba(179, 229, 252, 0.6)";
+        for (let i = 0; i < particles.length; i++) {
+            let p = particles[i];
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+            ctx.fill();
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.1; 
+            p.life--;
+            // Zemin seviyesine (groundY) değince yok olsun
+            if (p.life <= 0 || p.y > groundY) {
+                particles.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
+    function createParticles(x, y) {
+        for(let k=0; k<5; k++) {
+            const angle = (Math.PI + Math.random() * Math.PI) ;
+            const speed = Math.random() * 3 + 2;
+            particles.push({
+                x: x, y: y,
+                vx: Math.cos(angle) * (Math.random() * 4 - 2),
+                vy: -Math.abs(Math.sin(angle) * speed),
+                life: 30 + Math.random() * 20,
+                size: Math.random() * 2 + 1
+            });
+        }
+    }
+
+    function drawFullCircle(x, y, radius) {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2); 
+        ctx.strokeStyle = "rgba(2, 119, 189, 0.4)";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = "rgba(129, 212, 250, 0.05)";
+        ctx.fill();
+    }
+
+    function drawTriangleAndAnalysis() {
+        const intersection = getCircleIntersection(center1.x, center1.y, targetR1*scale, center2.x, center2.y, targetR2*scale);
+        
+        if (intersection) {
+            // DEĞİŞİKLİK: Y ekseni aşağı doğru arttığı için, Y değeri BÜYÜK olan nokta ALTTAKİ noktadır.
+            // intersection[0] ve intersection[1] den Y değeri büyük olanı seçiyoruz.
+            const p3 = intersection[0].y > intersection[1].y ? intersection[0] : intersection[1];
+
+            // Üçgenin içi
+            ctx.beginPath();
+            ctx.moveTo(center1.x, center1.y);
+            ctx.lineTo(center2.x, center2.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(255, 235, 59, 0.2)";
+            ctx.fill();
+
+            // Üçgenin kenarları
+            ctx.beginPath();
+            ctx.moveTo(center1.x, center1.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.lineTo(center2.x, center2.y);
+            ctx.strokeStyle = "#d32f2f"; 
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Köşe Noktaları
+            drawPoint(center1.x, center1.y);
+            drawPoint(center2.x, center2.y);
+            drawPoint(p3.x, p3.y); 
+
+            drawLabel(targetR1 + " cm", (center1.x + p3.x)/2, (center1.y + p3.y)/2);
+            drawLabel(targetR2 + " cm", (center2.x + p3.x)/2, (center2.y + p3.y)/2);
+        }
+    }
+
+    function drawPoint(x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI*2);
+        ctx.fillStyle = "#d32f2f";
+        ctx.fill();
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    function drawLabel(text, x, y) {
+        ctx.font = "bold 14px Arial";
+        const metrics = ctx.measureText(text);
+        const textWidth = metrics.width;
+        const boxWidth = textWidth + 20;
+        const boxHeight = 24;
+
+        ctx.beginPath();
+        ctx.roundRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight, 8);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(0,0,0,0.1)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = "#000";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, x, y);
+    }
+
+    function getCircleIntersection(x0, y0, r0, x1, y1, r1) {
+        let dx = x1 - x0;
+        let dy = y1 - y0;
+        let d = Math.sqrt((dy*dy) + (dx*dx));
+        if (d > (r0 + r1) || d < Math.abs(r0 - r1) || d === 0) return false;
+        let a = ((r0*r0) - (r1*r1) + (d*d)) / (2.0 * d) ;
+        let x2 = x0 + (dx * a/d);
+        let y2 = y0 + (dy * a/d);
+        let h = Math.sqrt((r0*r0) - (a*a));
+        let rx = -dy * (h/d);
+        let ry = dx * (h/d);
+        return [{x: x2 + rx, y: y2 + ry}, {x: x2 - rx, y: y2 - ry}];
+    }
+
+    function startSimulation(scenario) {
+        cancelAnimationFrame(animId);
+        resetValues();
+        activeScenario = scenario;
+        animationRunning = true;
+        particles = [];
+
+        let explanation = "";
+        let result = "";
+
+        if (scenario === 1) {
+            targetR1 = 20; targetR2 = 20;
+            explanation = "Fıskiye mesafesi 20 cm.<br>Yarıçaplar da 20 cm.";
+            result = "EŞKENAR ÜÇGEN";
+        } 
+        else if (scenario === 2) {
+            targetR1 = 20; targetR2 = 25;
+            explanation = "Mesafe 20 cm.<br>Yarıçaplar: 20 cm ve 25 cm.";
+            result = "İKİZKENAR ÜÇGEN";
+        } 
+        else if (scenario === 3) {
+            targetR1 = 15; targetR2 = 15;
+            explanation = "Mesafe 20 cm.<br>Yarıçaplar 15 cm.";
+            result = "İKİZKENAR ÜÇGEN";
+        }
+
+        infoPanel.innerHTML = `
+            <strong>Analiz:</strong><br>
+            ${explanation}<br>
+            <label class="result-checkbox-container">
+                <input type="checkbox" onchange="toggleResult(this)">
+                Sonucu Göster
+            </label>
+            <span id="result-text" class="highlight-text">${result}</span>
+        `;
+        animate();
+    }
+
+    function toggleResult(checkbox) {
+        const text = document.getElementById('result-text');
+        if (checkbox.checked) {
+            text.style.display = 'inline-block';
+            text.style.animation = 'popIn 0.3s ease';
+        } else {
+            text.style.display = 'none';
+        }
+    }
+
+    function animate() {
+        let done1 = false, done2 = false;
+        if (currentR1 < targetR1 * scale) currentR1 += 1.5; 
+        else { currentR1 = targetR1 * scale; done1 = true; }
+        if (currentR2 < targetR2 * scale) currentR2 += 1.5;
+        else { currentR2 = targetR2 * scale; done2 = true; }
+        drawScene();
+        if (!done1 || !done2) {
+            animId = requestAnimationFrame(animate);
+        } else {
+            if(animationRunning) {
+                setTimeout(() => { animationRunning = false; drawScene(); }, 500);
+            }
+        }
+    }
+
+    function resetValues() {
+        currentR1 = 0; currentR2 = 0; activeScenario = 0; particles = [];
+    }
+
+    function resetCanvas() {
+        cancelAnimationFrame(animId);
+        resetValues();
+        animationRunning = false;
+        infoPanel.innerHTML = `<span style="font-size: 40px; margin-bottom: 10px;">⛲</span><div>Başlamak için yukarıdaki durumlardan birini seçin.</div>`;
+        drawScene();
+    }
+
+    drawScene();
+
+</script>
+
+</body>
+</html>

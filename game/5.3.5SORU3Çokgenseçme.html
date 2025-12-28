@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çokgen Dedektifi: 2B Görseller</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #e0f2f1;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 { color: #00695c; margin-bottom: 5px; text-align: center; }
+        .subtitle { color: #555; margin-bottom: 30px; text-align: center; }
+
+        /* --- ANA DÜZEN --- */
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            max-width: 1100px;
+            width: 100%;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* --- SOL TARAF: NESNELER (Izgara) --- */
+        .grid-container {
+            flex: 1 1 400px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, border 0.2s;
+            border: 4px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+        }
+
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 12px rgba(0,0,0,0.15); }
+        .card.selected { border-color: #ffca28; background-color: #fff8e1; transform: scale(1.05); }
+        .card.solved-true { border-color: #66bb6a; background-color: #e8f5e9; opacity: 0.8; }
+        .card.solved-false { border-color: #ef5350; background-color: #ffebee; opacity: 0.8; }
+
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-icon svg {
+            width: 100%;
+            height: 100%;
+            /* filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.1));  Gölgeyi kaldırdık (Düz 2B için) */
+        }
+
+        .card-name { font-weight: bold; color: #444; font-size: 16px; }
+
+        /* --- SAĞ TARAF: BİLGİ PANELİ --- */
+        .info-panel {
+            flex: 1 1 350px;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-top: 8px solid #009688;
+            position: sticky;
+            top: 20px;
+        }
+
+        #placeholder-text {
+            text-align: center;
+            color: #999;
+            margin-top: 60px;
+            font-size: 18px;
+        }
+
+        /* Soru Alanı */
+        .question-area {
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .question-icon {
+            width: 100px;
+            height: 100px;
+            margin: 15px auto;
+        }
+        .question-icon svg { width: 100%; height: 100%; }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            color: white;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        
+        .btn-yes { background-color: #66bb6a; }
+        .btn-yes:hover { background-color: #57a65b; }
+        .btn-no { background-color: #ef5350; }
+        .btn-no:hover { background-color: #e53935; }
+
+        /* Analiz Alanı */
+        .analysis-area {
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .shape-preview {
+            width: 160px;
+            height: 160px;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            border-radius: 10px;
+            border: 1px dashed #ddd;
+        }
+        
+        .shape-preview svg {
+            width: 80%;
+            height: 80%;
+            fill: none; /* Analiz kısmında sadece kenar çizgileri */
+            stroke: #009688;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        /* Eğer analizde de dolgulu göstermek istersen aşağıdaki yorumu kaldır */
+        /* .shape-preview svg path, .shape-preview svg polygon, .shape-preview svg rect { fill: inherit; stroke: inherit; } */
+
+
+        .properties {
+            background: #f1f8e9;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            margin-top: 15px;
+            border: 1px solid #c5e1a5;
+        }
+        .prop-item { margin-bottom: 8px; font-size: 16px; display: flex; justify-content: space-between; }
+        
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-polygon { background: #039be5; }
+        .badge-not { background: #757575; }
+
+        .feedback-text {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .reason-text { 
+            color: #555; 
+            font-size: 16px; 
+            line-height: 1.5; 
+            background: #fff3e0;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #ffb74d;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <h1>🔍 Çokgen Dedektifi</h1>
+    <div class="subtitle">Nesnelerin 2B görüntüleri. Hangileri "Çokgen"?</div>
+
+    <div class="main-container">
+        
+        <div class="grid-container">
+            <div class="card" onclick="selectItem(0)">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100">
+                        <polygon points="50,5 5,95 95,95" fill="#ffeb3b" stroke="#fbc02d" stroke-width="2"/>
+                        <circle cx="35" cy="45" r="5" fill="#fdd835"/>
+                        <circle cx="60" cy="65" r="7" fill="#fdd835"/>
+                        <circle cx="30" cy="80" r="4" fill="#fdd835"/>
+                    </svg>
+                </div>
+                <div class="card-name">Peynir</div>
+            </div>
+            <div class="card" onclick="selectItem(1)">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M50,90 C10,60 0,30 25,15 C40,5 50,25 50,25 C50,25 60,5 75,15 C100,30 90,60 50,90 Z" fill="#f44336" stroke="#d32f2f" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="card-name">Kalp</div>
+            </div>
+            <div class="card" onclick="selectItem(2)">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100">
+                        <g transform="translate(5,5) scale(0.9)">
+                           <polygon points="30,0 60,0 75,26 60,52 30,52 15,26" fill="#ffc107" stroke="#ff8f00" stroke-width="2" transform="translate(0,0)"/>
+                           <polygon points="30,0 60,0 75,26 60,52 30,52 15,26" fill="#ffc107" stroke="#ff8f00" stroke-width="2" transform="translate(45,26)"/>
+                           <polygon points="30,0 60,0 75,26 60,52 30,52 15,26" fill="#ffc107" stroke="#ff8f00" stroke-width="2" transform="translate(0,52)"/>
+                           <polygon points="30,0 60,0 75,26 60,52 30,52 15,26" fill="#ffc107" stroke="#ff8f00" stroke-width="2" transform="translate(45,-26)"/>
+                        </g>
+                    </svg>
+                </div>
+                <div class="card-name">Bal Peteği</div>
+            </div>
+            <div class="card" onclick="selectItem(3)">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M50,5 Q90,65 50,95 Q10,65 50,5" fill="#03a9f4" stroke="#0288d1" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="card-name">Su Damlası</div>
+            </div>
+            <div class="card" onclick="selectItem(4)">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100">
+                        <path d="M50,95 L10,20 Q50,0 90,20 Z" fill="#ff9800" stroke="#f57c00" stroke-width="2"/>
+                        <circle cx="50" cy="40" r="5" fill="#d32f2f"/>
+                        <circle cx="35" cy="60" r="4" fill="#d32f2f"/>
+                        <circle cx="65" cy="55" r="5" fill="#d32f2f"/>
+                        <circle cx="50" cy="75" r="4" fill="#d32f2f"/>
+                    </svg>
+                </div>
+                <div class="card-name">Pizza</div>
+            </div>
+            <div class="card" onclick="selectItem(5)">
+                <div class="card-icon">
+                    <svg viewBox="0 0 100 100">
+                        <rect x="20" y="10" width="60" height="80" fill="#3f51b5" stroke="#303f9f" stroke-width="2"/>
+                        <line x1="25" y1="10" x2="25" y2="90" stroke="#fff" stroke-width="1"/>
+                        <line x1="30" y1="25" x2="70" y2="25" stroke="#fff" stroke-width="2"/>
+                        <line x1="30" y1="40" x2="70" y2="40" stroke="#fff" stroke-width="2"/>
+                        <line x1="30" y1="55" x2="70" y2="55" stroke="#fff" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div class="card-name">Kitap</div>
+            </div>
+        </div>
+
+        <div class="info-panel" id="infoPanel">
+            <div id="placeholder-text">
+                👉 Başlamak için soldan bir nesne seçin.
+            </div>
+
+            <div class="question-area" id="questionArea">
+                <h2 id="selectedName" style="color:#00796b;">...</h2>
+                <div class="question-icon" id="selectedIcon"></div>
+                <p style="font-size:18px;">Sence bu şekil bir <strong>ÇOKGEN</strong> midir?</p>
+                <div class="btn-group">
+                    <button class="btn-yes" onclick="checkAnswer(true)">Evet ✅</button>
+                    <button class="btn-no" onclick="checkAnswer(false)">Hayır ❌</button>
+                </div>
+            </div>
+
+            <div class="analysis-area" id="analysisArea">
+                <div class="feedback-text" id="feedbackTitle"></div>
+                <div class="reason-text" id="feedbackReason"></div>
+                
+                <div class="shape-preview" id="shapeSvgContainer">
+                    </div>
+
+                <div class="properties" id="propBox">
+                    <div class="prop-item"><span>Geometrik Adı:</span> <strong id="geomName"></strong></div>
+                    <div class="prop-item" id="sideProp"><span>Kenar Sayısı:</span> <strong id="sideCount"></strong></div>
+                    <div class="prop-item" id="vertProp"><span>Köşe Sayısı:</span> <strong id="vertCount"></strong></div>
+                </div>
+                
+                <button style="background:#546e7a; margin-top:15px; font-size:14px; padding:10px 20px;" onclick="resetPanel()">Başka Seç</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Veri Tabanı (Güncellenmiş 2B SVG'ler ile)
+    const items = [
+        { 
+            id: 0, name: "Peynir Dilimi", isPolygon: true, 
+            geomName: "Üçgen", sides: 3, vertices: 3,
+            reason: "Peynir dilimi, 3 tane düz kenarı olan kapalı bir şekildir. Bu yüzden Üçgen modelidir.",
+            // Karttaki 2B Görsel (Delikli)
+            cardSvg: `<polygon points="50,5 5,95 95,95" fill="#ffeb3b" stroke="#fbc02d" stroke-width="2"/><circle cx="35" cy="45" r="5" fill="#fdd835"/><circle cx="60" cy="65" r="7" fill="#fdd835"/><circle cx="30" cy="80" r="4" fill="#fdd835"/>`,
+            // Analizdeki Geometrik Çizim (Sadece Kenarlar - Dolgu rengi CSS'den miras alınabilir veya burada belirtilebilir, şimdilik sadece stroke)
+            geomSvg: `<polygon points="50,5 5,95 95,95" fill="rgba(255, 235, 59, 0.4)" stroke="#fbc02d" stroke-width="2"/>`
+        },
+        { 
+            id: 1, name: "Kalp", isPolygon: false, 
+            geomName: "Sembol", sides: "-", vertices: "-",
+            reason: "Kalp şeklinin kenarları eğridir (yuvarlaktır). Çokgen olması için kenarların cetvelle çizilmiş gibi düz olması gerekir.",
+            cardSvg: `<path d="M50,90 C10,60 0,30 25,15 C40,5 50,25 50,25 C50,25 60,5 75,15 C100,30 90,60 50,90 Z" fill="#f44336" stroke="#d32f2f" stroke-width="2"/>`,
+            geomSvg: `<path d="M50,90 C10,60 0,30 25,15 C40,5 50,25 50,25 C50,25 60,5 75,15 C100,30 90,60 50,90 Z" fill="rgba(244, 67, 54, 0.4)" stroke="#d32f2f" stroke-width="2"/>`
+        },
+        { 
+            id: 2, name: "Bal Peteği", isPolygon: true, 
+            geomName: "Altıgen", sides: 6, vertices: 6,
+            reason: "Petekler, yan yana gelmiş düzgün altıgenlerden oluşur. 6 düz kenarı vardır.",
+            cardSvg: `<g transform="translate(5,5) scale(0.9)"><polygon points="30,0 60,0 75,26 60,52 30,52 15,26" fill="#ffc107" stroke="#ff8f00" stroke-width="2" transform="translate(0,0)"/><polygon points="30,0 60,0 75,26 60,52 30,52 15,26" fill="#ffc107" stroke="#ff8f00" stroke-width="2" transform="translate(45,26)"/><polygon points="30,0 60,0 75,26 60,52 30,52 15,26" fill="#ffc107" stroke="#ff8f00" stroke-width="2" transform="translate(0,52)"/></g>`,
+            // Analiz için tek bir altıgen
+            geomSvg: `<polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="rgba(255, 193, 7, 0.4)" stroke="#ff8f00" stroke-width="2"/>`
+        },
+        { 
+            id: 3, name: "Su Damlası", isPolygon: false, 
+            geomName: "Damlacık", sides: "-", vertices: "-",
+            reason: "Su damlasının kenarları ovaldir. Çokgenlerin kenarları düz doğru parçaları olmalıdır.",
+            cardSvg: `<path d="M50,5 Q90,65 50,95 Q10,65 50,5" fill="#03a9f4" stroke="#0288d1" stroke-width="2"/>`,
+            geomSvg: `<path d="M50,5 Q90,65 50,95 Q10,65 50,5" fill="rgba(3, 169, 244, 0.4)" stroke="#0288d1" stroke-width="2"/>`
+        },
+        { 
+            id: 4, name: "Pizza Dilimi", isPolygon: false, 
+            geomName: "Daire Dilimi", sides: "-", vertices: "-",
+            reason: "Pizza diliminin iki kenarı düz olsa da, kabuk kısmı yuvarlaktır (yaydır). Bir kenar bile eğri olsa çokgen olamaz!",
+            cardSvg: `<path d="M50,95 L10,20 Q50,0 90,20 Z" fill="#ff9800" stroke="#f57c00" stroke-width="2"/><circle cx="50" cy="40" r="5" fill="#d32f2f"/><circle cx="35" cy="60" r="4" fill="#d32f2f"/><circle cx="65" cy="55" r="5" fill="#d32f2f"/><circle cx="50" cy="75" r="4" fill="#d32f2f"/>`,
+            geomSvg: `<path d="M50,95 L10,20 Q50,0 90,20 Z" fill="rgba(255, 152, 0, 0.4)" stroke="#f57c00" stroke-width="2"/>`
+        },
+        { 
+            id: 5, name: "Matematik Kitabı", isPolygon: true, 
+            geomName: "Dikdörtgen", sides: 4, vertices: 4,
+            reason: "Kitabın ön yüzü, karşılıklı kenarları paralel olan 4 düz kenardan oluşur.",
+            cardSvg: `<rect x="20" y="10" width="60" height="80" fill="#3f51b5" stroke="#303f9f" stroke-width="2"/><line x1="25" y1="10" x2="25" y2="90" stroke="#fff" stroke-width="1"/><line x1="30" y1="25" x2="70" y2="25" stroke="#fff" stroke-width="2"/><line x1="30" y1="40" x2="70" y2="40" stroke="#fff" stroke-width="2"/><line x1="30" y1="55" x2="70" y2="55" stroke="#fff" stroke-width="2"/>`,
+            geomSvg: `<rect x="20" y="10" width="60" height="80" fill="rgba(63, 81, 181, 0.4)" stroke="#303f9f" stroke-width="2"/>`
+        }
+    ];
+
+    let currentItem = null;
+
+    function selectItem(index) {
+        currentItem = items[index];
+        
+        // Kart seçimi görselleştir
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('.card')[index].classList.add('selected');
+
+        // Paneli temizle ve soruyu getir
+        document.getElementById('placeholder-text').style.display = 'none';
+        document.getElementById('analysisArea').style.display = 'none';
+        
+        const qArea = document.getElementById('questionArea');
+        qArea.style.display = 'block';
+        
+        document.getElementById('selectedName').innerText = currentItem.name;
+        
+        // Soru alanındaki ikonu güncelle
+        const displayDiv = document.getElementById('selectedIcon');
+        displayDiv.innerHTML = `<svg viewBox="0 0 100 100">${currentItem.cardSvg}</svg>`;
+    }
+
+    function checkAnswer(userSaysYes) {
+        const isCorrect = (userSaysYes === currentItem.isPolygon);
+        const cardElement = document.querySelectorAll('.card')[currentItem.id];
+
+        // Kart işaretle
+        if (currentItem.isPolygon) {
+            cardElement.classList.add('solved-true');
+            cardElement.classList.remove('solved-false');
+        } else {
+            cardElement.classList.add('solved-false');
+            cardElement.classList.remove('solved-true');
+        }
+
+        // Soru gizle, Analiz göster
+        document.getElementById('questionArea').style.display = 'none';
+        const analysis = document.getElementById('analysisArea');
+        analysis.style.display = 'block';
+
+        // Başlık
+        const fbTitle = document.getElementById('feedbackTitle');
+        if (isCorrect) {
+            fbTitle.innerHTML = "Doğru Bildin! 🎉";
+            fbTitle.style.color = "#2e7d32";
+        } else {
+            fbTitle.innerHTML = "Yanlış Cevap 😔";
+            fbTitle.style.color = "#c62828";
+        }
+
+        // Açıklama
+        document.getElementById('feedbackReason').innerText = currentItem.reason;
+        
+        // Geometrik Çizim (Analiz Alanı için)
+        // Analiz alanında sadece şeklin geometrik özünü göstermek için geomSvg kullanıyoruz,
+        // dolgu rengini de biraz şeffaflaştırıyoruz.
+        document.getElementById('shapeSvgContainer').innerHTML = `<svg viewBox="0 0 100 100">${currentItem.geomSvg}</svg>`;
+        
+        // Özellikler
+        document.getElementById('geomName').innerHTML = `${currentItem.geomName} <span class="badge ${currentItem.isPolygon ? 'badge-polygon' : 'badge-not'}">${currentItem.isPolygon ? 'ÇOKGEN' : 'ÇOKGEN DEĞİL'}</span>`;
+        
+        if (currentItem.isPolygon) {
+            document.getElementById('sideProp').style.display = 'flex';
+            document.getElementById('vertProp').style.display = 'flex';
+            document.getElementById('sideCount').innerText = currentItem.sides;
+            document.getElementById('vertCount').innerText = currentItem.vertices;
+        } else {
+            document.getElementById('sideProp').style.display = 'none';
+            document.getElementById('vertProp').style.display = 'none';
+        }
+    }
+
+    function resetPanel() {
+        document.getElementById('analysisArea').style.display = 'none';
+        document.getElementById('placeholder-text').style.display = 'block';
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        currentItem = null;
+    }
+
+</script>
+
+</body>
+</html>

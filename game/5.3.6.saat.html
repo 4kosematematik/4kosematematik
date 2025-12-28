@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saat ve Üçgen Laboratuvarı</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #2d3436;
+            user-select: none;
+        }
+
+        /* Ana Düzen */
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            max-width: 1100px;
+            width: 100%;
+            overflow: hidden;
+            border: 4px solid #fff;
+            min-height: 600px;
+        }
+
+        /* SOL PANEL: Saat */
+        .clock-panel {
+            flex: 1.5;
+            background: #f1f2f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-right: 2px solid #dfe6e9;
+            position: relative;
+        }
+
+        canvas {
+            background-color: #fff;
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 8px solid #2c3e50;
+        }
+
+        .digital-clock {
+            margin-top: 20px;
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #34495e;
+            font-family: 'Courier New', Courier, monospace;
+            background: #fff;
+            padding: 5px 30px;
+            border-radius: 15px;
+            border: 2px solid #bdc3c7;
+            box-shadow: 0 4px 0 #bdc3c7;
+        }
+
+        /* SAĞ PANEL: Kontroller */
+        .control-panel {
+            flex: 1;
+            padding: 40px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h2 { 
+            color: #2c3e50; 
+            margin: 0 0 10px 0; 
+            font-size: 1.8em; 
+            font-weight: 900;
+        }
+        
+        p.desc { color: #636e72; margin-bottom: 30px; }
+
+        /* Slider */
+        .slider-wrapper {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+        
+        label { font-weight: 800; display: block; margin-bottom: 10px; color: #2d3436; }
+        
+        input[type=range] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #dfe6e9;
+            outline: none;
+            cursor: pointer;
+            accent-color: #e74c3c;
+        }
+
+        /* Checkbox */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            cursor: pointer;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 12px;
+            border: 2px solid #ffeeba;
+            transition: 0.2s;
+        }
+        .checkbox-wrapper:hover { background: #ffeaa7; }
+        .checkbox-wrapper input {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+            accent-color: #f1c40f;
+        }
+        .checkbox-text { font-weight: 800; color: #d35400; font-size: 1.1em; }
+
+        /* Quiz Alanı */
+        .quiz-area {
+            border-top: 2px dashed #dcdde1;
+            padding-top: 25px;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: #fff;
+            border: 2px solid #b2bec3;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            color: #636e72;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background: #f1f2f6;
+            border-color: #636e72;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct { background-color: #00b894; border-color: #00b894; color: white; }
+        .option-btn.wrong { background-color: #ff7675; border-color: #ff7675; color: white; }
+        
+        .feedback {
+            margin-top: 15px;
+            font-weight: 900;
+            text-align: center;
+            height: 30px;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 900px) {
+            .main-container { flex-direction: column; }
+            .clock-panel { border-right: none; border-bottom: 2px solid #eee; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <!-- SOL: SAAT -->
+    <div class="clock-panel">
+        <canvas id="clockCanvas" width="380" height="380"></canvas>
+        <div class="digital-clock" id="digitalDisplay">03:00</div>
+    </div>
+
+    <!-- SAĞ: KONTROLLER -->
+    <div class="control-panel">
+        <h2>🕰️ Saat ve Üçgen</h2>
+        <p class="desc">Akrep (12) ve Yelkovan arasındaki üçgeni incele. Kenarları ve açıları görmek için kutucuğu işaretle.</p>
+
+        <div class="slider-wrapper">
+            <label>Saati Ayarla:</label>
+            <input type="range" id="timeSlider" min="1" max="11" value="3" step="1">
+        </div>
+
+        <label class="checkbox-wrapper">
+            <input type="checkbox" id="showDetailsCheck">
+            <span class="checkbox-text">👁️ Açı ve Kenarları Göster</span>
+        </label>
+
+        <div class="quiz-area">
+            <h3 style="margin-bottom:15px; color:#2d3436;">Bu üçgenin türü nedir?</h3>
+            <div class="options-grid" id="optionsContainer">
+                <!-- Şıklar buraya gelecek -->
+            </div>
+            <div class="feedback" id="feedbackDisplay"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('clockCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('timeSlider');
+    const digitalDisplay = document.getElementById('digitalDisplay');
+    const feedbackDisplay = document.getElementById('feedbackDisplay');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const showDetailsCheck = document.getElementById('showDetailsCheck');
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 160;
+    const handLength = 120; // Yarıçap (Kenar Uzunluğu) - 10 birim kabul edelim.
+    const REF_UNIT = 10; // Ekranda göstereceğimiz birim (120px = 10br)
+
+    let currentHour = 3;
+    let correctAnswer = "";
+
+    // Olay Dinleyicileri
+    slider.addEventListener('input', updateUI);
+    showDetailsCheck.addEventListener('change', () => {
+        drawClock(currentHour); // Sadece çizimi yenile
+    });
+
+    function updateUI() {
+        currentHour = parseInt(slider.value);
+        
+        let displayHour = currentHour < 10 ? "0" + currentHour : currentHour;
+        digitalDisplay.innerText = `${displayHour}:00`;
+
+        drawClock(currentHour);
+        
+        // Soru kısmını yenile
+        feedbackDisplay.innerText = ""; 
+        generateOptions(currentHour);
+    }
+
+    function drawClock(hour) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // --- KADRAN ---
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2*Math.PI);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        
+        // Rakamlar
+        ctx.font = "bold 18px Nunito";
+        ctx.fillStyle = "#b2bec3";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        for(let n=1; n<=12; n++) {
+            let theta = (n * 30 - 90) * Math.PI / 180;
+            let x = centerX + (radius - 25) * Math.cos(theta);
+            let y = centerY + (radius - 25) * Math.sin(theta);
+            ctx.fillText(n, x, y);
+        }
+
+        // --- KOORDİNAT HESABI ---
+        // Akrep (Sabit 12)
+        let fixedAngle = -90 * Math.PI / 180;
+        let x1 = centerX + handLength * Math.cos(fixedAngle);
+        let y1 = centerY + handLength * Math.sin(fixedAngle);
+
+        // Yelkovan (Hareketli)
+        let moveAngleDeg = (hour * 30) - 90;
+        let moveAngle = moveAngleDeg * Math.PI / 180;
+        let x2 = centerX + handLength * Math.cos(moveAngle);
+        let y2 = centerY + handLength * Math.sin(moveAngle);
+
+        // --- ÇİZGİLER ---
+        // Akrep Kolu
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x1, y1);
+        ctx.strokeStyle = "#3498db"; 
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // Yelkovan Kolu
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = "#e74c3c";
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // --- ÜÇGEN VE DETAYLAR ---
+        if (hour !== 6 && hour !== 12) {
+            // Birleşim Çizgisi (Kiriş)
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.setLineDash([8, 6]);
+            ctx.strokeStyle = "#27ae60";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Açı Dilimi (Görsel)
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            let startA = fixedAngle;
+            let endA = moveAngle;
+            let isCounterClockwise = false;
+            if (hour > 6) isCounterClockwise = true; 
+            ctx.arc(centerX, centerY, 40, startA, endA, isCounterClockwise);
+            ctx.fillStyle = "rgba(231, 76, 60, 0.15)";
+            ctx.fill();
+
+            // --- METİN DEĞERLERİ (Checkbox Kontrolü) ---
+            if (showDetailsCheck.checked) {
+                // 1. Tepe Açısı
+                let angleVal = hour * 30;
+                if (angleVal > 180) angleVal = 360 - angleVal;
+                
+                drawLabel(centerX, centerY + 50, angleVal + "°", "#2d3436");
+
+                // 2. Taban Açıları
+                let baseAngle = (180 - angleVal) / 2;
+                // Açıları köşelere yazmak zor olabilir, ortaya yazalım:
+                // "Taban Açıları: X"
+                // Veya köşelere yerleştirelim:
+                drawLabel(x1, y1 - 20, baseAngle + "°", "#3498db");
+                
+                // Diğer köşe için pozisyon ayarı
+                let labelX2 = x2 + (x2 - centerX) * 0.2;
+                let labelY2 = y2 + (y2 - centerY) * 0.2;
+                drawLabel(labelX2, labelY2, baseAngle + "°", "#e74c3c");
+
+                // 3. Kenar Uzunlukları
+                // Kollar 10 birim
+                drawLabel(centerX - 40, centerY - 40, "10 br", "#3498db"); // Sol kol
+                let midX2 = (centerX + x2) / 2;
+                let midY2 = (centerY + y2) / 2;
+                drawLabel(midX2 + 20, midY2, "10 br", "#e74c3c"); // Sağ kol
+
+                // Kiriş Uzunluğu
+                // c = 2 * r * sin(A/2)
+                let chordLen = 2 * REF_UNIT * Math.sin((angleVal * Math.PI / 180) / 2);
+                let midChordX = (x1 + x2) / 2;
+                let midChordY = (y1 + y2) / 2;
+                drawLabel(midChordX, midChordY, chordLen.toFixed(1) + " br", "#27ae60");
+            }
+        }
+        
+        // Merkez Nokta
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 10, 0, 2*Math.PI);
+        ctx.fillStyle = "#2c3e50";
+        ctx.fill();
+    }
+
+    // Metin Kutusu Çizen Yardımcı
+    function drawLabel(x, y, text, color) {
+        ctx.font = "bold 14px Nunito";
+        let w = ctx.measureText(text).width;
+        
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.fillRect(x - w/2 - 4, y - 10, w + 8, 20);
+        
+        ctx.fillStyle = color;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, x, y);
+    }
+
+    function generateOptions(hour) {
+        optionsContainer.innerHTML = "";
+
+        if (hour === 6) {
+            feedbackDisplay.innerText = "Doğrusal (Üçgen Oluşmaz)";
+            return;
+        }
+
+        let rawAngle = hour * 30;
+        let angle = rawAngle > 180 ? 360 - rawAngle : rawAngle;
+
+        // Doğru Cevap Mantığı
+        // Kollar eşit olduğu için ya İkizkenar ya Eşkenar olabilir. Çeşitkenar olamaz.
+        if (angle === 60) {
+            correctAnswer = "Eşkenar Üçgen"; // (60-60-60)
+        } else if (angle === 90) {
+            correctAnswer = "İkizkenar Dik Üçgen";
+        } else if (angle > 90) {
+            correctAnswer = "İkizkenar Geniş Açılı Üçgen";
+        } else {
+            correctAnswer = "İkizkenar Dar Açılı Üçgen";
+        }
+
+        const allOptions = [
+            "İkizkenar Dar Açılı Üçgen",
+            "İkizkenar Dik Üçgen",
+            "İkizkenar Geniş Açılı Üçgen",
+            "Eşkenar Üçgen",
+            "Çeşitkenar Dar Açılı Üçgen", // Çeldirici
+            "Çeşitkenar Geniş Açılı Üçgen" // Çeldirici
+        ];
+
+        let distractors = allOptions.filter(opt => opt !== correctAnswer);
+        shuffleArray(distractors);
+        let selectedOpts = [correctAnswer, ...distractors.slice(0, 3)];
+        shuffleArray(selectedOpts);
+
+        selectedOpts.forEach(optText => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = optText;
+            btn.onclick = () => checkAnswer(btn, optText === correctAnswer);
+            optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(btn, isCorrect) {
+        const allBtns = document.querySelectorAll('.option-btn');
+        allBtns.forEach(b => b.disabled = true);
+
+        if (isCorrect) {
+            btn.classList.add('correct');
+            feedbackDisplay.innerHTML = "🎉 Harika! Doğru Cevap.";
+            feedbackDisplay.style.color = "#00b894";
+        } else {
+            btn.classList.add('wrong');
+            feedbackDisplay.innerHTML = "⚠️ Yanlış. Doğru cevap: " + correctAnswer;
+            feedbackDisplay.style.color = "#d63031";
+            
+            allBtns.forEach(b => {
+                if (b.innerText === correctAnswer) b.classList.add('correct');
+            });
+        }
+    }
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Başlangıç
+    updateUI();
+
+</script>
+
+</body>
+</html>

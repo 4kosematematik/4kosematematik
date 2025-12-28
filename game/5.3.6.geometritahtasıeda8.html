@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometri Tahtası</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #fdf6e3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: #5d4037;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1300px;
+            width: 100%;
+            height: 95vh;
+            box-sizing: border-box;
+        }
+
+        /* --- SOL TARA: GEOBOARD --- */
+        .board-area {
+            flex: 1.5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .wood-board {
+            position: relative;
+            padding: 20px;
+            background: #d7ccc8;
+            /* Ahşap Doku Efekti */
+            background: repeating-linear-gradient(
+                45deg,
+                #deb887,
+                #deb887 10px,
+                #d2a679 10px,
+                #d2a679 20px
+            );
+            border: 12px solid #8d6e63;
+            border-radius: 20px;
+            box-shadow: 
+                inset 0 0 50px rgba(0,0,0,0.3),
+                10px 20px 30px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            display: block;
+        }
+
+        /* --- SAĞ TARAF: SORULAR VE KONTROLLER --- */
+        .sidebar {
+            flex: 1;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #8d6e63;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .instruction {
+            font-size: 0.95rem;
+            color: #5d4037;
+            background-color: #fff8e1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ffe082;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            text-align: center;
+        }
+        
+        .instruction strong {
+            color: #e65100;
+        }
+
+        .question-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+        }
+
+        .question-list::-webkit-scrollbar { width: 8px; }
+        .question-list::-webkit-scrollbar-track { background: #f1f1f1; }
+        .question-list::-webkit-scrollbar-thumb { background: #8d6e63; border-radius: 4px; }
+
+        .question-item {
+            background: #fff3e0;
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 5px solid #ff9800;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .q-text {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #e65100;
+        }
+
+        .q-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .btn-show-answer {
+            background: #8d6e63;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            align-self: flex-start;
+            transition: background 0.2s;
+        }
+        .btn-show-answer:hover { background: #6d4c41; }
+
+        /* CEVAP KUTULARI */
+        .answer-box {
+            display: none;
+            margin-top: 5px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            animation: fadeIn 0.5s;
+        }
+
+        .answer-box.success {
+            background: #e8f5e9;
+            border-left: 4px solid #43a047;
+            color: #2e7d32;
+        }
+
+        .answer-box.error {
+            background: #ffebee;
+            border-left: 4px solid #d32f2f;
+            color: #b71c1c;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls-bottom {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            border-top: 2px solid #eee;
+            padding-top: 10px;
+        }
+
+        .btn-action {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            font-family: inherit;
+            transition: transform 0.1s;
+        }
+        .btn-action:active { transform: scale(0.95); }
+        
+        .btn-clear { background: #ef5350; }
+        .btn-clear:hover { background: #c62828; }
+
+        .btn-undo { background: #ffa726; } 
+        .btn-undo:hover { background: #f57c00; }
+
+        /* Lastik Renk Paleti */
+        .color-palette {
+            display: flex;
+            gap: 8px;
+        }
+        .swatch {
+            width: 25px; height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .swatch.active { border-color: #333; transform: scale(1.15); }
+
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    
+    <div class="board-area">
+        <div class="wood-board">
+            <canvas id="geoCanvas" width="600" height="600"></canvas>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>Geometri Tahtası</h2>
+        <div class="instruction">
+            <strong>Yönerge:</strong><br>
+            Şekil oluşturmak için lastikleri bir çividen diğerine sürükleyin veya esnetin.
+        </div>
+        
+        <ul class="question-list" id="questionList">
+            </ul>
+
+        <div class="controls-bottom">
+            <div class="color-palette">
+                <div class="swatch active" style="background:#ef5350;" onclick="setColor('#ef5350', this)"></div>
+                <div class="swatch" style="background:#ffa726;" onclick="setColor('#ffa726', this)"></div>
+                <div class="swatch" style="background:#ffee58;" onclick="setColor('#ffee58', this)"></div>
+                <div class="swatch" style="background:#66bb6a;" onclick="setColor('#66bb6a', this)"></div>
+                <div class="swatch" style="background:#42a5f5;" onclick="setColor('#42a5f5', this)"></div>
+            </div>
+            <button class="btn-action btn-undo" onclick="undoLast()">Geri Al</button>
+            <button class="btn-action btn-clear" onclick="resetBoard()">Temizle</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('geoCanvas');
+    const ctx = canvas.getContext('2d');
+    const qListEl = document.getElementById('questionList');
+
+    // --- AYARLAR ---
+    const GRID_SIZE = 6;
+    const PADDING = 50;
+    const WIDTH = canvas.width;
+    const SPACING = (WIDTH - (PADDING * 2)) / (GRID_SIZE - 1);
+    
+    let pegs = [];  
+    let bands = []; 
+    let currentColor = '#ef5350';
+
+    // --- NOKTA HARİTASI ---
+    const labelMap = {
+        '0-1': 'A', '0-3': 'B',
+        '1-4': 'C',
+        '3-0': 'D', '3-2': 'E', '3-4': 'F',
+        '5-1': 'G', '5-4': 'H'
+    };
+
+    // --- SORULAR (Aynen Korundu) ---
+    const questions = [
+        { 
+            text: "ABC üçgeni oluşturulur mu?", 
+            answer: "Evet, noktalar doğrusal olmadığı için üçgen oluşur." 
+        },
+        { 
+            text: "DEF üçgeni oluşturulur mu?", 
+            answer: "Hayır. D, E ve F noktaları aynı doğru üzerindedir (doğrusaldır)." 
+        },
+        { 
+            text: "ABFE beşgeni oluşur mu?", 
+            answer: "Hayır, bu şekli birleştirdiğimizde dörtgen oluşur." 
+        },
+        { 
+            text: "CDEF dörtgeni oluşturulabilir mi?", 
+            answer: "Hayır dörtgen oluşmadı, üçgen oluştu. Çünkü D, E, F aynı doğru üzerinde." 
+        },
+        { 
+            text: "ABCFH beşgeni oluşturulur mu?", 
+            answer: "Hayır beşgen oluşmadı çünkü C, F, H hepsi aynı hizada. Kenar sayısına baktığımızda dörtgen oluşur." 
+        },
+        { 
+            text: "DEFHG bir beşgen midir? Deneyiniz.", 
+            answer: "Hayır, çünkü D-E-F kenarı düz bir doğrudur. Bu yüzden köşe sayısı azalır." 
+        },
+        { 
+            text: "ABCE çokgeni oluşur mu?", 
+            answer: "Evet, oluşur." 
+        },
+        { 
+            text: "ABCFHGD kaç kenarlıdır?", 
+            answer: "Cevap: 6 kenarlıdır." 
+        },
+        { 
+            text: "ABHGDE kaç kenarlıdır?", 
+            answer: "Cevap: 6 kenarlıdır." 
+        },
+        { 
+            text: "DECFG kaç kenarlıdır?", 
+            answer: "Cevap: 5 kenarlıdır." 
+        }
+    ];
+
+    // --- ETKİLEŞİM DEĞİŞKENLERİ ---
+    let isDragging = false;
+    let dragType = null; 
+    let activeBandIndex = -1;
+    let insertIndex = -1;
+    let dragPos = { x: 0, y: 0 };
+    let startPegId = -1;
+
+    // --- INIT ---
+    function init() {
+        createPegs();
+        renderQuestions();
+        draw();
+    }
+
+    function createPegs() {
+        pegs = [];
+        let idCounter = 0;
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                const key = `${r}-${c}`;
+                pegs.push({
+                    id: idCounter++,
+                    r: r,
+                    c: c,
+                    x: PADDING + c * SPACING,
+                    y: PADDING + r * SPACING,
+                    label: labelMap[key] || null
+                });
+            }
+        }
+    }
+
+    function renderQuestions() {
+        qListEl.innerHTML = '';
+        questions.forEach((q, index) => {
+            const isNegative = q.answer.trim().toLowerCase().startsWith('hayır');
+            const boxClass = isNegative ? 'answer-box error' : 'answer-box success';
+
+            const li = document.createElement('li');
+            li.className = 'question-item';
+            li.innerHTML = `
+                <div class="q-text">${q.text}</div>
+                <div class="q-controls">
+                    <button class="btn-show-answer" onclick="toggleAnswer(${index}, this)">Cevabı Gör</button>
+                    <div id="ans-${index}" class="${boxClass}">${q.answer}</div>
+                </div>
+            `;
+            qListEl.appendChild(li);
+        });
+    }
+
+    window.toggleAnswer = function(index, btn) {
+        const ansBox = document.getElementById(`ans-${index}`);
+        if (ansBox.style.display === 'block') {
+            ansBox.style.display = 'none';
+            btn.innerText = 'Cevabı Gör';
+        } else {
+            ansBox.style.display = 'block';
+            btn.innerText = 'Cevabı Gizle';
+        }
+    };
+
+    // --- DRAW LOOP ---
+    function draw() {
+        ctx.clearRect(0, 0, WIDTH, WIDTH);
+
+        // Çiviler (Orijinal v3 tasarımı)
+        pegs.forEach(p => {
+            // Gölge
+            ctx.beginPath();
+            ctx.arc(p.x+3, p.y+3, 6, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.fill();
+            
+            // Çivi Gövdesi
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+            let grad = ctx.createLinearGradient(p.x-6, p.y-6, p.x+6, p.y+6);
+            grad.addColorStop(0, '#ddd');
+            grad.addColorStop(1, '#777');
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            if (p.label) {
+                ctx.font = "bold 18px Fredoka";
+                ctx.fillStyle = "#3e2723";
+                ctx.textAlign = "center";
+                ctx.fillText(p.label, p.x, p.y - 12);
+            }
+        });
+
+        // Lastikler (DÜZ ÇİZGİLER AMA 3D GÖRÜNÜM)
+        bands.forEach((band, bIdx) => {
+            if (band.points.length < 1) return;
+            
+            let pts = band.points.map(id => pegs[id]);
+            let drawPts = [...pts];
+            
+            // Bu lastik şu an düzenleniyor mu?
+            let isThisBandActive = (isDragging && activeBandIndex === bIdx);
+
+            if (isThisBandActive) {
+                if (dragType === 'edit') {
+                    drawPts = [];
+                    for(let i=0; i<pts.length; i++) {
+                         let p1 = pts[i];
+                         drawPts.push(p1);
+                         if ((i+1) === insertIndex) {
+                             drawPts.push({x: dragPos.x, y: dragPos.y});
+                         } 
+                         if (insertIndex === pts.length && i === pts.length - 1) {
+                             drawPts.push({x: dragPos.x, y: dragPos.y});
+                         }
+                    }
+                } else if (dragType === 'new') {
+                    drawPts.push({x: dragPos.x, y: dragPos.y});
+                }
+            }
+
+            if (drawPts.length < 2) return;
+
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+
+            // Kavis/Gevşeme mantığını kaldırdık, isTaut parametresini kullanmıyoruz artık
+            // ancak fonksiyon imzasını bozmamak için false/true geçmeye devam edebiliriz
+            
+            const isClosed = !isThisBandActive || dragType === 'edit';
+
+            // 1. Gölge (Ahşap üzerine düşen) - Artık düz çizgi
+            ctx.beginPath();
+            ctx.lineWidth = 9;
+            ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+            drawBandPath(ctx, drawPts, isClosed); 
+            ctx.stroke();
+
+            // 2. Ana Renk
+            ctx.beginPath();
+            ctx.lineWidth = 7;
+            ctx.strokeStyle = band.color;
+            drawBandPath(ctx, drawPts, isClosed);
+            ctx.stroke();
+
+            // 3. Işık Yansıması (Plastik parlaklık)
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            drawBandPath(ctx, drawPts, isClosed);
+            ctx.stroke();
+        });
+    }
+
+    // YENİ DÜZ ÇİZİM FONKSİYONU
+    // Artık 'sag' (sarkma) hesaplaması yok. Sadece lineTo.
+    function drawBandPath(ctx, points, isClosed) {
+        ctx.moveTo(points[0].x, points[0].y);
+        
+        let loopLimit = points.length; 
+        if (!isClosed && dragType === 'new') loopLimit = points.length - 1;
+
+        for (let i = 0; i < loopLimit; i++) {
+            if (i === points.length - 1 && !isClosed) break; 
+
+            let p2 = points[(i + 1) % points.length];
+
+            // Daima düz çizgi
+            ctx.lineTo(p2.x, p2.y);
+        }
+    }
+
+    // --- MOUSE & TOUCH EVENTLERİ ---
+    function getClosestPeg(x, y) {
+        let minDist = 30; 
+        let closest = null;
+        pegs.forEach(p => {
+            let d = Math.hypot(p.x - x, p.y - y);
+            if (d < minDist) {
+                minDist = d;
+                closest = p;
+            }
+        });
+        return closest;
+    }
+
+    function isNearLine(x, y, p1, p2) {
+        const A = x - p1.x; const B = y - p1.y;
+        const C = p2.x - p1.x; const D = p2.y - p1.y;
+        const dot = A * C + B * D;
+        const lenSq = C * C + D * D;
+        let param = -1;
+        if (lenSq !== 0) param = dot / lenSq;
+        let xx, yy;
+        if (param < 0) { xx = p1.x; yy = p1.y; }
+        else if (param > 1) { xx = p2.x; yy = p2.y; }
+        else { xx = p1.x + param * C; yy = p1.y + param * D; }
+        const dx = x - xx; const dy = y - yy;
+        return Math.hypot(dx, dy) < 15;
+    }
+
+    canvas.addEventListener('mousedown', e => {
+        const r = canvas.getBoundingClientRect();
+        handleStart(e.clientX - r.left, e.clientY - r.top);
+    });
+    window.addEventListener('mousemove', e => {
+        if(!isDragging) return;
+        const r = canvas.getBoundingClientRect();
+        handleMove(e.clientX - r.left, e.clientY - r.top);
+    });
+    window.addEventListener('mouseup', handleEnd);
+
+    canvas.addEventListener('touchstart', e => {
+        e.preventDefault();
+        const r = canvas.getBoundingClientRect();
+        handleStart(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+    }, {passive:false});
+    window.addEventListener('touchmove', e => {
+        if(!isDragging) return;
+        e.preventDefault();
+        const r = canvas.getBoundingClientRect();
+        handleMove(e.touches[0].clientX - r.left, e.touches[0].clientY - r.top);
+    }, {passive:false});
+    window.addEventListener('touchend', handleEnd);
+
+    function handleStart(x, y) {
+        dragPos = { x, y };
+        let hitPeg = getClosestPeg(x, y);
+
+        if (hitPeg) {
+            isDragging = true;
+            dragType = 'new';
+            startPegId = hitPeg.id;
+            bands.push({ points: [hitPeg.id], color: currentColor });
+            activeBandIndex = bands.length - 1;
+        } else {
+            for (let i = bands.length - 1; i >= 0; i--) {
+                let pts = bands[i].points;
+                if(pts.length < 2) continue;
+                for (let j = 0; j < pts.length; j++) {
+                    let p1 = pegs[pts[j]];
+                    let p2 = pegs[pts[(j + 1) % pts.length]];
+                    if (isNearLine(x, y, p1, p2)) {
+                        isDragging = true;
+                        dragType = 'edit';
+                        activeBandIndex = i;
+                        insertIndex = j + 1;
+                        return;
+                    }
+                }
+            }
+        }
+        draw();
+    }
+
+    function handleMove(x, y) {
+        dragPos.x = x;
+        dragPos.y = y;
+        draw();
+    }
+
+    function handleEnd() {
+        if (!isDragging) return;
+        let hitPeg = getClosestPeg(dragPos.x, dragPos.y);
+
+        if (dragType === 'new') {
+            if (hitPeg && hitPeg.id !== startPegId) {
+                bands[activeBandIndex].points.push(hitPeg.id);
+            } else {
+                bands.pop();
+            }
+        } 
+        else if (dragType === 'edit') {
+            if (hitPeg) {
+                bands[activeBandIndex].points.splice(insertIndex, 0, hitPeg.id);
+            }
+        }
+        isDragging = false;
+        activeBandIndex = -1;
+        draw();
+    }
+
+    function undoLast() {
+        if (bands.length > 0) {
+            bands.pop(); 
+            draw();
+        }
+    }
+
+    function setColor(hex, el) {
+        currentColor = hex;
+        document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function resetBoard() {
+        bands = [];
+        document.querySelectorAll('.answer-box').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.btn-show-answer').forEach(el => el.innerText = 'Cevabı Gör');
+        draw();
+    }
+
+    init();
+</script>
+
+</body>
+</html>

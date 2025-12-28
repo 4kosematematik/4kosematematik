@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometrik Şekiller Etkinliği</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fdfbf7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 { color: #333; margin-bottom: 10px; }
+        p { color: #666; margin-bottom: 20px; max-width: 800px; text-align: center; }
+
+        .game-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-size: 0.9em;
+            border: 1px solid #555;
+        }
+
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* SVG İkonları için stiller */
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            border-radius: 50%;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        .blue-shape { background-color: #0056b3; }
+        .yellow-shape { background-color: #ffc107; }
+        .red-shape { background-color: #dc3545; }
+        .green-shape { background-color: #28a745; }
+        .purple-shape { background-color: #6f42c1; }
+
+        svg {
+            fill: none;
+            stroke: white;
+            stroke-width: 2.5;
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Form Elemanları */
+        select, input[type="number"] {
+            width: 90%;
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+        /* Geri Bildirim Renkleri */
+        .correct {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724;
+        }
+        .incorrect {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24;
+        }
+
+        /* Butonlar */
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        button:active { transform: scale(0.95); }
+
+        .btn-check { background-color: #28a745; }
+        .btn-check:hover { background-color: #218838; }
+
+        .btn-reset { background-color: #6c757d; }
+        .btn-reset:hover { background-color: #5a6268; }
+
+        .btn-show { background-color: #17a2b8; }
+        .btn-show:hover { background-color: #138496; }
+
+        #scoreBoard {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🔷 Geometrik Şekilleri Tanıyalım 🔶</h1>
+    <p>Aşağıdaki renkli taşların üzerindeki şekilleri inceleyin ve tabloyu uygun bilgilerle doldurun.</p>
+
+    <div class="game-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Şekiller</th>
+                    <th>İsimlendirilmesi</th>
+                    <th>Kenar Sayısı</th>
+                    <th>Köşe Sayısı</th>
+                    <th>İç Açı Sayısı</th>
+                    <th>Dış Açı Sayısı</th>
+                </tr>
+            </thead>
+            <tbody id="quizBody">
+                <tr data-shape="pentagon">
+                    <td>
+                        <div class="icon-box blue-shape">
+                            <svg viewBox="0 0 24 24">
+                                <polygon points="12,2 21.5,9 18,21 6,21 2.5,9" />
+                            </svg>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="input-name">
+                            <option value="">Seçiniz...</option>
+                            <option value="Üçgen">Üçgen</option>
+                            <option value="Dörtgen">Dörtgen</option>
+                            <option value="Beşgen">Beşgen</option>
+                            <option value="Çember">Çember</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="input-side"></td>
+                    <td><input type="number" class="input-vertex"></td>
+                    <td><input type="number" class="input-inner"></td>
+                    <td><input type="number" class="input-outer"></td>
+                </tr>
+
+                <tr data-shape="trapezoid">
+                    <td>
+                        <div class="icon-box yellow-shape">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M4 18h16l-4-12H8z" />
+                            </svg>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="input-name">
+                            <option value="">Seçiniz...</option>
+                            <option value="Üçgen">Üçgen</option>
+                            <option value="Dörtgen">Dörtgen</option>
+                            <option value="Beşgen">Beşgen</option>
+                            <option value="Çember">Çember</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="input-side"></td>
+                    <td><input type="number" class="input-vertex"></td>
+                    <td><input type="number" class="input-inner"></td>
+                    <td><input type="number" class="input-outer"></td>
+                </tr>
+
+                <tr data-shape="circle">
+                    <td>
+                        <div class="icon-box red-shape">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="9" />
+                            </svg>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="input-name">
+                            <option value="">Seçiniz...</option>
+                            <option value="Üçgen">Üçgen</option>
+                            <option value="Dörtgen">Dörtgen</option>
+                            <option value="Beşgen">Beşgen</option>
+                            <option value="Çember">Çember</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="input-side"></td>
+                    <td><input type="number" class="input-vertex"></td>
+                    <td><input type="number" class="input-inner"></td>
+                    <td><input type="number" class="input-outer"></td>
+                </tr>
+
+                <tr data-shape="triangle">
+                    <td>
+                        <div class="icon-box green-shape">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 3l10 18H2z" />
+                            </svg>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="input-name">
+                            <option value="">Seçiniz...</option>
+                            <option value="Üçgen">Üçgen</option>
+                            <option value="Dörtgen">Dörtgen</option>
+                            <option value="Beşgen">Beşgen</option>
+                            <option value="Çember">Çember</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="input-side"></td>
+                    <td><input type="number" class="input-vertex"></td>
+                    <td><input type="number" class="input-inner"></td>
+                    <td><input type="number" class="input-outer"></td>
+                </tr>
+
+                <tr data-shape="square">
+                    <td>
+                        <div class="icon-box purple-shape">
+                            <svg viewBox="0 0 24 24" style="transform: rotate(45deg);">
+                                <rect x="5" y="5" width="14" height="14" />
+                            </svg>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="input-name">
+                            <option value="">Seçiniz...</option>
+                            <option value="Üçgen">Üçgen</option>
+                            <option value="Dörtgen">Dörtgen</option>
+                            <option value="Beşgen">Beşgen</option>
+                            <option value="Çember">Çember</option>
+                        </select>
+                    </td>
+                    <td><input type="number" class="input-side"></td>
+                    <td><input type="number" class="input-vertex"></td>
+                    <td><input type="number" class="input-inner"></td>
+                    <td><input type="number" class="input-outer"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="btn-container">
+            <button class="btn-check" onclick="checkAnswers()">Kontrol Et</button>
+            <button class="btn-show" onclick="showAnswers()">Cevapları Göster</button>
+            <button class="btn-reset" onclick="resetForm()">Temizle</button>
+        </div>
+
+        <div id="scoreBoard"></div>
+    </div>
+
+<script>
+    // DOĞRU CEVAPLAR (Düzgün mü özelliği kaldırıldı)
+    const answers = {
+        pentagon: {
+            name: "Beşgen",
+            side: 5,
+            vertex: 5,
+            inner: 5,
+            outer: 5
+        },
+        trapezoid: {
+            name: "Dörtgen",
+            side: 4,
+            vertex: 4,
+            inner: 4,
+            outer: 4
+        },
+        circle: {
+            name: "Çember",
+            side: 0,
+            vertex: 0,
+            inner: 0,
+            outer: 0
+        },
+        triangle: {
+            name: "Üçgen",
+            side: 3,
+            vertex: 3,
+            inner: 3,
+            outer: 3
+        },
+        square: {
+            name: "Dörtgen",
+            side: 4,
+            vertex: 4,
+            inner: 4,
+            outer: 4
+        }
+    };
+
+    function checkAnswers() {
+        let correctCount = 0;
+        let totalCount = 0;
+        const rows = document.querySelectorAll('#quizBody tr');
+
+        rows.forEach(row => {
+            const shapeKey = row.getAttribute('data-shape');
+            const data = answers[shapeKey];
+
+            // Inputs
+            const iName = row.querySelector('.input-name');
+            const iSide = row.querySelector('.input-side');
+            const iVertex = row.querySelector('.input-vertex');
+            const iInner = row.querySelector('.input-inner');
+            const iOuter = row.querySelector('.input-outer');
+
+            // Doğrulama Fonksiyonu
+            const validate = (input, correctVal) => {
+                totalCount++;
+                // Sayısal değerleri stringe çevirip karşılaştır, trim yap
+                if (input.value.toString().trim() === correctVal.toString()) {
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                    correctCount++;
+                } else {
+                    input.classList.add('incorrect');
+                    input.classList.remove('correct');
+                }
+            };
+
+            validate(iName, data.name);
+            validate(iSide, data.side);
+            validate(iVertex, data.vertex);
+            validate(iInner, data.inner);
+            validate(iOuter, data.outer);
+        });
+
+        const scoreDiv = document.getElementById('scoreBoard');
+        const score = Math.round((correctCount / totalCount) * 100);
+        scoreDiv.style.display = 'block';
+        scoreDiv.innerHTML = `Puanınız: ${score} / 100 <br> (${correctCount} doğru, ${totalCount - correctCount} yanlış)`;
+        
+        if(score === 100) {
+            scoreDiv.style.color = "green";
+            scoreDiv.innerHTML += " <br>🎉 Harika İş Çıkardın! 🎉";
+        } else {
+            scoreDiv.style.color = "#d35400";
+        }
+    }
+
+    function showAnswers() {
+        const rows = document.querySelectorAll('#quizBody tr');
+        rows.forEach(row => {
+            const shapeKey = row.getAttribute('data-shape');
+            const data = answers[shapeKey];
+
+            row.querySelector('.input-name').value = data.name;
+            row.querySelector('.input-side').value = data.side;
+            row.querySelector('.input-vertex').value = data.vertex;
+            row.querySelector('.input-inner').value = data.inner;
+            row.querySelector('.input-outer').value = data.outer;
+
+            // Renkleri sıfırla
+            row.querySelectorAll('input, select').forEach(el => {
+                el.classList.remove('correct', 'incorrect');
+                el.classList.add('correct'); // Hepsi doğru olduğu için yeşil yap
+            });
+        });
+        document.getElementById('scoreBoard').style.display = 'none';
+    }
+
+    function resetForm() {
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.value = "";
+            input.classList.remove('correct', 'incorrect');
+        });
+        document.getElementById('scoreBoard').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

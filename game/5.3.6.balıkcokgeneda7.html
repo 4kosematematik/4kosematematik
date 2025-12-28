@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometrik Balık: Final</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2c3e50;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* SOL PANEL: OYUN ALANI */
+        .game-area {
+            flex: 4;
+            background-color: #ecf0f1; /* Hafif gri zemin */
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-right: 5px solid #34495e;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* SAĞ PANEL: KONTROLLER */
+        .sidebar {
+            flex: 1;
+            min-width: 350px;
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        h2 {
+            margin: 0 0 10px 0;
+            color: #f1c40f;
+            text-align: center;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #455a64;
+            padding-bottom: 10px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .panel-box {
+            background: #34495e;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #5d6d7e;
+        }
+
+        .status-text {
+            font-size: 1.1rem;
+            text-align: center;
+            font-weight: bold;
+            min-height: 40px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #2c3e50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #7f8c8d;
+            color: #ecf0f1;
+        }
+        .status-correct { background-color: #27ae60; border: 1px solid #2ecc71; color: white; }
+        .status-wrong { background-color: #c0392b; border: 1px solid #e74c3c; color: white; }
+        .status-info { color: #ecf0f1; border: 1px dashed #7f8c8d; }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+            color: #bdc3c7;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 2px solid #95a5a6;
+            background: #ecf0f1;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+        select:focus { outline: none; border-color: #f1c40f; }
+        select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-check {
+            width: 100%;
+            padding: 15px;
+            background-color: #7f8c8d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #1e8449;
+            text-transform: uppercase;
+        }
+        .btn-check.active { background-color: #27ae60; box-shadow: 0 4px 0 #1e8449; }
+        .btn-check.active:hover { background-color: #2ecc71; }
+        .btn-check:disabled { background-color: #7f8c8d; box-shadow: none; cursor: not-allowed; opacity: 0.7; }
+
+        .toggles {
+            margin-top: auto; 
+            background: #34495e;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #5d6d7e;
+        }
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        .toggle-item input { width: 22px; height: 22px; accent-color: #e67e22; cursor: pointer; }
+
+        #finalMessage {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0, 0, 0, 0.9);
+            color: #f1c40f;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 100;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 4px solid #f1c40f;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+        #finalMessage.show { transform: translate(-50%, -50%) scale(1); }
+
+        .btn-reset-game {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .btn-reset-game:hover { background-color: #c0392b; }
+    </style>
+</head>
+<body>
+
+    <div class="game-area" id="gameArea">
+        <canvas id="canvas"></canvas>
+        <div id="finalMessage">
+            <h1 style="margin:0; font-size:3rem;">TEBRİKLER! 🏆</h1>
+            <p style="font-size:1.5rem; color:white;">Bütün şekilleri doğru bildin!</p>
+            <button class="btn-reset-game" onclick="initGame()">Tekrar Oyna</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h2>🧩 ÜÇGEN AVCISI</h2>
+
+        <div class="panel-box">
+            <div style="text-align:center; color:#f39c12; font-weight:bold; margin-bottom:10px;">SEÇİLİ PARÇA</div>
+            
+            <label>Açılarına Göre:</label>
+            <select id="angleSelect" onchange="enableCheckBtn()" disabled>
+                <option value="">Seçiniz...</option>
+                <option value="dar">Dar Açılı</option>
+                <option value="dik">Dik Açılı</option>
+                <option value="genis">Geniş Açılı</option>
+            </select>
+
+            <label>Kenarlarına Göre:</label>
+            <select id="sideSelect" onchange="enableCheckBtn()" disabled>
+                <option value="">Seçiniz...</option>
+                <option value="cesit">Çeşitkenar</option>
+                <option value="ikiz">İkizkenar</option>
+                <option value="es">Eşkenar</option>
+            </select>
+
+            <button class="btn-check" id="btnCheck" onclick="checkAnswer()" disabled>KONTROL ET</button>
+        </div>
+
+        <div id="statusBox" class="status-text status-info">
+            Şekil üzerindeki gri bir alana tıkla.
+        </div>
+
+        <div class="toggles">
+            <label class="toggle-item"><input type="checkbox" id="showAngles" onchange="draw()"> 📐 Açıları Göster</label>
+            <label class="toggle-item"><input type="checkbox" id="showSides" onchange="draw()"> 📏 Kenarları Göster</label>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const gameArea = document.getElementById('gameArea');
+    
+    const angleSelect = document.getElementById('angleSelect');
+    const sideSelect = document.getElementById('sideSelect');
+    const btnCheck = document.getElementById('btnCheck');
+    const statusBox = document.getElementById('statusBox');
+    const showAngles = document.getElementById('showAngles');
+    const showSides = document.getElementById('showSides');
+    const finalMessage = document.getElementById('finalMessage');
+
+    let SCALE = 6; 
+    let shapes = [];
+    let selectedIndex = -1;
+
+    function init() {
+        canvas.width = gameArea.offsetWidth;
+        canvas.height = gameArea.offsetHeight;
+        
+        // DEĞİŞİKLİK 1: Ölçek küçültüldü (/65 yerine /85)
+        SCALE = Math.min(canvas.width, canvas.height) / 85; 
+        
+        createShapes();
+        draw();
+    }
+
+    window.addEventListener('resize', init);
+
+    function createShapes() {
+        // Balık sola kaydırılmış durumda (-200)
+        const cx = (canvas.width / 2) - 200; 
+        
+        // DEĞİŞİKLİK 2: Balık hafif aşağı indirildi (+60)
+        const cy = (canvas.height / 2) + 60;
+
+        shapes = [
+            // 1. GÖVDE (EŞKENAR ÜÇGEN) - ORTADA
+            {
+                id: 1, name: "Gövde",
+                // P1(Üst), P2(Alt), P3(Sağ Uç)
+                basePoints: [{x:0, y:-17.5}, {x:0, y:17.5}, {x:30.3, y:0}],
+                targetPos: {x: cx, y: cy},
+                
+                ansAngle: 'dar', ansSide: 'es',
+                color: '#3498db',
+                
+                // KURAL: 60-60-60, Kenar: 35
+                angles: [60, 60, 60],
+                sides: [35, 35, 35],
+                solved: false
+            },
+            
+            // 2. KAFA (DAR ÇEŞİTKENAR) - SOLDA
+            {
+                id: 2, name: "Kafa",
+                // P1(Üst), P2(Alt), P3(Sol Uç)
+                // P3 y:0 yaparak tam hizaladım (Üste/Alta kaçma yok)
+                basePoints: [{x:0, y:-17.5}, {x:0, y:17.5}, {x:-30, y:0}], 
+                targetPos: {x: cx, y: cy},
+                
+                ansAngle: 'dar', ansSide: 'cesit',
+                color: '#e67e22',
+                
+                // KURAL: 50-60-70. (En büyük açı 70, karşısı en büyük kenar 40)
+                // P1(Üst) Açısı: 60. Karşısı (P2-P3 Alt Kenar): 38.
+                // P2(Alt) Açısı: 70. Karşısı (P1-P3 Üst Kenar): 40.
+                // P3(Uç) Açısı: 50. Karşısı (P1-P2 Ortak Kenar): 35.
+                
+                angles: [60, 70, 50], // P1, P2, P3 açıları
+                // Kenarlar sırayla: P1-P2(35), P2-P3(38), P3-P1(40) - Çizim sırasına göre mapping
+                // Kod içinde drawLabels fonksiyonu p1->p2 arasını ilk eleman olarak alır.
+                sides: [35, 38, 40], 
+                solved: false
+            },
+
+            // 3. ÜST YÜZGEÇ (DİK İKİZKENAR) - ÜSTTE
+            {
+                id: 3, name: "Üst Yüzgeç",
+                basePoints: [{x:0, y:-17.5}, {x:20, y:-17.5}, {x:0, y:-37.5}],
+                targetPos: {x: cx - 10*SCALE, y: cy}, // Hafif X ayarı
+                
+                ansAngle: 'dik', ansSide: 'ikiz',
+                color: '#9b59b6',
+                
+                // KURAL: 90-45-45. 20-20-20√2
+                angles: [90, 45, 45], 
+                sides: [20, "20√2", 20], 
+                solved: false
+            },
+
+            // 4. KUYRUK (GENİŞ İKİZKENAR) - SAĞDA
+            {
+                id: 4, name: "Kuyruk",
+                basePoints: [{x:30.3, y:0}, {x:55, y:-15}, {x:55, y:15}], 
+                targetPos: {x: cx, y: cy},
+                
+                ansAngle: 'genis', ansSide: 'ikiz',
+                color: '#e74c3c',
+                
+                // KURAL: 120-30-30. Kenar: 32-20-20.
+                // 120 karşısı 32 (En büyük)
+                angles: [120, 30, 30], 
+                sides: [20, 32, 20], 
+                solved: false
+            }
+        ];
+
+        // Koordinatları Hesapla
+        shapes.forEach(s => {
+            s.drawPoints = s.basePoints.map(p => ({
+                x: s.targetPos.x + p.x * SCALE,
+                y: s.targetPos.y + p.y * SCALE
+            }));
+        });
+    }
+
+    // --- ÇİZİM ---
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // HEDEF GÖLGESİ
+        shapes.forEach(s => {
+            drawPolygon(s, s.targetPos.x, s.targetPos.y, "#ecf0f1", true);
+        });
+
+        shapes.forEach((s, index) => {
+            ctx.beginPath();
+            ctx.moveTo(s.drawPoints[0].x, s.drawPoints[0].y);
+            s.drawPoints.forEach(p => ctx.lineTo(p.x, p.y));
+            ctx.closePath();
+
+            // Renklendirme
+            if (s.solved) {
+                ctx.fillStyle = s.color;
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([]);
+            } else if (index === selectedIndex) {
+                ctx.fillStyle = "#bdc3c7"; 
+                ctx.strokeStyle = "#f1c40f"; 
+                ctx.lineWidth = 4;
+                ctx.setLineDash([5, 5]);
+            } else {
+                ctx.fillStyle = "#ecf0f1"; 
+                ctx.strokeStyle = "#7f8c8d"; 
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+            }
+            
+            ctx.fill();
+            ctx.stroke();
+            ctx.setLineDash([]); 
+
+            if (s.solved) {
+                // Tik işaretini tam merkeze (centroid) koy
+                const cx = (s.drawPoints[0].x + s.drawPoints[1].x + s.drawPoints[2].x) / 3;
+                const cy = (s.drawPoints[0].y + s.drawPoints[1].y + s.drawPoints[2].y) / 3;
+                ctx.fillStyle = "rgba(255,255,255,0.9)";
+                ctx.font = "bold 30px Arial";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("✓", cx, cy);
+            }
+
+            if (showAngles.checked) drawText(s, 'angles');
+            if (showSides.checked) drawText(s, 'sides');
+        });
+    }
+
+    function drawPolygon(shape, offsetX, offsetY, color, isGhost) {
+        if(!isGhost) return;
+        ctx.beginPath();
+        // Gölge için (targetPos zaten offsetli, basePoints ile çizim)
+        // Ancak ana çizim drawPoints kullandığı için gölgeyi de benzer çizelim
+        // Basitlik için draw fonksiyonundaki döngüyü kullanıyoruz.
+        // Burası sadece referans fonksiyon.
+    }
+
+    function drawText(s, type) {
+        ctx.font = "bold 13px Arial"; // Yazı boyutunu orantılamak için sabit bıraktık ama scale etkileyecek
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        
+        const cx = (s.drawPoints[0].x + s.drawPoints[1].x + s.drawPoints[2].x) / 3;
+        const cy = (s.drawPoints[0].y + s.drawPoints[1].y + s.drawPoints[2].y) / 3;
+
+        if (type === 'angles') {
+            ctx.fillStyle = "#2c3e50";
+            s.drawPoints.forEach((p, i) => {
+                // Köşeden merkeze %35 içeri
+                const tx = p.x + (cx - p.x) * 0.35;
+                const ty = p.y + (cy - p.y) * 0.35;
+                ctx.fillText(s.angles[i] + "°", tx, ty);
+            });
+        } else {
+            ctx.fillStyle = "#c0392b";
+            for(let i=0; i<3; i++) {
+                const p1 = s.drawPoints[i];
+                const p2 = s.drawPoints[(i+1)%3];
+                const mx = (p1.x + p2.x)/2;
+                const my = (p1.y + p2.y)/2;
+                
+                // Kenar yazısı (Özel dizi sırası)
+                let txt = s.sides[i];
+                ctx.fillText(txt, mx, my);
+            }
+        }
+    }
+
+    function isInside(x, y, shape) {
+        const pts = shape.drawPoints;
+        let inside = false;
+        for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+            const xi = pts[i].x, yi = pts[i].y;
+            const xj = pts[j].x, yj = pts[j].y;
+            const intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        let clicked = -1;
+        shapes.forEach((s, i) => {
+            if (isInside(mx, my, s)) clicked = i;
+        });
+
+        if (clicked !== -1) {
+            if (shapes[clicked].solved) {
+                statusBox.textContent = "Bu parçayı zaten tamamladın! ✅";
+                statusBox.className = "status-text status-correct";
+                disableForm();
+            } else {
+                selectedIndex = clicked;
+                const name = shapes[clicked].name;
+                statusBox.textContent = `${name} Seçildi. Özellikleri gir.`;
+                statusBox.className = "status-text";
+                statusBox.style.color = "#f1c40f";
+                enableForm();
+            }
+        } else {
+            selectedIndex = -1;
+            statusBox.textContent = "Bir parçaya tıkla!";
+            statusBox.className = "status-text status-info";
+            statusBox.style.color = "#ecf0f1";
+            disableForm();
+        }
+        draw();
+    });
+
+    function enableForm() {
+        angleSelect.disabled = false;
+        sideSelect.disabled = false;
+        btnCheck.disabled = false;
+        btnCheck.classList.add('active');
+        angleSelect.value = "";
+        sideSelect.value = "";
+    }
+
+    function disableForm() {
+        angleSelect.disabled = true;
+        sideSelect.disabled = true;
+        btnCheck.disabled = true;
+        btnCheck.classList.remove('active');
+        angleSelect.value = "";
+        sideSelect.value = "";
+    }
+
+    function checkAnswer() {
+        if (selectedIndex === -1) return;
+
+        const s = shapes[selectedIndex];
+        const uAngle = angleSelect.value;
+        const uSide = sideSelect.value;
+
+        if (uAngle === "" || uSide === "") {
+            statusBox.textContent = "Lütfen iki seçimi de yap.";
+            statusBox.className = "status-text status-wrong";
+            return;
+        }
+
+        if (uAngle === s.ansAngle && uSide === s.ansSide) {
+            s.solved = true;
+            statusBox.textContent = "DOĞRU! Harika! 🎉";
+            statusBox.className = "status-text status-correct";
+            selectedIndex = -1;
+            disableForm();
+            draw();
+
+            if (shapes.every(sh => sh.solved)) {
+                setTimeout(() => {
+                    finalMessage.classList.add('show');
+                }, 500);
+            }
+        } else {
+            statusBox.textContent = "YANLIŞ! Tekrar dene. 🤔";
+            statusBox.className = "status-text status-wrong";
+        }
+    }
+
+    function resetForm() {
+        angleSelect.value = "";
+        sideSelect.value = "";
+    }
+
+    function initGame() {
+        finalMessage.classList.remove('show');
+        resetForm();
+        selectedIndex = -1;
+        init();
+    }
+
+    setTimeout(init, 100);
+
+</script>
+
+</body>
+</html>
