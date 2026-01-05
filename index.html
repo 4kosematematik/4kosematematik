@@ -8,6 +8,185 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* Yan Yana İki Oyun Bölümü */
+        .interactive-games {
+            margin: 70px auto;
+            max-width: 1300px;
+            padding: 0 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+        }
+
+        .game-box {
+            background: linear-gradient(135deg, #295025, #98ff43);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+            color: white;
+            text-align: center;
+            flex: 1;
+            min-width: 340px;
+            max-width: 580px;
+        }
+
+        .game-box h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .game-box h2 i {
+            font-size: 2.3rem;
+        }
+
+        /* Kesir Laboratuvarı Stilleri */
+        #pizza {
+            width: 250px;
+            height: 250px;
+            margin: 25px auto;
+            position: relative;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+        }
+
+        .pizza-slice {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%);
+            transform-origin: 50% 50%;
+            background: white;
+            transition: background 0.3s ease;
+        }
+
+        .fraction-display {
+            font-size: 2.4rem;
+            margin: 25px 0;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .slider-label {
+            font-size: 1.3rem;
+            min-width: 70px;
+        }
+
+        .slider {
+            flex: 1;
+            max-width: 220px;
+            height: 12px;
+            border-radius: 6px;
+            background: #334155;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: whitesmoke;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.6);
+        }
+
+        .value-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: whitesmoke;
+            min-width: 50px;
+        }
+
+        /* Ardışık Sayılar Oyunu Stilleri */
+        .sequence-display {
+            font-size: 2.4rem;
+            font-family: monospace;
+            letter-spacing: 10px;
+            margin: 30px 0;
+            min-height: 70px;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            margin: 20px 0;
+            min-height: 50px;
+        }
+
+        #sequence-input {
+            padding: 14px 18px;
+            font-size: 1.5rem;
+            width: 130px;
+            border: none;
+            border-radius: 12px;
+            text-align: center;
+            background: #334155;
+            color: white;
+        }
+
+        #check-btn {
+            padding: 14px 28px;
+            font-size: 1.3rem;
+            background: whitesmoke;
+            color: black;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+
+        #check-btn:hover {
+            background: whitesmoke;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            min-height: 45px;
+            font-weight: bold;
+        }
+
+        .score {
+            margin-top: 15px;
+            font-size: 1.3rem;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 860px) {
+            .interactive-games {
+                flex-direction: column;
+                align-items: center;
+            }
+            .game-box {
+                max-width: 100%;
+            }
+            #pizza {
+                width: 220px;
+                height: 220px;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="page-container">
@@ -20,7 +199,6 @@
                 <a href="hakkimizda.html" class="btn">Hakkımızda</a>
                 <a href="bizeulasin.html" class="btn">Bize Ulaşın</a>
 
-                <!-- KULLANICI DROPDOWN -->
                 <div class="user-dropdown">
                     <button id="user-btn" class="btn dropbtn">
                         <span id="user-name">Giriş Yap</span>
@@ -109,6 +287,41 @@
             </div>
         </div>
 
+        <!-- YAN YANA İKİ ETKİLEŞİMLİ OYUN -->
+        <section class="interactive-games">
+            <!-- Kesir Laboratuvarı -->
+            <div class="game-box">
+                <h2><i class="fas fa-pizza-slice"></i> Kesir Laboratuvarı</h2>
+                <div class="pizza-container" id="pizza"></div>
+                <div class="fraction-display" id="fraction-text">3 / 4</div>
+                <div class="controls">
+                    <div class="slider-group">
+                        <span class="slider-label">Pay</span>
+                        <input type="range" min="0" max="12" value="3" class="slider" id="numerator">
+                        <span class="value-display" id="num-value">3</span>
+                    </div>
+                    <div class="slider-group">
+                        <span class="slider-label">Payda</span>
+                        <input type="range" min="1" max="12" value="4" class="slider" id="denominator">
+                        <span class="value-display" id="den-value">4</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ardışık Sayılar Avcısı -->
+            <div class="game-box">
+                <h2><i class="fas fa-search"></i> Ardışık Sayılar Avcısı</h2>
+                <div class="sequence-display" id="sequence">12 &nbsp; 15 &nbsp; 18 &nbsp; ?</div>
+                <div class="question-text" id="question">Eksik sayı kaçtır?</div>
+                <div>
+                    <input type="number" id="sequence-input" placeholder="?" />
+                    <button id="check-btn">Kontrol Et</button>
+                </div>
+                <div class="feedback" id="feedback"></div>
+                <div class="score">Puan: <span id="score">0</span></div>
+            </div>
+        </section>
+
         <!-- En İyi İçerikler -->
         <section class="best-content">
             <h2 class="centered-heading">En İyi İçerikler</h2>
@@ -164,7 +377,11 @@
         </p>
     </footer>
 </div>
+
 <script src="login.js"></script>
+<script src="chatbot-data.js"></script>
+<script src="chatbot.js"></script>
+
 <script>
     // Sağ tıklama engelleme
     document.addEventListener("contextmenu", e => e.preventDefault());
@@ -174,8 +391,103 @@
         }
     });
     document.addEventListener("copy", e => e.preventDefault());
+
+    /* =============== KESİR LABORATUVARI =============== */
+    const pizzaContainer = document.getElementById('pizza');
+    const fractionText = document.getElementById('fraction-text');
+    const numSlider = document.getElementById('numerator');
+    const denSlider = document.getElementById('denominator');
+    const numValue = document.getElementById('num-value');
+    const denValue = document.getElementById('den-value');
+
+    function updatePizza() {
+        let pay = parseInt(numSlider.value);
+        let payda = parseInt(denSlider.value);
+
+        if (pay > payda) {
+            pay = payda;
+            numSlider.value = payda;
+            numValue.textContent = payda;
+        }
+
+        pizzaContainer.innerHTML = '';
+
+        for (let i = 0; i < payda; i++) {
+            const slice = document.createElement('div');
+            slice.className = 'pizza-slice';
+            slice.style.transform = `rotate(${i * (360 / payda)}deg)`;
+            slice.style.background = i < pay ? '#f59e0b' : '#1e293b';
+            pizzaContainer.appendChild(slice);
+        }
+
+        fractionText.textContent = `${pay} / ${payda}`;
+        numValue.textContent = pay;
+        denValue.textContent = payda;
+    }
+
+    updatePizza();
+    numSlider.addEventListener('input', updatePizza);
+    denSlider.addEventListener('input', updatePizza);
+
+    /* =============== ARDIŞIK SAYILAR AVCISI =============== */
+    let currentAnswer = 0;
+    let score = 0;
+
+    const sequenceEl = document.getElementById('sequence');
+    const questionEl = document.getElementById('question');
+    const inputEl = document.getElementById('sequence-input');
+    const feedbackEl = document.getElementById('feedback');
+    const scoreEl = document.getElementById('score');
+    const checkBtn = document.getElementById('check-btn');
+
+    const questions = [
+        { seq: [12, 15, 18, "?"], ans: 21, q: "Eksik sayı kaçtır?" },
+        { seq: [5, 10, 15, "?"], ans: 20, q: "Devam eden sayı nedir?" },
+        { seq: [100, 90, 80, "?"], ans: 70, q: "Eksik sayı kaçtır?" },
+        { seq: [2, 5, 8, "?"], ans: 11, q: "Örüntüyü tamamla." },
+        { seq: [30, 25, 20, "?"], ans: 15, q: "Eksik sayı nedir?" },
+        { seq: [7, 14, 21, "?"], ans: 28, q: "Kaç olmalı?" },
+        { seq: ["?", 12, 18, 24], ans: 6, q: "Başlangıç sayısı kaçtır?" },
+        { seq: [50, 45, 40, "?"], ans: 35, q: "Devam et." },
+        { seq: [3, 7, 11, "?"], ans: 15, q: "Sonraki sayı nedir?" },
+        { seq: [99, 88, 77, "?"], ans: 66, q: "Eksik sayı kaç?" }
+    ];
+
+    function newQuestion() {
+        const q = questions[Math.floor(Math.random() * questions.length)];
+        currentAnswer = q.ans;
+
+        sequenceEl.innerHTML = q.seq.map(n => n === "?" ? "<span style='color:#f59e0b'>?</span>" : n).join(" &nbsp; ");
+        questionEl.textContent = q.q;
+        inputEl.value = "";
+        feedbackEl.textContent = "";
+    }
+
+    checkBtn.addEventListener('click', () => {
+        const userAns = parseInt(inputEl.value);
+        if (isNaN(userAns)) {
+            feedbackEl.textContent = "Lütfen bir sayı gir!";
+            feedbackEl.style.color = "#ef4444";
+            return;
+        }
+
+        if (userAns === currentAnswer) {
+            feedbackEl.textContent = "Süper! Doğru cevap 🎉";
+            feedbackEl.style.color = "#10b981";
+            score += 10;
+            scoreEl.textContent = score;
+            setTimeout(newQuestion, 1600);
+        } else {
+            feedbackEl.textContent = `Yanlış! Doğru cevap: ${currentAnswer}`;
+            feedbackEl.style.color = "#ef4444";
+        }
+    });
+
+    inputEl.addEventListener('keypress', e => {
+        if (e.key === 'Enter') checkBtn.click();
+    });
+
+    newQuestion();
 </script>
-<script src="chatbot-data.js"></script>
-<script src="chatbot.js"></script>
 </body>
 </html>
